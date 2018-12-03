@@ -1,0 +1,105 @@
+﻿@model Teeyoot.Module.ViewModels.CurrencyExchangeMatrixViewModel
+@{
+    Layout.Title = T("Convertation Table");
+    Style.Include("/WizardSettings/Styles/crosstable.css");
+
+    var Currrencies = (Teeyoot.Module.Models.CurrencyRecord[])ViewBag.Currencies;
+}
+
+@using(Script.Foot())
+{
+    @*<script>
+        $(document).ready(function () {
+            $(".currency").change(function () {
+                selectedrow = $(".currency").val();
+                $(".currency-row").hide();
+                $("." + selectedrow).show();
+
+            });
+            selectedrow = $(".currency").val();
+            $(".currency-row").hide();
+            $("." + selectedrow).show();
+
+        });
+    </script>*@
+}
+
+@using (Html.BeginFormAntiForgeryPost(
+            Url.Action("Edit", "AdminCurrenciesConvertationTable"), FormMethod.Post))
+{
+    <label for="currency">@T("Currency: ")</label>
+    @*<select class="currency" name="currency">
+        @{
+            var i = 0;
+            foreach (var currency in Currrencies)
+            {
+                i++;
+
+                <option id="@currency.Code" value="@currency.Code" @(i == 1 ? "selectd" : "")>
+                    @currency.Code
+                </option>
+            }
+        }
+    </select>*@
+
+
+    <br />
+    <table style="width: 100%;">
+        <thead>
+            @* Creating the horizontal header of the currencies-to. *@
+            <tr>
+                <th class="crosscell"></th>
+                @for (int x = 0; x < Model.Columns.Count; x++)
+                {
+                    <th class="headercell">
+                        @Model.Columns[x][0].CurrencyToCode
+                    </th>
+                }
+            </tr>
+        </thead>
+        @for (int y = 0; y < Model.Columns[0].Count; y++)
+        {
+            <tr class="currency-row @Model.Columns[0][y].CurrencyFromCode">
+                @* Creating the vertical header of the currencies-from. *@
+                <td class="headercell">
+                    @Model.Columns[0][y].CurrencyFromCode
+                </td>
+
+                @* Creating cells. *@
+                @for (int x = 0; x < Model.Columns.Count; x++)
+                {
+                    if (x != y)
+                    {
+                        <td class="cell">
+                            @*@Html.LabelFor(m => m.Columns[x][y].RateForBuyer, T("Rate"))*@
+                            @Html.TextBoxFor(m => m.Columns[x][y].RateForBuyer, new { style = "float: right;" })
+
+                            @*<br /><br />
+                                @Html.LabelFor(m => m.Columns[x][y].RateForSeller, T("Rate for seller"))
+                                @Html.TextBoxFor(m => m.Columns[x][y].RateForSeller, new { style = "float: right;" })
+                                <br /><br />*@
+
+                            @Html.HiddenFor(m => m.Columns[x][y].CurrencyFromId)
+                            @Html.HiddenFor(m => m.Columns[x][y].CurrencyToId)
+                            @*@Html.HiddenFor(m => m.Columns[x][y].CurrencyFromCode)
+                            @Html.HiddenFor(m => m.Columns[x][y].CurrencyToCode)*@
+                            
+                        </td>
+                    }
+                    else
+                    {
+                        <td class="crosscell">
+                            @Html.HiddenFor(m => m.Columns[x][y].RateForBuyer)
+                            @Html.HiddenFor(m => m.Columns[x][y].RateForSeller)
+                        </td>
+                    }
+                }
+            </tr>
+        }
+
+    </table>
+    <br /><br />
+    <button type="submit" class="primaryAction">@T("Save settings")</button>
+
+}
+

@@ -1,0 +1,770 @@
+﻿@model Teeyoot.Module.ViewModels.PaymentViewModel
+@{
+    <script>
+        window.exchangeRate = JSON.parse('@Html.Raw(Model.exchangeRate)');
+    </script>
+
+
+    Style.Include("campaign.css");
+    Style.Include("checkout.css");
+    Style.Include("bootstrap.min.css");
+
+    Script.Require("jQuery");
+    Script.Include("jquery.validate.min.js");
+    Script.Include("additional-methods.min.js");
+    Script.Include("bignumber.min.js");
+    Script.Include("Payment.js");
+    Script.Include("//gateway.bluesnap.com/js/cse/v1.0.3/bluesnap.js");
+
+
+
+
+    <style>
+        .visible-phone {
+            display: none !important;
+        }
+
+        .hidden-phone {
+            display: block !important;
+        }
+
+        @@media all and (max-width: 1000px) {
+            .visible-phone {
+                display: block !important;
+                width: 100%;
+            }
+
+            .hidden-phone {
+                display: none !important;
+            }
+        }
+    </style>
+    <script>
+
+        window.order_currency = "@Model.Order.Campaign.CurrencyRecord.Code";
+        window.order_id = @Model.Order.Id;
+
+
+        function ConvertPirce(s, c){
+            var cs = window.exchangeRate.find(function(element, index, array){
+                if(element.From == c && element.To == window.Currency) return true;
+                return false;
+            }).RateForBuyer;
+
+            return (s * cs).toFixed(2);
+        }
+
+        function UpdateCurrency(){
+
+            $(".currency-code-placeholder").each(function(index, data){
+                text = $(data).text();
+                //if(text == 'MYR') return;
+                p = parseFloat($(data).text());
+                p = ConvertPirce(p, "MYR");
+                $(data).text(p);
+            });//.text(window.Currency);
+
+        };
+    </script>
+
+
+    var resourceManager = WorkContext.Resolve<Orchard.UI.Resources.IResourceManager>();
+    resourceManager.SetMeta(new Orchard.UI.Resources.MetaEntry
+    {
+        Name = "Cache-control",
+        Content = "no-cache"
+    });
+
+    resourceManager.SetMeta(new Orchard.UI.Resources.MetaEntry
+    {
+        Name = "Expires",
+        Content = "-1"
+    });
+
+
+
+
+    if (!string.IsNullOrWhiteSpace(Model.FacebookCustomAudiencePixel) ||
+       !string.IsNullOrWhiteSpace(Model.SellerFbPixel)
+        )
+    {
+        var pixelSet = false;
+        if (!string.IsNullOrWhiteSpace(Model.FacebookCustomAudiencePixel))
+        {
+            pixelSet = true;
+            <script>
+                !function (f, b, e, v, n, t, s) {
+                    if (f.fbq) return;
+                    n = f.fbq = function () {
+                        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                    };
+                    if (!f._fbq) f._fbq = n;
+                    n.push = n; n.loaded = !0;
+                    n.version = '2.0';
+                    n.queue = []; t =
+                        b.createElement(e);
+                    t.async = !0;
+                    t.src = v; s = b.getElementsByTagName(e)[0];
+                    s.parentNode.insertBefore(t, s)
+                }(window, document, 'script', '//connect.facebook.net/en_US/fbevents.js');
+                // Insert Your Custom Audience Pixel ID below.
+                fbq('init', @Model.FacebookCustomAudiencePixel);
+                fbq('track', 'PageView');
+
+
+                // Replace the values for the parameters below with actual values of the purchase
+            </script> <!-- End Custom Audience Pixel Code --><!-- Facebook Custom Audience Pixel Code -->
+            <!--End New Pixel-->
+        }
+        else
+        {
+         <!--Old Pixel-->
+            @*<script type="text/javascript">
+                    (function () {
+                        var _fbq = window._fbq || (window._fbq = []);
+                        if (!_fbq.loaded) {
+                            var fbds = document.createElement('script');
+                            fbds.async = true;
+                            fbds.src = '//connect.facebook.net/en_US/fbds.js';
+                            var s = document.getElementsByTagName('script')[0];
+                            s.parentNode.insertBefore(fbds, s);
+                            _fbq.loaded = true;
+                        }
+                        _fbq.push(['addPixelId', '@Model.SellerFbPixel']);
+                    })();
+                    window._fbq = window._fbq || [];
+                    window._fbq.push(['track', 'PixelInitialized', {}]);
+                </script>
+                if (!string.IsNullOrWhiteSpace(Model.SellerFbPixel) && !pixelSet)
+                {
+                    <noscript><img height="1" width="1" alt="" style="display:none" src="https://www.facebook.com/tr?ev=@(Model.SellerFbPixel)&amp;noscript=1&dt=ivmgtvlesuk3lon9t8ptnd55qytp1lrk" /></noscript>
+                }*@
+    <!--End Old Pixel-->
+        }
+
+    }
+
+
+
+}
+
+<script>
+    window.AjaxRefresh = true;
+
+</script>
+@Html.HiddenFor(aa => aa.Order.TotalSold)
+<input type="hidden" value="0.5" name="percent-to-increase" id="percent-to-increase" />
+<div class="site__content_container">
+    <div class="site__wrapper">
+        <div>@Html.ValidationSummary()</div>
+        <div class="form__message form__message--error hidden" style="padding: 15px"></div>
+        <div class="checkout__wrapper">
+            <div class="container">
+                <div class="row">
+                    @if (ViewBag.error != null)
+                    {
+                        <div class="errorMessae">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    <div class="timer-to-show">
+                        @T("Your Order is reserved for <span class='order-timer'>15:00</span> minutes, Kindly complete the payment before the time expires.")
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-f-left">
+                        <form action="@Url.Action("CreateTransaction", "Home" )" method="POST" id="braintree-payment-form">
+                            @Html.AntiForgeryToken()
+
+                            <input id="selectedCurrency" type="hidden" value="@Model.Order.Campaign.CurrencyRecord.Code" name="selectedCurrency" />
+                            @if (Model.Promotion != null)
+                            {
+                                <input type="hidden" id="PromoId" name="PromoId" value=@Model.Promotion.PromoId>
+                            }
+                            <input type="hidden" id="seller_country_id" value="@Model.SellerCountryId" />
+                            <input type="hidden" id="OrderId" name="OrderId" value=@Model.Order.Id>
+                            <input type="hidden" id="OrderPublicId" name="OrderPublicId" value=@Model.Order.OrderPublicId>
+                            <div class="">
+                                <div class="contact-info">
+                                    <div class="checkout__legend">@T("Contact Info")</div>
+                                    <div class="">
+                                        <input autofocus="autofocus" class="form__textfield " id="Email" name="Email" placeholder="@T(" email address")" type="text">
+                                        <label id="Email-error" class="error valid" for="Email"></label>
+                                    </div>
+                                    <input type="hidden" name="paumentMeth" id="paymentMethod">
+                                    <input type="hidden" name="paumentState" id="paymentState">
+                                    <div class="form__group js-checkout-shipping">
+                                        <div class="checkout__legend">@T("Shipping Info")</div>
+                                        <div class="inp-half">
+                                            <input class="form__textfield " data-default="" data-type="name" id="FirstName" maxlength="30" name="FirstName" placeholder="@T(" first name")" size="30" type="text">
+                                        </div>
+                                        <div class="inp-half-right">
+                                            <input class="form__textfield " data-default="" data-type="name" id="LastName" maxlength="30" name="LastName" placeholder="@T(" last name")" size="30" type="text">
+                                        </div>
+                                        <div class="input-address">
+                                            <input class="form__textfield " data-default="" id="StreetAddress" maxlength="50" name="StreetAddress" placeholder="@T(" address line 1")" size="50" type="text">
+                                        </div>
+                                        <div class="input-address">
+                                            <input class="form__textfield " data-default="" id="StreetAddress2" maxlength="50" name="StreetAddress2" placeholder="@T(" address line 2")" size="50" type="text">
+                                        </div>
+                                        <div class="checkout_form__row">
+                                            <div class="inp-half">
+                                                <input class="form__textfield " data-default="" id="City" maxlength="30" name="City" placeholder="@T(" city")" size="30" type="text">
+                                                <label id="City-error" class="error valid" for="City"></label>
+                                            </div>
+                                            <div class="inp-half-right">
+                                                <input class="form__textfield " data-default="" id="PostalCode" name="PostalCode" placeholder="@T(" postal code")" type="text">
+                                                <label id="PostalCode-error" class="error valid" for="PostalCode"></label>
+                                            </div>
+                                        </div>
+                                        <div class="checkout_form__row">
+                                            <div>
+                                                <div class="inp-half smarty-streets-container">
+                                                    <select class="form__textfield " style="font-size: 17px" data-default="43" id="State" placeholder="@T(" state")" name="State" type="text">
+                                                        <option value="">@T("Select State")</option>
+                                                    </select>
+                                                    <label id="State-error" class="error valid" for="State"></label>
+                                                </div>
+                                                <div class="inp-half-right">
+                                                    <select class="form__textfield" id="Country">
+                                                        @foreach (var deliverableCountry in Model.DeliverableCountries)
+                                                        {
+                                                            <option value="@deliverableCountry.Id"
+                                                                    data-currency-code="@deliverableCountry.CurrencyCode"
+                                                                    data-exchange-rate="@Json.Encode(deliverableCountry.ExchangeRate)"
+                                                                    @if (deliverableCountry.Id == Model.BuyerCountryId) { @: selected="selected"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }>
+                                                                @deliverableCountry.Name
+                                                            </option>
+                                                        }
+                                                    </select>
+                                                    <input type="hidden" id="hidden_country" name="Country" value="@Model.BuyerCountryId" />
+                                                    <label id="Country-error" class="error valid" for="Country"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="checkout_form__row">
+                                            <div class="form-phone inp-half">
+                                                <input class="form__textfield  js-shipping-phone" id="PhoneNumber" placeholder="@T(" phone number")" type="text" value="" name="PhoneNumber">
+                                                <label id="PhoneNumber-error" class="error valid" for="PhoneNumber"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="paypal-container" id="paypal-container" style="display:@(Model.PayPal? "block":"none");">
+
+                                    </div>
+                                </div>
+                                <div class="payment-methods">
+                                    <ul class="payment-method-list">
+                                        @if (Model.BlueSnap)
+                                        {
+                                            <li class="blue-snap">
+                                                <a href="javascript:;" class="payment-method" data-payment-method="creditcard-bluesnap" data-message="@Model.BlueSnapDesc">
+                                                    <input type="radio" name="payment" id="creditcard-bluesnap" /><label>@Model.BlueSnapTabName</label>
+                                                    <img class="creditcardicons" src="../Themes/Teeyoot.theme/content/creditcard.png" />
+                                                </a>
+
+                                                <div class="cridit-card-info">
+                                                    @Html.Partial("_bluesnapform", Model)
+                                                </div>
+                                            </li>
+                                        }
+
+                                        @if (Model.Mol)
+                                        {
+                                            <li>
+                                                <a href="javascript:;" class="payment-method" data-payment-method="mol" data-message="@Model.MolNote">
+                                                    <input type="radio" name="payment" id="mol" /><label>@Model.MolTabName</label>
+                                                    <img src="../Themes/Teeyoot.theme/content/molpay.png" />
+                                                </a>
+                                            </li>
+                                        }
+
+                                        @if (Model.IPay88)
+                                        {
+                                            <li>
+                                                <a href="javascript:;" class="payment-method" data-payment-method="ipay-88" data-message="@Model.Ipay88Note">
+                                                    <input type="radio" name="payment" id="ipay-88" /><label>@Model.Ipay88TabName</label>
+                                                    <img src="../Themes/Teeyoot.theme/content/ipay.png" />
+                                                </a>
+                                            </li>
+                                        }
+
+                                        @if (Model.Paypal_)
+                                        {
+                                            <li>
+                                                <a href="javascript:;" class="payment-method" data-payment-method="paypal_" data-message="@Model.PayPalNote_">
+                                                    <input type="radio" name="payment" id="paypal_" checked /><label>@Model.PaypalTabName_</label>
+                                                    <img src="../Themes/Teeyoot.theme/content/paypal.png" />
+                                                </a>
+                                            </li>
+                                        }
+
+
+                                        @if (Model.CreditCard)
+                                        {
+                                            <li>
+                                                <a href="javascript:;" class="payment-method" data-payment-method="creditcard" data-message="@Model.CreditCardNote">
+                                                    <input type="radio" name="payment" id="creditcard" /><label>@Model.CreditCardTabName</label>
+                                                    <!-- <img src="../Themes/Teeyoot.theme/content/creditcard.png" /> -->
+                                                </a>
+                                                @*<p class="recom">Recommended</p>*@
+                                            </li>
+                                        }
+                                        @if (Model.PayPal)
+                                        {
+                                            <li>
+                                                <a href="javascript:;" class="payment-method" data-payment-method="paypal" data-message="@Model.PayPalNote">
+                                                    <input type="radio" name="payment" id="paypal" /><label>@Model.PayPalTabName</label>
+                                                    <img src="../Themes/Teeyoot.theme/content/paypal.png" />
+                                                </a>
+                                            </li>
+                                        }
+
+                                        @if (Model.CashDeliv)
+                                        {
+                                            <li>
+                                                <a href="javascript:;" class="payment-method" data-payment-method="cash" data-message="@Model.CashDelivNote">
+                                                    <input type="radio" name="payment" id="cash" /><label>@Model.CashDelivTabName</label>
+                                                    <img src="../Themes/Teeyoot.theme/content/cash.png" />
+                                                </a>
+                                            </li>
+                                        }
+
+
+
+
+
+                                    </ul>
+                                </div>
+
+                                <div class="checkout_form_footer">
+                                    <span class="checkout_form_footer__submit_wrap js_submit_wrap_cc">
+                                        <p class="info-text tos_agreement">
+                                            @T("By clicking 'Place Your Order' you agree to our")
+                                            <a href='/Privacy' target="_blank">@T("privacy policy")</a>
+                                            @T("and") <a href='/Terms' target="_blank">@T("terms of service")</a>
+                                            .
+                                        </p>
+                                        <p style="display:none;">
+                                            @T("Your Order will be deliver")
+                                            <span id="time-to-deliver">
+                                                3
+                                            </span>
+                                            @T("Day(s)")
+                                        </p>
+                                        <button id="transaction" class="button button--transaction--flat checkout_form_footer__submit js_checkout_submit" data-disable-with="Placing Your Order" type="submit" value="@T(" place your order")" onclick="encryptMe()">@T("Place Your Order")</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-6 col-lg-6 col-sm-12 col-f-right">
+                        <div class="row">
+                            <div class="col-md-12 certificate">
+                                <a href="//www.securitymetrics.com/site_certificate?id=1354684&tk=6192253d546da1223fe2f73f2fc61420" target="_blank" class="securitymetrics"><img src="http://www.securitymetrics.com/static/img/site_certified_logos/Credit_Card_Safe_blue.png" alt="SecurityMetrics Credit Card Safe" /></a>
+                                <!-- Begin DigiCert site seal HTML and JavaScript -->
+                                <div id="DigiCertClickID_52Vgkh5f" data-language="en">
+                                    <a href="https://www.digicert.com/wildcard-ssl-certificates.htm">Wildcard SSL</a>
+                                </div>
+                                <script type="text/javascript">
+                                    var __dcid = __dcid || [];__dcid.push(["DigiCertClickID_52Vgkh5f", "5", "m", "black", "AawC1ToE"]);(function(){var cid=document.createElement("script");cid.async=true;cid.src="//seal.digicert.com/seals/cascade/seal.min.js";var s = document.getElementsByTagName("script");var ls = s[(s.length - 1)];ls.parentNode.insertBefore(cid, ls.nextSibling);}());
+                                </script>
+                                <!-- End DigiCert site seal HTML and JavaScript -->
+
+                            </div>
+                            <div class="col-md-12 order_summary__wrapper js_order_summary">
+                                <div class="">
+                                    <h2 class="checkout__title checkout__title--small">@T("Order Summary")</h2>
+                                    <table class="order_summary">
+                                        <tbody class="order_summary__items">
+                                            @foreach (var item in Model.Order.Products)
+                                            {
+                                                var index = Model.Order.Products.IndexOf(item);
+                                                var idSize = item.OrderRecord.Products[index].ProductSizeRecord.Id;
+                                                var costSize = item.CampaignProductRecord.ProductRecord.SizesAvailable.First(c => c.ProductSizeRecord.Id == idSize).SizeCost;
+                                                var price = (float)item.CampaignProductRecord.Price + costSize;
+                                                var colorName = item.ProductColorRecord == null ? item.CampaignProductRecord.ProductColorRecord.Name : item.ProductColorRecord.Name;
+                                                var colorValue = item.ProductColorRecord == null ? item.CampaignProductRecord.ProductColorRecord.Value : item.ProductColorRecord.Value;
+                                                var colorImage = (item.ProductColorRecord == null || item.ProductColorRecord.Id == item.CampaignProductRecord.ProductColorRecord.Id) ? item.CampaignProductRecord.Id.ToString() : item.CampaignProductRecord.Id + "_" + item.ProductColorRecord.Id;
+                                                if (item.CampaignProductRecord.SecondProductColorRecord == null)
+                                                {
+                                                    colorImage = item.CampaignProductRecord.Id.ToString();
+                                                }
+                                                <tr>
+                                                    <td>
+                                                        <div class="order_summary__item_image ">
+                                                            <img src="/Media/campaigns/@item.CampaignProductRecord.CampaignRecord_Id/@colorImage/normal/front.png" alt="">
+                                                        </div>
+                                                    </td>
+                                                    <td class="order_summary__item_name">
+                                                        @item.Count x @item.CampaignProductRecord.ProductRecord.Name
+                                                        <ul class="order_summary__item_options">
+                                                            <li>@item.ProductSizeRecord.SizeCodeRecord.Name</li>
+                                                            <li>
+                                                                <span class="order_summary__item_color_label">@colorName</span>
+                                                                <span class="order_summary__item_color" style="background-color:@colorValue"></span>
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                    <td class="order_summary__item_price">
+                                                        <span class="currency-code-placeholder price-currency-code" data-bc="@Model.Order.Campaign.CurrencyRecord.Code" data-price="@((price * item.Count))" data-string-format="{0}">
+                                                            @Model.CurrencyCode
+                                                            @*</span>
+                                                                <span class="item-price-value-placeholder">*@
+                                                            @((price * item.Count).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                    <div class="order_summary__breakdown_container">
+                                        @if (Model.Promotion != null && Model.Order.TotalPriceWithPromo != 0)
+                                        {
+                                            <dl class="order_summary__breakdown">
+
+                                                <dt>
+                                                    @T("Discount")
+                                                </dt>
+                                                <dd>
+                                                    <span class="currency-code-placeholder discount_curreny price-currency-code" data-bc="@Model.Order.Campaign.CurrencyRecord.Code" data-price="@(Model.Order.Promotion)" data-string-format="{0}">
+                                                        @Model.CurrencyCode
+                                                        @*</span>
+                                                            <span class="order_summary__total item-price-value-placeholder">*@
+                                                        @(Model.Order.Promotion == null ? 0 : Model.Order.Promotion)
+                                                    </span>
+                                                </dd>
+
+                                            </dl>
+                                        }
+                                        <dl class="order_summary__breakdown">
+                                            <dt>
+                                                @T("Delivery")
+                                            </dt>
+                                            <dd id="parentDelivery" class="price-currency-code" data-bc="@Model.Order.Campaign.CurrencyRecord.Code" data-price="@(Model.Order.Delivery)" data-string-format="{0}">
+                                                @*<span class="currency-code-placeholder">
+                                                    </span>*@
+                                                <span id="deliveryCost" class="price-currency-code" data-bc="@Model.Order.Campaign.CurrencyRecord.Code" data-price="@(Model.Order.Delivery)" data-string-format="{0}">
+
+                                                </span>
+                                            </dd>
+                                        </dl>
+                                        <dl class="order_summary__breakdown">
+                                            <dt class="order_summary__total_label">
+                                                @T("Total")
+                                            </dt>
+                                            <dd>
+                                                @if (Model.Order.TotalPriceWithPromo > 0)
+                                                {
+                                                    <span class="order_summary__total">
+                                                        <span id="ordTotal" class="price-currency-code" data-bc="@Model.Order.Campaign.CurrencyRecord.Code" data-price="@(Model.Order.TotalPriceWithPromo)" data-string-format="{0}">
+                                                            @((Model.Order.TotalPriceWithPromo).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))
+                                                        </span>
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="order_summary__total">
+                                                        <span id="ordTotal" class="price-currency-code" data-bc="@Model.Order.Campaign.CurrencyRecord.Code" data-price="@(Model.Order.TotalPrice)" data-string-format="{0}">
+                                                            @((Model.Order.TotalPrice).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))
+                                                        </span>
+                                                    </span>
+                                                }
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                    <div class="order_summary--offset js_order_summary--offset"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row nomargin">
+                            <div class="col-md-12">
+                                <div>
+
+
+                                </div>
+                                <div style="clear: both;">
+                                </div>
+                                <div class="checkout__legend">
+                                    <div class="checkout__tool_tip--lock" data-tooltip="@T(" all transactions are secure and encrypted.")">
+                                        <i class="checkout__lock_icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row nomargin">
+                            <div class="col-md-12">
+                                <div class="messages-payment-method">
+                                    <span class="message"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row hidden-phone">
+                            <div class="col-md-12 col-lg-12 col-sm-12">
+                                <!-- <div class="mobile-question">
+                                    <h2>+ @T("Questions and answers")</h2>
+                                </div> -->
+                                <div class="order_summary__help">
+                                    <div class="order_summary__help__container">
+                                        @Html.Raw(Model.CheckoutPageRightSideContent)
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row visible-phone">
+                <div class="col-md-12 col-lg-12 col-sm-12">
+                    <!-- <div class="mobile-question">
+                        <h2>+ @T("Questions and answers")</h2>
+                    </div> -->
+                    <div class="or
+                    <div class=" order_summary__help">
+                        <div class="order_summary__help__container">
+                            @Html.Raw(Model.CheckoutPageRightSideContent)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="Token" value="@Model.ClientToken">
+    </div>
+</div>
+
+
+<input type="hidden" id="credit_card_note" value="@Model.CreditCardNote" />
+<input type="hidden" id="paypal_note" value="@Model.PayPalNote" />
+<input type="hidden" id="mol_note" value="@Model.MolNote" />
+<input type="hidden" id="cash_deliv_note" value="@Model.CashDelivNote" />
+
+
+@using (Script.Foot())
+{
+    <script type="text/javascript" src="https://js.braintreegateway.com/v1/braintree.js"></script>
+    <script type="text/javascript">
+        var braintree = Braintree.create("@Model.BTClientToken");
+        braintree.onSubmitEncryptForm('braintree-payment-form');
+
+    </script>
+    <script type="text/javascript" src="https://js.braintreegateway.com/v2/braintree.js"></script>
+    <script>
+
+        window.ExchangeRate = @Model.ExchangeRate;
+        jQuery.validator.setDefaults({
+            debug: true,
+            success: "valid"
+        });
+        $("#braintree-payment-form").validate({
+            rules: {
+                Email: {
+                    required: true,
+                    email: true
+                },
+                FirstName: {
+                    required: true
+                },
+                LastName: {
+                    required: true
+                },
+                City: {
+                    required: true
+                },
+                State: {
+                    required: true
+                },
+                StreetAddress: {
+                    required: true
+                },
+                PostalCode: {
+                    required: true
+                },
+                PhoneNumber: {
+                    required: true
+                },
+                creditCard: {
+                    required:'#creditcard-bluesnap:checked',
+                    creditcard: true
+                },
+                "exp-month": {
+                    required:'#creditcard-bluesnap:checked',
+                    minlength: 2,
+                    maxlength: 2,
+                    digits: true
+
+                },
+                "exp-year": {
+                    required:'#creditcard-bluesnap:checked',
+                    minlength: 4,
+                    maxlength: 4,
+                    digits: true
+                },
+                cvv: {
+                    required:'#creditcard-bluesnap:checked',
+                    digits: true,
+                    minlength: 3,
+                    maxlength: 4,
+
+
+                }
+            },
+            submitHandler: function (form) {
+                var elem = document.getElementById('transaction');
+                elem.disabled = 'disabled';
+                $(elem).addClass('waiting');
+                fbq('track', 'AddToCart');
+                ///Send Facebook event
+
+                ///
+                form.submit();
+            }
+        });
+    </script>
+
+    <script>
+        document.getElementById("transaction").disabled = "";
+        var token = "@Model.BTClientToken";//document.getElementById("Token").value;
+        braintree.setup(token, "paypal",
+        {
+            container: "paypal-container",
+            onPaymentMethodReceived: function () {
+            },
+            onCancelled: function () {
+                document.getElementById("accordion").className = "credit_card_accordion accordion_min accordion";
+                document.querySelector(".contLable").style.display = "inline";
+            }
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            Payment.init();
+        });
+    </script>
+
+    <script>
+        $(".mobile-question").click(function () {
+            var text = "@T("Questions and answers")";
+            if ($(".order_summary__help").css("display") === "none") {
+                $(".order_summary__help").css("display", "block");
+                $(".mobile-question").css("border-radius", "5px 5px 0 0");
+                $(".mobile-question").css("border-bottom", "0");
+                $(".mobile-question")[0].innerHTML = "<h2>&ndash; " + text + "</h2>";
+            } else {
+                $(".order_summary__help").css("display", "none");
+                $(".mobile-question").css("border-radius", "5px 5px 5px 5px");
+                $(".mobile-question").css("border-bottom", "1px solid #c2c9cc");
+                $(".mobile-question")[0].innerHTML = "<h2>+ " + text + "</h2>";
+            }
+        });
+    </script>
+
+    <script>
+        $("document").ready(function(){
+            orderTime = @DateTime.UtcNow.Subtract(Model.Order.Created).TotalSeconds;
+            timertoShow = Math.floor(orderTime);
+            timertoShow = 15 * 60 - timertoShow;
+            timers_interval = setInterval(function(){
+                timertoShow --;
+                if(timertoShow <= 0){
+                    window.clearInterval(timers_interval);
+                    alert('Seems you waited too long to place your order, your previous order has expired, you can still place a new one');
+                    document.location = "/" + "@Model.Order.Campaign.Alias";
+                }
+                var minutes = "0" + Math.floor(timertoShow / 60);
+                var seconds = "0" + (timertoShow - minutes * 60);
+                //time = (timertoShow/ 60).toString(2) + ":" + (timertoShow % 60).toString(2);
+                $(".order-timer").text(minutes.substr(-2) + ":" + seconds.substr(-2));
+            }, 1000);
+        });
+    </script>
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+                n.callMethod ?
+                n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            }; if (!f._fbq) f._fbq = n;
+            n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s)
+        }(window,
+        document, 'script', '//connect.facebook.net/en_US/fbevents.js');
+
+        fbq('init', '114806928867925');
+        fbq('track', 'AddToCart');</script>
+    <noscript>
+        <img height="1" width="1" style="display:none"
+             src="https://www.facebook.com/tr?id=114806928867925&ev=PageView&noscript=1" />
+    </noscript>
+}
+
+@using (Script.Foot())
+{
+    <script>
+        $(document).ready(function(){
+
+        });
+
+        window.onChangeCurrency = function(){
+            c =  window.Currency;
+
+        };
+    </script>
+    <script>
+        var bluesnap = new BlueSnap
+            ("10001$b40acef2f06ffc0a4bd5d8fa76814824d74633e9ca054f666ca42edc2cc3fe83cb43b222bc8d83b9c94a5dfafac6e38695346a24a5cd24269a0537faacd57c189d4cf4354ef6e4ce4323e329d2114cefd0cbca212fb69a7aa6a2b330836dfe1aff2657e3fb97fd6074e7c69ba91d9075a030912fdd64df118a42f10e7dc7333b0f5af6cb28e497edb5eb16e6d267cd051c33bc20da1387cd6eca4d06e628ff7303f27d7cd2b3e15ac620be9f23f60ce0e39057e965d58f9dac5906e1d934ea6c18805fa1f44b3ad6475229896ab777540ca282b1df92640e72d294d14d280559362b580d1098c10985444addff955bf83a7e1c43f1884e4ce4fcc94af08fd167");
+    </script>
+
+    @*<script>
+            $(document).ready(function(){
+
+                //setTimeout(function(){UpdateCurrency();}, 1000);
+
+                ga('ecommerce:addTransaction', {
+                    'id': '@Model.Order.Id',
+                    'affiliation': 'Teeyoot.com',
+                    'revenue': '@Model.Order.TotalPrice',
+                    'shipping': '@Model.Order.Delivery',
+                    'tax': '0.00'
+                });
+
+
+                ga('ecommerce:addItem', {
+                    'id': '@Model.Order.Id',                     // Transaction ID. Required.
+                    'name': '@Model.Order.Campaign.Title',    // Product name. Required.
+                    'sku': '@Model.Order.Campaign.Id',                 // SKU/code.
+                    'category': '@Model.Order.Campaign.Title',         // Category or variation.
+                    'price': '@Model.Order.TotalPrice',                 // Unit price.
+                    'quantity': '@Model.Order.TotalSold'                   // Quantity.
+                });
+                ga('ecommerce:send');
+            });
+        </script>*@
+}
+
+
+@using (Script.Foot())
+{
+    <script>
+        $(document).ready(function(){
+            $.get("/showmycountry", function(res){
+                if(typeof(res) == "string"){
+                    res = JSON.parse(res);
+                }
+                if(res.Code){
+                    if(res.Code.CountryCode == "MY"){
+                        $("#creditcard-bluesnap").click();
+                    }
+                }
+            });
+        });
+
+        function encryptMe(){
+            $("#selectedCurrency").val($(".currencies").val());
+            bluesnap.encrypt('braintree-payment-form');
+        }
+    </script>
+}

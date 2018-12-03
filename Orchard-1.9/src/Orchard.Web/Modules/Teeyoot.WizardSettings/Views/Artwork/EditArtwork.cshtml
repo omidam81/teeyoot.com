@@ -1,0 +1,27 @@
+﻿@model Teeyoot.WizardSettings.ViewModels.ArtworkViewModel
+@{
+    Layout.Title = T("Edit Artwork");
+}
+
+<h2>@T("Edit Artwork")</h2>
+
+@using (Html.BeginFormAntiForgeryPost(Url.Action("EditArtwork", "Artwork"), FormMethod.Post, new {enctype = "multipart/form-data"}))
+{
+    @Html.HiddenFor(m => m.Id)
+    <fieldset>
+        @Html.LabelFor(m => m.Name, T("Name"))
+        @Html.TextBoxFor(m => m.Name, new {@class = "text large"})
+    </fieldset>
+    <fieldset>
+        @Html.LabelFor(m => m.ArtworkSvgImage, T("Artwork SVG Image (only *.svg allowed)"))
+        @Html.TextBoxFor(m => m.ArtworkSvgImage, new {type = "file", accept = "image/svg"})
+    </fieldset>
+    <fieldset>
+        @Html.LabelFor(m => m.ArtworkPngImage, T("Artwork PNG Image (only *.png allowed)"))
+        @Html.TextBoxFor(m => m.ArtworkPngImage, new {type = "file", accept = "image/png"})
+    </fieldset>
+    <fieldset class="save-button">
+        <button type="submit" class="primaryAction">@T("Save")</button>
+        <a class="button" href="@Url.Action("Index", "Artwork")">@T("Cancel")</a>
+    </fieldset>
+}

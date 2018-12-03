@@ -1,0 +1,250 @@
+﻿@model Teeyoot.FeaturedCampaigns.ViewModels.AdminFeaturedCampaignsViewModel
+@{
+    Layout.Title = T("Campaigns").ToString();
+    string colorAdmin = "#FFEBCD";
+    string colorTOP = "#00FFFF";
+    string colorOther = "#FFFFFF";
+    Style.Include("jquery.dataTables.css");
+    Script.Require("jQuery");
+    Script.Include("jquery.dataTables.min.js");
+}
+
+
+<div>
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+    }
+    <fieldset>
+        <p style="margin-bottom:20px">
+            @T("Filter by currency: ")
+            @Html.DropDownListFor(m => m.FilterCurrencyId,
+                            new SelectList(Model.Currencies.Table, "Id", "Code"),
+                            T("Select currency ...").ToString(),
+                            new { id = "currencies" })
+        </p>
+
+        <table class="items" id="campaign-table">
+            <thead>
+                <tr>
+                    <th>@T("Campaign Id")</th>
+                    <th>@T("Campaign name")</th>
+                    <th>@T("Create date")</th>
+                    <th>@T("Active")</th>
+                    <th>@T("Sold last 24 hours")</th>
+                    <th>@T("Sold / Minimum / Goal")</th>
+                    <th>@T("Approved")</th>
+                    <th>@T("Featured")</th>
+                    <th>@T("Ready to print")</th>
+                    <th>@T("Seller")</th>
+                    <th>@T("Currency") </th>
+                    <th>@T("Modify")</th>
+                    <th>@T("Export")</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Campaigns.Length > 0)
+                {
+                    int colorIndex = Model.StartedIndex == null ? 0 : Model.StartedIndex;
+                    foreach (var camp in Model.Campaigns)
+                    {
+                        var isFeatured = camp.Campaign.IsFeatured ? T("Yes").ToString() : T("No").ToString();
+                        var isActive = camp.Campaign.IsActive ? T("Yes").ToString() : T("No").ToString();
+                        var value = camp.Last24HoursSold > 0 ? camp.Last24HoursSold.ToString() : "-";
+
+                        var color = camp.Campaign.IsFeatured ? colorTOP : (camp.Last24HoursSold > 0 ? colorAdmin : colorOther);
+
+                        <tr style="background-color: @color">
+                            <td>@camp.Campaign.Id</td>
+                            <td><a href="~/@camp.Campaign.Alias">@camp.Campaign.Title</a></td>
+                            <td>@camp.Campaign.CreatedDate.ToString("dd/MM/yyyy")</td>
+                            <td>@T(isActive)</td>
+                            <td>@value</td>
+                            @if (camp.Campaign.Sold < 0)
+                            {
+                                <td>@camp.Campaign.Sold / @camp.Campaign.Minimum / @camp.Campaign.Goal</td>
+                            }else{
+                                <td>@camp.Campaign.Sold / @camp.Campaign.Minimum / @camp.Campaign.Goal</td>
+                            }
+                            
+                            <td>
+                                @if (camp.Campaign.IsApproved)
+                                {
+                                    <span style="font-weight:600">@T("Yes")</span>
+                                    <span> / </span>
+                                    <a style="text-decoration:underline" href="@Url.Action("Reject", new {  id = camp.Campaign.Id })" title="@T("Reject")">@T("No")</a>
+                                }
+                                else
+                                {
+                                    if (camp.Campaign.Rejected)
+                                    {
+                                        <span style="font-weight:600">@T("No")</span>
+                                        <span> / </span>
+                                        <a style="text-decoration:underline" href="@Url.Action("Approve", new {  id = camp.Campaign.Id })" title="@T("Approve")">@T("Yes")</a>
+                                    }
+                                    else
+                                    {
+                                        <a style="text-decoration:underline" href="@Url.Action("Approve", new {  id = camp.Campaign.Id })" title="@T("Approve")">@T("Yes")</a>
+                                        <span> / </span>
+                                        <a style="text-decoration:underline" href="@Url.Action("Reject", new {  id = camp.Campaign.Id })" title="@T("Reject")">@T("No")</a>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                @if (camp.Campaign.IsActive)
+                                {
+                                    if (camp.Campaign.IsFeatured)
+                                    {
+                                        <span style="font-weight:600">@T("Yes")</span>  
+                                        <span> / </span>
+                                        <a href="@Url.Action("ChangeVisible", new {  id = camp.Campaign.Id, visible = false })" title="@T("Unmark as featured")">@T("No")</a>
+
+                                    }
+                                    else
+                                    {
+                                        <span style="font-weight:600">@T("No")</span>
+                                        <span> / </span>
+                                        <a href="@Url.Action("ChangeVisible", new { id = camp.Campaign.Id, visible = true })" title="@T("Mark as featured")">@T("Yes")</a>
+                                       
+                                    }                                  
+                                }
+
+                            </td>
+                            <td>
+                                @if (camp.Campaign.Minimum <= camp.Campaign.Sold)
+                                {
+
+                                    <span>@T("Yes")</span>
+                                }
+                                else
+                                {
+                                    <span>@T("No")</span>
+                                }
+
+                            </td>
+                            <td>
+                                @if (camp.Campaign.Seller == null)
+                                {
+                                    <span>@T("Campaign have no User")</span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        @camp.Campaign.Seller.Email
+                                        (
+                                            @camp.Campaign.Seller.Id
+                                        )
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                <span style="vertical-align:middle">
+                                    @camp.Campaign.Currency.Code
+                                </span>
+                            </td>
+                            <td>
+                                <a class="button" href="@Url.Action("ChangeInformation","AdminCampaignsSettings", new { Id = camp.Campaign.Id })" title="@T("Modify")">@T("Modify")</a>
+                                @if (!camp.Campaign.IsActive)
+                                {
+                                    @*@T(" | ")*@
+                                    <a class="button" href="@Url.Action("DeleteCampaign", new { id = camp.Campaign.Id })" title="@T("Delete")">@T("Delete")</a>
+                                }
+                            </td>
+
+                            <td>
+                                <a class="button" href="@Url.Action("ExportToExcel", new { id = camp.Campaign.Id })" title="@T("Export")">@T("Export CO")</a>
+                                <a class="button" href="@Url.Action("ExportToExcel2", new { id = camp.Campaign.Id })" title="@T("Export(2)")">@T("Export PO")</a>
+                            </td>
+
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </fieldset>
+</div>
+
+@using (Script.Foot())
+{
+    <script>
+        $(document).ready(function () {
+
+            $('#currencies').change(function () {
+                window.location = "@Url.Action("Index", "AdminFeaturedCampaigns")?filterCurrencyId=" +
+                                    $(this).find('option:selected').val();
+            })
+
+            var campaignTable = $('#campaign-table').dataTable({
+                "aLengthMenu": [[5, 10, 25, 50, 100, 500, 1000, -1], [5, 10, 25, 50, 100, 500, 1000, "All"]],
+                iDisplayLength: 10,
+                aaSorting: [[2, 'desc']],
+                bSortable: true,
+                aoColumnDefs: [
+                { "aTargets": [0], "bSortable": true },
+                { "aTargets": [1], "bSortable": true },
+                { "aTargets": [2], "bSortable": true, "sType": "date-eu" },          
+                { "aTargets": [3], "bSortable": true },
+                { "aTargets": [4], "bSortable": true },
+                { "aTargets": [5], "bSortable": true },
+                { "aTargets": [6], "bSortable": true },
+                { "aTargets": [7], "bSortable": true },
+                { "aTargets": [8], "bSortable": true },
+                { "aTargets": [9], "bSortable": true },
+                { "aTargets": [10], "bSortable": true }
+                ]
+            });
+        });
+
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "date-eu-pre": function (date) {
+                date = date.replace(" ", "");
+
+                if (!date) {
+                    return 0;
+                }
+
+                var year;
+                var eu_date = date.split(/[\.\-\/]/);
+
+                /*year (optional)*/
+                if (eu_date[2]) {
+                    year = eu_date[2];
+                }
+                else {
+                    year = 0;
+                }
+
+                /*month*/
+                var month = eu_date[1];
+                if (month.length == 1) {
+                    month = 0 + month;
+                }
+
+                /*day*/
+                var day = eu_date[0];
+                if (day.length == 1) {
+                    day = 0 + day;
+                }
+
+                return (year + month + day) * 1;
+            },
+
+            "date-eu-asc": function (a, b) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+
+            "date-eu-desc": function (a, b) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        });
+        
+    </script>
+    
+
+}
+
+
+
+

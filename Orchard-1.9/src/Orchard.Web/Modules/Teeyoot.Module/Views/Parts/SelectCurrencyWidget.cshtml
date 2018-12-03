@@ -1,0 +1,35 @@
+﻿@using Orchard.Utility.Extensions;
+@using Orchard.Mvc.Html;
+@using Orchard.Mvc.Extensions;
+@using System.Linq;
+@using Teeyoot.Module.Models;
+@{
+    Script.Include("SelectCurrecnyWidget.js");
+}
+@using (Script.Head())
+{
+    <script>
+        window.countryCurreny = '@Model.Selected.Code';
+        window.ExchangRate = @Html.Raw(Model.ExchangeRate);
+        if (!window.Currency) window.Currency = window.countryCurreny;
+    </script>
+}
+<select class="currencies currency">
+    @foreach (var currency in Model.Currencies)
+    {
+        if (currency.Id == Model.Selected.Id)
+        {
+            <option value="@currency.Code" selected="selected">
+                @currency.Code
+            </option>
+        }
+        else
+        {
+            <option value="@currency.Code">
+                @currency.Code
+            </option>
+        }
+    }
+</select>
+
+

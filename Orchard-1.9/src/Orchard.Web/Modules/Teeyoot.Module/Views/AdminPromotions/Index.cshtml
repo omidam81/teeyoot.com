@@ -1,0 +1,257 @@
+﻿@model  List<Teeyoot.Module.ViewModels.AdminPromotionViewModel>
+@{
+    Script.Require("jQuery");
+    Script.Require("jQueryUI");
+    Script.Include("bootstrap.min.js");
+    Style.Include("Message.css");
+    Style.Include("jqueryui.css");
+    Script.Include("jquery.dataTables.min.js");
+    Style.Include("jquery.dataTables.css");
+    Layout.Title = T("Promotions").ToString();
+}
+
+@using (Script.Foot())
+{
+    <script>
+        function showRequesters(id) {
+            var modalId = "#"+id; 
+            $(modalId).modal('show');
+        }
+
+        function addAntiForgeryToken(data) {
+            data.__RequestVerificationToken = "@Html.AntiForgeryTokenValueOrchard()";
+            return data;
+        };
+
+
+    function changeState(id)
+    {
+
+        var args = {};
+        var elId = "switch_" + id;
+        args.switchState = document.getElementById(elId).checked;
+        args.id = id;
+
+        $.ajax({
+
+            async: false,
+            cache: false,
+            type: "POST",
+            url: "@Url.Action("ChangeState", "AdminPromotions")",
+            data: addAntiForgeryToken({"id" : args.id, "switchState": args.switchState}),
+        success: function (msg) {
+            // Something afterwards here
+
+        }
+    });
+
+    }
+
+
+        function editNode(Id) {
+            var tdId = "action_"+Id;
+            var buttonId = "btn_"+Id;
+            var amountTd =  document.getElementById(Id);
+            var action = document.getElementById(tdId);
+            var sp = amountTd.querySelector("span");
+            var butt = document.getElementById(buttonId);
+            var valueSpan = sp.innerHTML;
+            sp.parentNode.removeChild(sp);
+            var inp = document.createElement("input");
+            inp.type = "text";
+            inp.style.width = "40px";
+            inp.value = valueSpan;
+            amountTd.appendChild(inp);
+            butt.style.display = "none";
+
+
+            var butSave = document.createElement("button");
+            butSave.innerHTML = "save";
+            butSave.classList.add("btnEdit");
+            action.appendChild(butSave);
+
+            butSave.addEventListener("click", function () {
+                var span2 = document.createElement("span");
+                span2.innerHTML = inp.value;
+                inp.parentNode.removeChild(inp);
+                butSave.parentNode.removeChild(butSave);
+                butt.style.display = "";
+                amountTd.appendChild(span2);
+                $.ajax({
+                    async: false,
+                    cache: false,
+                    type: "POST",
+                    url: "@(Url.Action("ChangePromotion", "AdminPromotions"))",
+                    data: addAntiForgeryToken({ "id": Id, "amount": span2.innerHTML.replace(".", ",") }),
+                success: function (data) {
+                }, error: function (data, status, resp) {
+                    alert('Status: ' + data.status + '. Error message: ' + data.statusText);
+                }
+            });
+
+
+        });
+        }
+
+
+        $(document).ready(function () {
+                   var campaignTable = $('#promotions-table').dataTable({
+                        "aLengthMenu": [[5, 10, 25, 50, 100, 500, 1000, -1], [5, 10, 25, 50, 100, 500, 1000, "All"]],
+                        iDisplayLength: 10,
+                        aaSorting: [[1, 'desc']],
+                        bSortable: true,
+                        aoColumnDefs: [
+                        { "aTargets": [0], "bSortable": true },
+                        { "aTargets": [1], "bSortable": true },
+                        { "aTargets": [2], "bSortable": true },          
+                        { "aTargets": [3], "bSortable": false },
+                        { "aTargets": [4], "bSortable": false },
+                        { "aTargets": [5], "bSortable": true },
+                        { "aTargets": [6], "bSortable": true },
+                        { "aTargets": [7], "bSortable": true },
+                        { "aTargets": [8], "bSortable": true },
+                        { "aTargets": [9], "bSortable": true },
+                        { "aTargets": [10], "bSortable": true },
+                        { "aTargets": [11], "bSortable": false }
+                        
+                        ]
+                    });
+                });
+    </script>
+}
+
+@{
+    <fieldset>
+        <table id="promotions-table" class="items">
+            <thead>
+                <tr class="admin-categories">
+                    <th class="date">
+                        <h3>@T("ID")</h3>
+                    </th>
+                    <th class="userId">
+                        <h3>@T("Promotion code")</h3>
+                    </th>
+                    <th class="subject">
+                        <h3>@T("Amount")</h3>
+                    </th>
+                    <th class="sender">
+                        <h3>@T("Campaign Id")</h3>
+                    </th>
+                    <th class="sender">
+                        <h3>@T("Campaign name")</h3>
+                    </th>
+                    <th class="sender">
+                        <h3>@T("Campaigner name")</h3>
+                    </th>
+                    <th class="sender">
+                        <h3>@T("Created on")</h3>
+                    </th>
+                    <th class="sender">
+                        <h3>@T("Expires on")</h3>
+                    </th>
+                    <th class="sender">
+                        <h3>@T("Redeemed")</h3>
+                    </th>
+                    <th class="sender">
+                        <h3>@T("Status")</h3>
+                    </th>
+                    <th class="sender">
+                        <h3>@T("URL")</h3>
+                    </th>
+                    <th class="sender">
+                        <h3>@T("Action")</h3>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="admin-categories-tr">
+                        <td class="date">
+                            @item.Promotion.Id
+                        </td>
+                        <td class="userId">
+                            @item.Promotion.PromoId
+                        </td>
+                        <td id="@item.Promotion.Id" class="amount">
+                            @if (item.Promotion.AmountType == "%")
+                            {
+                                <span>@item.Promotion.AmountSize.ToString("F", System.Globalization.CultureInfo.InvariantCulture)</span>@T(" ")@item.Promotion.AmountType
+
+                            }
+                            else
+                            {
+                                @item.Promotion.AmountType@T(" ")<span>@item.Promotion.AmountSize.ToString("F", System.Globalization.CultureInfo.InvariantCulture)</span>
+
+
+                            }
+                        </td>
+                        <td class="inf">
+                           
+                        </td>
+                        <td class="inf"></td>
+                        <td class="inf">
+                            @item.CampaignerEmail
+                        </td>
+                        <td class="inf">
+                            @if (item.Promotion.Created != null)
+                            {
+                                @item.Promotion.Created.Value.ToLocalTime();
+                            }
+                            else
+                            {
+                                 @T("-")
+                            }
+                        </td>
+                        <td class="inf">
+                            @if (item.Promotion.Expiration.Year == DateTime.MaxValue.Year)
+                            {
+                            @T("Never")
+                            }
+                            else
+                            {
+                            @item.Promotion.Expiration.ToLocalTime().ToString("dd/MM/yyyy");
+                            }
+                        </td>
+                        <td class="inf">
+                            @item.Promotion.Redeemed
+                        </td>
+                        <td id="status">
+                            @if (item.Promotion.Expiration < DateTime.UtcNow)
+                            {
+                                <div class="list_item__cell list_item__status">
+                                    <label class="switch__label">
+                                        <input id="switch_@item.Promotion.Id" checked="@item.Promotion.Status" class="switch__input promotion__status__checkbox" name="active" type="checkbox" onclick="changeState(@item.Promotion.Id)" />
+                                        <div class="switch__el" data-off="Off" data-on="On"></div>
+                                    </label>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="list_item__cell list_item__status">
+                                    <label class="switch__label">
+
+                                        <input id="switch_@item.Promotion.Id" checked="@item.Promotion.Status" class="switch__input promotion__status__checkbox" name="active" type="checkbox" onclick="changeState(@item.Promotion.Id)" />
+                                        <div class="switch__el" data-off="Off" data-on="On"></div>
+                                    </label>
+                                </div>
+                            }
+                            
+                        </td>
+                        <td class="inf">
+
+                        </td>
+                        <td id="action_@item.Promotion.Id" class="inf">
+                            <button id="btn_@item.Promotion.Id" class="btnEdit" type="submit" onclick="editNode(@item.Promotion.Id)">@T("edit")</button>
+                        </td>
+                        
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </fieldset>
+
+}
+

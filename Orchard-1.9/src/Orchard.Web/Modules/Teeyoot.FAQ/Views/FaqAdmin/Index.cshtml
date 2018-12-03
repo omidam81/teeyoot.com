@@ -1,0 +1,131 @@
+﻿@model Teeyoot.FAQ.ViewModels.FaqEntriesIndexViewModel
+@{
+    Script.Require("ShapesBase");
+    Layout.Title = T("FAQ").ToString();
+}
+
+
+
+
+<div class="manage">
+    <a class="button primaryAction" href="@Url.Action("AddFaqEntry", new { returnUrl = Request.Url.ToString(), culture = Model.Culture })">@T("Add New FAQ Topic")</a>
+</div>
+
+<div>
+
+    @using (Html.BeginForm("Index", "FaqAdmin", FormMethod.Get, new { id = "countryCultureForm" }))
+    {
+        <fieldset class="bulk-actions">
+            @Html.LabelFor(m => m.CountryId, T("Country")):
+            @Html.DropDownListFor(m => m.CountryId,
+                        Model.Countries.Select(c => new SelectListItem
+                        {
+                            Selected = Model.CountryId > 1 ? c.Key == Model.CountryId : false,
+                            Text = c.Value,
+                            Value = c.Key.ToString()
+                        }),
+                        new { @id = "dropDownCountry", @text = T("Choose country...") })
+
+            @Html.LabelFor(m => m.CultureId, T("Culture")):
+            @Html.DropDownListFor(m => m.CultureId,
+                        Model.Cultures.Select(c => new SelectListItem
+                        {
+                            Selected = Model.CultureId > 1 ? c.Key == Model.CultureId : false,
+                            Text = c.Value,
+                            Value = c.Key.ToString()
+                        }),
+                        new { @id = "dropDownCulture", @text = T("Choose culture...") })
+
+            @*<button type="submit">@T("Select")</button>*@
+            <hr /><br /><br />
+        </fieldset>
+
+        <fieldset class="bulk-actions">
+            @Html.LabelFor(m => m.Search.SearchString, T("Filter")):
+            @Html.TextBoxFor(m => m.Search.SearchString)
+
+            @if (Model.Sections != null) {
+                @Html.LabelFor(m => m.Search.SectionId, T("Section"))
+                @Html.DropDownListFor(m => m.Search.SectionId, Model.Sections.Select(l => new SelectListItem
+                                            {
+                                                Selected = Model.Search.SectionId > 1 ? l.Id == Model.Search.SectionId : false,
+                                                Text = l.Name,
+                                                Value = l.Id.ToString()
+                                            }), T("-- show all --").ToString())
+            }
+            <button type="submit">@T("Apply")</button>
+            <a href="@Url.Action("Index")">@T("By Default")</a>
+        </fieldset>
+    }
+</div>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+}
+
+<ul class="contentItems">
+    @foreach (var entry in Model.FaqEntries)
+    {
+        <li data-record-text="@entry.Id">
+            <div class="summary">
+                <div class="properties">
+                    <div>
+                        <h3>@entry.Question</h3>
+                    </div>
+                </div>
+                <div class="related">
+                    <a href="@Url.Action("EditFaqEntry", new { id = entry.Id, returnUrl = Request.Url.PathAndQuery })" title="@T("Edit")">@T("Edit")</a>@T(" | ")
+                    <a href="@Url.Action("Delete", new { id = entry.Id, returnUrl = Request.Url.PathAndQuery })" itemprop="RemoveUrl UnsafeUrl">@T("Delete")</a>
+                </div>
+            </div>
+        </li>
+    }
+</ul>
+@Display(Model.Pager)
+
+
+@using (Script.Foot())
+{
+    <script>
+        $("#dropDownCountry").change(function () {
+            $("#dropDownCountry option:selected").each(function () {
+                var idCountry = this.value;
+                $.ajax({
+                    async: false,
+                    cache: false,
+                    type: "POST",
+                    url: "@(Url.Action("GetCultureByCountry", "FaqAdmin"))",
+                    data: addAntiForgeryToken({ "countryId": idCountry }),
+                    success: function (data) {
+                        var cultures = data.Cultures;
+                        var childs = $("#dropDownCulture").children();
+                        for (var i = 0; i < childs.length; i++) {
+                            childs[i].remove();
+                        };
+                        if (cultures.length > 0) {
+                            for (var k = 0; k < cultures.length; k++) {
+                                var ch = document.createElement("option");
+                                ch.value = cultures[k].Id;
+                                ch.innerHTML = cultures[k].Culture;
+                                $("#dropDownCulture").append(ch);
+                            }
+                        }
+                    }, error: function (data, status, resp) {
+                        alert('Status: ' + data.status + '. Error message: ' + data.statusText);
+                    }
+                });
+            });
+            $("#countryCultureForm").submit();
+        });
+
+        $("#dropDownCulture").change(function () {
+            $("#countryCultureForm").submit();
+        });
+
+        function addAntiForgeryToken(data) {
+            data.__RequestVerificationToken = "@Html.AntiForgeryTokenValueOrchard()";
+            return data;
+        };
+    </script>
+}

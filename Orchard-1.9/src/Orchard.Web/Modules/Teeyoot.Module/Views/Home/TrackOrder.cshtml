@@ -1,0 +1,43 @@
+﻿@{
+    Style.Include("designerTeeyoot.css");
+
+    Style.Include("track.css");
+}
+@using (Script.Foot())
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            document.title = "@T("Track your order | Teeyoot")";
+        }
+    </script>
+}
+<div class="track-order-page content">
+    <div class="row">
+        <div class="col-sm-7" style="padding-left:0;">
+            <h1 style="font-weight: bold; font-size: 2.508em;">
+                @T("Track your order")
+            </h1>
+            <p>@T("Enter your tracking number to check the status of your order. Your tracking number is in your confirmation email when you ordered.")</p>
+
+            @using (Html.BeginFormAntiForgeryPost(Url.Action("SearchForOrder", "Home")))
+            {
+                <div class="row">
+                    <div class="col-sm-12 lookupNumber">
+                        <input class="form-control input-lg input-inline-with-btn" id="orderId" name="orderId" placeholder="@T("Tracking number")" type="text">
+                        <p>
+                            <a class="forgotordernumber" href="@Url.Action("RecoverOrder")">@T("Forgot your order number?")</a>
+                        </p>
+                    </div>
+                    <div class="col-sm-12">
+                        <input class="btnTrack" type="submit" value="@T("Track my order")" />
+                    </div>
+                </div>
+            }
+
+        </div>
+        <div class="col-sm-3 col-sm-offset-1 hidden-xs img-car">
+            <img alt="@T("Index")" src="/Modules/Teeyoot.Module/Content/images/track-order.png">
+        </div>
+    </div>
+</div>
+

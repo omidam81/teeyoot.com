@@ -1,0 +1,78 @@
+﻿@model Teeyoot.Search.ViewModels.SearchViewModel
+@{
+    var countPrice = 0;
+
+    foreach (var campaign in Model.Campaigns)
+    {
+        var min = campaign.ProductMinimumGoal == 0 ? 1 : campaign.ProductMinimumGoal;
+        var sold = campaign.ProductCountSold + "/" + min + " sold";
+
+        var now = DateTime.UtcNow;
+        var dif = campaign.EndDate.Subtract(now);
+        string dateLeft;
+        if (dif.Days < 0)
+        {
+            dateLeft = "Ended";
+        }
+        else if (dif.Days == 1)
+        {
+            dateLeft = dif.Days + " day left";
+        }
+        else
+        {
+            dateLeft = dif.Days + " days left";
+        }
+
+        float widthResult;
+        if ((min - campaign.ProductCountSold) <= 0)
+        {
+            widthResult = 100;
+        }
+        else
+        {
+            if (campaign.ProductCountSold != 0)
+            {
+                var procent = (float)min / 100;
+                widthResult = campaign.ProductCountSold / procent;
+            }
+            else
+            {
+                widthResult = 0;
+            }
+        }
+        var width = (int)widthResult + "% !important";
+
+        var path = "/Media/campaigns/" + campaign.Id + "/" + campaign.CampaignFirstProductId + "/";
+        string backImg;
+        string frontImg;
+        if (campaign.BackSideByDefault)
+        {
+            backImg = path + "normal/front.png";
+            frontImg = path + "normal/back.png";
+        }
+        else
+        {
+            backImg = path + "normal/back.png";
+            frontImg = path + "normal/front.png";
+        }
+
+
+        <a href="~/@campaign.Alias" class="item">
+            <div class="daysleft @((dif.Days) > 0 ? "active" : "ended")">@dateLeft</div>
+            <img onmouseover="this.src = '@backImg'" onmouseout="this.src = '@frontImg'" src="@frontImg" alt="">
+            <h4>@campaign.Title</h4>
+            <p>
+                <span class="price price-currency-code" data-bc="@Model.CampaignFirstProductPrices[countPrice].CurrencyCode" data-price="@Model.CampaignFirstProductPrices[countPrice].Price" data-string-format="{0}">
+                    @Model.CampaignFirstProductPrices[countPrice].CurrencyCode
+                    @Model.CampaignFirstProductPrices[countPrice].Price.ToString("F", System.Globalization.CultureInfo.InvariantCulture)
+                </span>|
+                <span class="sold">@campaign.ProductCountSold Sold</span>
+            </p>
+        </a>
+
+
+
+        countPrice++;
+    }
+
+}

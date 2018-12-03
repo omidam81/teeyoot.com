@@ -1,0 +1,38 @@
+﻿.headercell {
+    background: #9d6666;
+    text-align : center;
+    vertical-align:middle;
+    padding: 10px;
+    border: 1px solid #907070;
+    color : #efefef;
+}
+.crosscell {
+    background: #F7F1F1;
+}
+.cell {
+    border: 1px solid #eae2e2;
+    padding: 10px;
+}
+.cell label{
+    display: inline-block;
+    margin-right: 5px;
+}
+.cell input {
+    width: 50px
+}
+
+.cell input {
+    width: 120px;
+}
+
+label {
+    display: inline-block;
+    width: 56px;
+    /* text-align: right; */
+    margin-bottom: 16px;
+}
+
+label {
+    display: inline-block !important;
+    margin-bottom: 10px !important;
+}

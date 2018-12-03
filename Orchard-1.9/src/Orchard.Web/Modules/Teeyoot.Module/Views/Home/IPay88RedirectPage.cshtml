@@ -1,0 +1,31 @@
+﻿@model Teeyoot.Module.Models.Ipay88ViewModel
+@{
+    ViewBag.Title = "IPay88RedirectPage";
+    Script.Include("jQuery");
+}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>
+    $("document").ready(function () {
+        $(".submit").click();
+    });
+</script>
+
+
+
+<form method="post" name="ePayment" action="https://www.mobile88.com/ePayment/entry.asp">
+    <input type="hidden" name="MerchantCode" value="@Model.MerchantCode">
+    <input type="hidden" name="PaymentId" value="">
+    <input type="hidden" name="RefNo" value="@Model.RefNo">
+    <input type="hidden" name="Amount" value="@Model.Amount">
+    <input type="hidden" name="Currency" value="@Model.Currency">
+    <input type="hidden" name="ProdDesc" value="@Model.ProdDesc">
+    <input type="hidden" name="UserName" value="@Model.UserName">
+    <input type="hidden" name="UserEmail" value="@Model.UserEmail">
+    <input type="hidden" name="UserContact" value="@Model.UserContact">
+    <input type="hidden" name="Remark" value="@Model.Remark">
+    <input type="hidden" name="Lang" value="en-MY">
+    <input type="hidden" name="Signature" value="@Model.Signature">
+    <input type="hidden" name="ResponseURL" value="@Model.ResponseURL">
+    <input type="hidden" name="BackendURL" value="@Model.BackendURL">
+    <input type="submit" value="Proceed with Payment" name="Submit" class="submit">
+</form>

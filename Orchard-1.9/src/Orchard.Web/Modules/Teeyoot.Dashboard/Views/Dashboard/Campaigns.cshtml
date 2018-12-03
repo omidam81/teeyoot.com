@@ -1,0 +1,546 @@
+﻿@model Teeyoot.Dashboard.ViewModels.CampaignsViewModel
+@using Teeyoot.Module.Common.ExtentionMethods;
+@{
+    Style.Include("campaigns.css");
+    Script.Include("CostCalculator.js");
+}
+
+<div class="campaign-title-dashboard dashboard-section-title">
+    <span class="centr"> @T("Your Campaigns Overview")</span>
+    <span class="menu-closer" onclick="toggleMobileMenu()"><i class="fa fa-angle-up"></i></span>
+    <span class="menu-opener" onclick="toggleMobileMenu()"><i class="fa fa-angle-down"></i></span>
+</div>
+
+<div class="box">
+    <div class="campaigns-overview-body centr">
+        @for (var i = 0; i < Model.Overviews.Count; i++)
+        {
+            var item = Model.Overviews[i];
+            if (item.Type == Teeyoot.Module.Common.Enums.OverviewType.Active)
+            {
+                <div class="overview-for-period selected">
+                    <div>
+                        <span>@item.ProductsOrdered</span>@T("products ordered")
+                    </div>
+                    <div>
+                        <div>
+                            <span>
+                                @Model.CurrencyCode @item.Profit.ToString("F", System.Globalization.CultureInfo.InvariantCulture)
+                            </span>
+                            @T("Profit")
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (item.Type != Teeyoot.Module.Common.Enums.OverviewType.AllTime)
+            {
+                <div class="overview-for-period">
+                    <div>
+                        <span>@item.ProductsOrdered</span>@T("products ordered")
+                    </div>
+                    <div>
+                        <span>
+                            @Model.CurrencyCode @item.Profit.ToString("F", System.Globalization.CultureInfo.InvariantCulture)
+                        </span>
+                        @T("Profit (includes pending profit)")
+                    </div>
+                </div>
+            }
+
+            else
+            {
+                <div class="overview-for-period">
+                    <div>
+                        <span>@item.ProductsOrdered</span>@T("products ordered")
+                    </div>
+                    <div>
+                        <span>
+                            @Model.CurrencyCode @item.Profit.ToString("F", System.Globalization.CultureInfo.InvariantCulture)
+                        </span>@T("Profit")
+                    </div>
+                </div>
+            }
+        }
+        <div class="period-selector">
+            @for (var i = 0; i < Model.Overviews.Count; i++)
+            {
+                var item = Model.Overviews[i];
+                var current = item.Type == Teeyoot.Module.Common.Enums.OverviewType.Active ? "current" : "";
+                if (i == 0)
+                {
+                    <span onclick="showOverviewForPeriod(@i)" class="overview-period first @current">@T(item.Type.ToString().SplitCamelCase())</span>
+                }
+                else if (i < Model.Overviews.Count - 1)
+                {
+                    <span onclick="showOverviewForPeriod(@i)" class="overview-period @current">@T(item.Type.ToString().SplitCamelCase())</span>
+                }
+                else
+                {
+                    <span onclick="showOverviewForPeriod(@i)" class="overview-period last @current">@T(item.Type.ToString().SplitCamelCase())</span>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<div class="box">
+    <div class="box-header">
+        <div class="group-control filters">
+            <input type="text" id="campaign_list_filter" oninput="filterCampaignList(this);" placeholder="@T("Search by filter")" />
+            <div class="campaign-sort filter-dropdown">
+                <div class="filter-dropdown-toggle">
+                    @T("Sort By")
+                    @{
+                        var sortBy = Enum.GetValues(typeof(Teeyoot.Module.Common.Enums.CampaignSortOrder)).GetValue(0);
+                    }
+                    <span class="sort-by">
+                        <span data-sortby="@sortBy">
+                            @T(sortBy.ToString().SplitCamelCase())
+                        </span>
+                    </span>
+                </div>
+                <div class="filter-dropdown-menu">
+                    <ul>
+                        @foreach (Teeyoot.Module.Common.Enums.CampaignSortOrder item in Enum.GetValues(typeof(Teeyoot.Module.Common.Enums.CampaignSortOrder)))
+                        {
+                            if (item.ToString() == "Reservations") { continue; }
+                            <li onclick="sortCampaignList(this)" class="filter-dropdown-item">
+                                <span data-sortby="@item">
+                                    @T(item.ToString().SplitCamelCase())
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="campaign-status-filter filter-dropdown">
+                <div class="filter-dropdown-toggle">
+                    @T("Show")
+                    <span class="filtered-by">
+                        <span data-filterby="Active">
+                            @T("Active")
+                        </span>
+                    </span>
+                </div>
+                <div class="filter-dropdown-menu">
+                    <ul>
+                        <li onclick="filterByState(this)" class="filter-dropdown-item">
+                            <span data-filterby="Active">
+                                @T("Active")
+                            </span>
+                        </li>
+                        <li onclick="filterByState(this)" class="filter-dropdown-item">
+                            <span data-filterby="Ended">
+                                @T("Ended")
+                            </span>
+                        </li>
+                        <li onclick="filterByState(this)" class="filter-dropdown-item">
+                            <span data-filterby="All">
+                                @T("All")
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="campaigns-list-container">
+        <div>
+            @foreach (var c in Model.Campaigns)
+            {
+                var daysRemaining = c.EndDate.Subtract(DateTime.UtcNow).Days;
+
+                var state = c.IsActive ? "Active" : "Ended";
+
+                var colorForPrivate = c.IsPrivate ? "private-campaigns-true" : "private-campaigns-false";
+
+                <div data-name="@c.Name.ToLower()" class="campaign-card @(c.IsActive? "shown": "hidden")"
+                     data-campaign-state="@state"
+                     data-startdate="@c.StartDate.Ticks"
+                     data-reservations="1"
+                     data-enddate="@c.EndDate.Ticks"
+                     data-sales="@c.Sold">
+
+                    <div class="campaign-card-image" style="background-image: url('/Media/campaigns/@c.Id/@c.FirstProductId/normal/@(!c.ShowBack ? "front.png" : "back.png")')">
+
+                        <div class="campaign-card-links">
+                            <a class="private-campaigns-true" href="@Url.Action("EditCampaign", "Dashboard", new {id = c.Id})" title="@T("Edit")">
+                                <i class="fa fa-edit"></i>
+                            </a>
+                            @if (!c.IsActive)
+                            {
+                                <div>
+                                    <a href="@Url.Action("DeleteCampaign", "Dashboard", new {id = c.Id})" title="@T("Move to Trash")">
+                                        <i class="fa fa-times"></i>
+                                    </a>
+                                </div>
+                            }
+                            <div>
+                                <a href="@Url.Action("PrivateCampaign", "Dashboard", new {id = c.Id, change = !c.IsPrivate})" title="@T("Private")" class="@colorForPrivate">
+                                    <i class="fa fa-globe"></i>
+                                </a>
+                            </div>
+                            @if (!c.IsActive && !c.IsArchived && c.CountRequests >= 10)
+                            {
+                                <div>
+                                    <a href="#re-enable" onclick="Relaunch(@c.Id, '@c.Name')" title="@T("Re-enable")">
+                                        <i class="fa fa-refresh"></i>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                        <div class="campaign-card-profit">
+                            
+                            @if (c.Sold >= c.Minimum)
+                            {
+                                <span>@c.SummaryCurrency @c.Profit.ToString("F", System.Globalization.CultureInfo.InvariantCulture)</span>
+                            }
+                            else
+                            {
+                                <span>@c.SummaryCurrency 0.00</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="campaign-card-progress">
+                        <div class="campaign-card-progress-bar">
+                            <div class="campaign-card-progress-bar-completed @((c.Sold < c.Minimum)? "not-reached-minimum": "")" style="width: @(c.Goal == 0? 0 : c.Sold*100/@c.Goal)%">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="campaign-card-title">
+                        <a href="/@c.Alias" title="@c.Name">@c.Name</a>
+                    </div>
+                    <div class="campaign-card-info">
+                        <div class="campaign-card-sold">@c.Sold @T("sold")</div>
+                        <div class="campaign-card-left" title="@c.EndDate.ToString("dd.MM.yyyy")">
+                            <span>
+                                @if (daysRemaining > 0)
+                                {
+                                    @daysRemaining@: days @T("remaining")
+                                }
+                                else if (daysRemaining <= -1)
+                                { 
+                                    @("Ended " + Math.Abs(daysRemaining))
+                                    @: days @T("ago")
+                                }
+                                else
+                                {
+                                    var hours = c.EndDate.Subtract(DateTime.UtcNow).Hours;
+                                    if (hours > 0)
+                                    {
+                                        @hours
+                                        @: h @T("remaining")
+                                    }
+                                    else
+                                    {
+                                        @("Ended " + Math.Abs(hours))
+                                        @: h @T("ago")
+                                    }
+                                }
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="dg-overlay-not-show" id="re-enable">
+    <div class="dg-table">
+        <div class="dg-cell">
+            <div class="dg-modal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <span id="modal__title"></span>
+                            <span class="precheckout_close_button" id="close-reservation" onclick="CloseModal()">X</span>
+                            <i class="ts-icon-close"></i>
+                        </div>
+                        <div class="modal-body">
+                            <div class="label__title">@T("Set a new target")</div>
+                            <p class="relaunch__goal_info">@T("Your target must be at least 15.")</p>
+
+                            <input class="tipping_point_input" id="relaunch_form_tipping_point" type="text">
+                            <div class="relaunch_info_container">
+                                <span class="relaunch_info">@T("Minimum: ") </span><span id="minimmumGoal" class="profit_range_text"></span>
+                            </div>
+                            <div>
+                                <span class="relaunch_info">@T("Estimated profit if you achieve your target: ")</span><span id="total_profit" class="profit_range_text"></span>
+                            </div>
+                            <div class="relaunch__length">
+                                <label class="label__title" for="relaunch_form_length"> @T("Choose a campaign length")</label>
+                                <select name="length" class="length form__select_menu campaign-length--select" id="length" data-reactid=".6.0.3.2">
+                                    <option data-attr-delay="0" value="3">3 @T("Days") (@T("Ending") @DateTime.Now.AddDays(3).ToString("dddd, MMMM dd, yyyy", new System.Globalization.CultureInfo(WorkContext.CurrentCulture)))</option>
+                                    <option data-attr-delay="0" value="5">5 @T("Days") (@T("Ending") @DateTime.Now.AddDays(5).ToString("dddd, MMMM dd, yyyy", new System.Globalization.CultureInfo(WorkContext.CurrentCulture)))</option>
+                                    <option data-attr-delay="0" value="7">7 @T("Days") (@T("Ending") @DateTime.Now.AddDays(7).ToString("dddd, MMMM dd, yyyy", new System.Globalization.CultureInfo(WorkContext.CurrentCulture)))</option>
+                                    <option data-attr-delay="0" value="14">14 @T("Days") (@T("Ending") @DateTime.Now.AddDays(14).ToString("dddd, MMMM dd, yyyy", new System.Globalization.CultureInfo(WorkContext.CurrentCulture)))</option>
+                                    <option data-attr-delay="0" value="21">21 @T("Days") (@T("Ending") @DateTime.Now.AddDays(21).ToString("dddd, MMMM dd, yyyy", new System.Globalization.CultureInfo(WorkContext.CurrentCulture)))</option>
+                                    <option data-attr-delay="0" value="28">28 @T("Days") (@T("Ending") @DateTime.Now.AddDays(28).ToString("dddd, MMMM dd, yyyy", new System.Globalization.CultureInfo(WorkContext.CurrentCulture)))</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div class="payment_options_container">
+                                <div class="payment_options_actions">
+                                    <div onclick="sendData(); return false;" class="button--relaunch">
+                                        @T("Reopen your campaign now!")
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@using (Script.Foot())
+{
+    <script>
+        var campaignId;
+        var products;
+        var cntFrontColor;
+        var cntBackColor;
+        var productCountGoal;
+        var tShirtCostRecord;
+        var baseCost;
+
+        function Relaunch(id, name) {
+
+            $.ajax({
+                async: false,
+                cache: false,
+                type: "GET",
+                url: "@(Url.Action("GetDataForReLaunch", "Dashboard"))",
+                data: {
+                    "id": id
+                },
+                success: function (data) {
+                    products = data.Products;
+                    cntFrontColor = data.CntFrontColor;
+                    cntBackColor = data.CntBackColor;
+                    productCountGoal = data.ProductCountGoal;
+                    tShirtCostRecord = data.TShirtCostRecord;
+                    baseCost = minimumGoal(data.Products, data.CntFrontColor, data.CntBackColor, data.ProductCountGoal, data.TShirtCostRecord);
+                    document.getElementById("relaunch_form_tipping_point").value = data.ProductCountGoal;
+
+                    estimatedProfitChange(products, data.ProductCountGoal);
+                }
+            });
+
+            document.getElementById("modal__title").innerHTML = "Reopen \"" + name + "\"";
+            campaignId = id;
+            document.getElementById("re-enable").className = "dg-overlay";
+        }
+
+
+        $("#relaunch_form_tipping_point").keyup(function () {
+            var cnt = document.getElementById("relaunch_form_tipping_point").value;
+            if (cnt > tShirtCostRecord.SalesGoal) {
+                cnt = tShirtCostRecord.SalesGoal;
+                document.getElementById("relaunch_form_tipping_point").value = tShirtCostRecord.SalesGoal;
+            }
+            baseCost = minimumGoal(products, cntFrontColor, cntBackColor, cnt, tShirtCostRecord);
+
+            estimatedProfitChange(baseCost, cnt);
+
+        });
+
+        function CloseModal() {
+            document.getElementById("re-enable").className = "dg-overlay-not-show";
+        }
+
+        function sendData() {
+            var countTees = parseInt(document.getElementById("relaunch_form_tipping_point").value);
+            var minProfit = estimatedProfitChange(baseCost, countTees);
+
+            if (minProfit <= 0 || countTees < 15) {
+                return;
+            }
+            var campaignLength = parseInt(document.getElementById('length').value);
+            var profit = document.getElementById('total_profit').innerHTML;
+            var minimum = parseInt(document.getElementById("minimmumGoal").innerHTML);
+
+            $.ajax({
+                async: false,
+                cache: false,
+                type: "POST",
+                url: "@(Url.Action("ReLaunchCampaign", "Dashboard"))",
+                data: addAntiForgeryToken({
+                    "productCountGoal": countTees,
+                    "campaignProfit": profit,
+                    "campaignLength": campaignLength,
+                    "minimum": minimum,
+                    "baseCost": baseCost,
+                    "id": campaignId
+                }),
+                success: function (data, status, resp) {
+                    if (resp.status === 200) {
+                        CloseModal();
+
+                        window.location.href = '/Dashboard/Campaigns';
+                    }
+                },
+                error: function (data, status, resp) {
+                    alert('Status: ' + data.status + '. Error message: ' + data.statusText);
+                }
+            });
+        }
+
+        function addAntiForgeryToken(data) {
+            data.__RequestVerificationToken = "@Html.AntiForgeryTokenValueOrchard()";
+            return data;
+        };
+
+        var showOverviewForPeriod = function (index) {
+            $('.overview-for-period.selected').removeClass('selected');
+            $('.overview-period.current').removeClass('current');
+            $($('.overview-for-period')[index]).addClass('selected');
+            $($('.overview-period')[index]).addClass('current');
+        }
+
+        var filterCampaignList = function (el) {
+            $('.campaign-card').each(function (index, elem) {
+                elem = $(elem);
+                if (elem.attr('data-Name').indexOf(el.value) === -1) {
+                    elem.addClass('hidden');
+                } else if (elem.hasClass('hidden')) {
+                    elem.removeClass('hidden');
+                }
+            });
+        }
+
+        var sortCampaignList = function (el) {
+            var sortBy = $(el).find('span');
+
+            $('.sort-by span').text(sortBy.text()).attr('data-sortby', sortBy.attr('data-sortby'));
+
+            var campaigns = $('.campaign-card');
+
+            campaigns.sort(function (a, b) {
+                var sortByValue = sortBy.attr('data-sortby');
+                var an = sortByValue === "Sales" ? parseInt(b.getAttribute('data-' + sortByValue), 10) : a.getAttribute('data-' + sortByValue),
+                    bn = sortByValue === "Sales" ? parseInt(a.getAttribute('data-' + sortByValue), 10) : b.getAttribute('data-' + sortByValue);
+
+                if (an > bn) {
+                    return 1;
+                }
+                if (an < bn) {
+                    return -1;
+                }
+                return 0;
+            });
+
+            campaigns.detach().appendTo($('.campaigns-list-container > div'));
+        }
+
+        var filterByState = function (el) {
+            var status = $(el).find('span');
+
+            $('.filtered-by span').text(status.text()).attr('data-filterby', status.attr('data-filterby'));
+
+            if (status.attr('data-filterby') === 'All') {
+                $('.campaign-card').removeClass('hidden');
+            } else {
+                $('.campaign-card').each(function (index, el) {
+                    el = $(el);
+                    if (el.attr('data-campaign-state') !== status.attr('data-filterby')) {
+                        el.addClass('hidden');
+                    } else if (el.hasClass('hidden')) {
+                        el.removeClass('hidden');
+                    }
+                });
+            }
+        }
+
+        $('.filter-dropdown-toggle').click(function () {
+            //$(".filter-dropdown").removeClass('open');
+            $(this).parent().toggleClass('open')
+        });
+
+        $(document).click(function (e) {
+            if (!$(e.target).hasClass("filter-dropdown-toggle") && !$(e.target).parent().parent().hasClass("filter-dropdown-toggle")) {
+                $(".filter-dropdown").removeClass('open');
+            }
+        }
+        );
+
+        $(document).ready(function () {
+
+            document.title = "Your Campaigns | Teeyoot";
+            var statusFilter = document.getElementsByClassName('filtered-by');
+            var sortBy = document.getElementsByClassName('sort-by');
+            filterByState(statusFilter);
+            sortCampaignList(sortBy);
+        });
+
+    </script>
+    
+    <script>
+        $(document).load(function () {
+            $($(".filter-dropdown-menu")[1]).find(".filter-dropdown-item").first().click();
+        });
+    </script>
+}
+
+@*<div class="box-header">
+        <div class="box-header-title">@T("Overview")</div>
+    </div>*@
+@*@for (int i = 0; i < Model.Overviews.Count; i++)
+    {
+        var item = Model.Overviews[i];
+        if (item.Type == Teeyoot.Module.Common.Enums.OverviewType.Active)
+        {
+            <div class="overview-for-period selected">
+                <div><span>@item.ProductsOrdered</span>@T("products ordered")</div>
+                <div class="profit-paid-div">
+                    <div class="profit-paid-span-div"><span>@Model.MYCurrencyCode@item.MYProfit</span>@T("profit")</div>
+                    <div class="profit-paid-span-div"><span>@Model.SGCurrencyCode@item.SGProfit</span>@T("profit")</div>
+                    <div class="profit-paid-span-div"><span>@Model.IDCurrencyCode@item.IDProfit</span>@T("profit")</div>
+                </div>
+
+                <div class="profit-paid-div">
+                    <div class="profit-paid-span-div"><span>@Model.MYCurrencyCode@item.MYToBePaid</span>@T("to be paid")</div>
+                    <div class="profit-paid-span-div"><span>@Model.SGCurrencyCode@item.SGToBePaid</span>@T("to be paid")</div>
+                    <div class="profit-paid-span-div"><span>@Model.IDCurrencyCode@item.IDToBePaid</span>@T("to be paid")</div>
+                </div>
+            </div>
+        }
+        else if (item.Type != Teeyoot.Module.Common.Enums.OverviewType.AllTime)
+        {
+            <div class="overview-for-period">
+                <div><span>@item.ProductsOrdered</span>@T("products ordered")</div>
+                <div><span>@Model.MYCurrencyCode@item.MYProfit</span>@T("profit (includes pending profit)")</div>
+                <div><span>@Model.SGCurrencyCode@item.SGProfit</span>@T("profit (includes pending profit)")</div>
+                <div><span>@Model.IDCurrencyCode@item.IDProfit</span>@T("profit (includes pending profit)")</div>
+
+            </div>
+        }
+        else
+        {
+            <div class="overview-for-period">
+                <div><span>@item.ProductsOrdered</span>@T("products ordered")</div>
+                <div><span>@Model.MYCurrencyCode@item.MYProfit</span>@T("profit")</div>
+                <div><span>@Model.SGCurrencyCode@item.SGProfit</span>@T("profit")</div>
+                <div><span>@Model.IDCurrencyCode@item.IDProfit</span>@T("profit")</div>
+
+            </div>
+        }
+    }*@
+
+@*<div>
+        <div><span>@Model.MYCurrencyCode @item.MYToBePaid.ToString("F", System.Globalization.CultureInfo.InvariantCulture)</span>@T("Claimed Payout Balance")</div>
+
+    </div>*@
+@*<a href="@Url.Action("EditCampaign", "Dashboard", new { id = c.Id })" title="@T("Edit")">*@
+
+@*<div>
+
+        <a href="@Url.Action("Wizard", "Dashboard", new { id = c.Id })" title="@T("Duplicate")">
+        <i class="fa fa-files-o"></i>
+        </a>
+    </div>*@

@@ -1,0 +1,17 @@
+﻿@model Teeyoot.Module.Models.SizeCodeRecord
+
+@using (Html.BeginFormAntiForgeryPost())
+{
+    @Html.HiddenFor(aa => aa.Id)
+    <label for="">
+        @T("Name:")
+    </label>
+    @Html.TextBoxFor(aa => aa.Name)
+    
+    <br />
+    
+    <label for=""> @T("Order :") </label>
+    @Html.TextBoxFor(aa => aa.xOrder)
+    <br />
+    <input type="submit" value="@T("Update")" />
+}

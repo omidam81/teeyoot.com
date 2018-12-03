@@ -1,0 +1,35 @@
+﻿@using Orchard.Utility.Extensions;
+@using Orchard.Mvc.Html;
+@using Orchard.Mvc.Extensions;
+@using System.Linq;
+@using Teeyoot.Module.Models;
+
+@{
+    var providers = Model.Providers as List<CampaignCategoriesRecord>;
+}
+
+
+@if (providers.Any())
+{
+    <div class="main1420">
+        <h2 class="sectiontitle">Popular Categories</h2>
+        <span class="raw gray">@T("Featured")</span>
+        <span class="morecat">More Categories<span class="down"></span></span>
+        <ul class="menu menu-tags">
+            @foreach (CampaignCategoriesRecord p in providers)
+            {
+                if (p.IsVisible && !string.IsNullOrEmpty(p.Name))
+                {
+                    <li>
+
+                        <a href="/CategoriesSearch?categoriesName=@p.Name">@p.Name</a>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+}
+else
+{
+    @*<div>@T("Sorry, but there is no category")</div>*@
+}

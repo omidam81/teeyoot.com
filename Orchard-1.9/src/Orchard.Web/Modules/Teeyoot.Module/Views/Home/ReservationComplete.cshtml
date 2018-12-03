@@ -1,0 +1,223 @@
+﻿@{
+    @model Teeyoot.Module.ViewModels.ReservationCompleteViewModel
+    Style.Include("reservationcomplete.css");
+
+    //var _user = Teeyoot.Module.Models.TeeyootUserPart T_user =
+
+    var amount = Model.Order.TotalPriceWithPromo > 0 ? Model.Order.TotalPriceWithPromo : Model.Order.TotalPrice;
+    var currency = Model.Order.CurrencyRecord.Code;
+}
+
+@if (!Model.Oops)
+{
+    var pixelSet = false;
+    using (Script.Head())
+    {
+       <!-- Facebook Pixel Code -->
+    <!-- Facebook Pixel Code -->
+    <script>
+    !function (f, b, e, v, n, t, s) {
+        if (f.fbq) return; n = f.fbq = function () {
+            n.callMethod ?
+            n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+        }; if (!f._fbq) f._fbq = n;
+        n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
+        t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s)
+    }(window,
+    document, 'script', '//connect.facebook.net/en_US/fbevents.js');
+
+    fbq('init', '114806928867925');
+
+
+   
+
+
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none"
+             src="https://www.facebook.com/tr?id=114806928867925&ev=PageView&noscript=1" />
+    </noscript>
+    
+    
+    <!-- End Facebook Pixel Code -->
+
+        if (!string.IsNullOrWhiteSpace(Model.FacebookCustomAudiencePixel))
+        {
+            pixelSet = true;
+
+            <!-- Facebook Pixel Code -->
+            <script>
+                !function (f, b, e, v, n, t, s) {
+                    if (f.fbq) return; n = f.fbq = function () {
+                        n.callMethod ?
+                        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                    }; if (!f._fbq) f._fbq = n;
+                    n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
+                    t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s)
+                }(window,
+                document, 'script', '//connect.facebook.net/en_US/fbevents.js');
+
+                fbq('init', '@Model.FacebookCustomAudiencePixel');
+                </script>
+            <noscript>
+                <img height="1" width="1" style="display:none"
+                     src="https://www.facebook.com/tr?id=@(Model.FacebookCustomAudiencePixel)&ev=PageView&cd[value]=@(amount)&cd[currency]=@(currency)&noscript=1&noscript=1" />
+            </noscript>
+            <!-- End Facebook Pixel Code -->
+        }
+        if (!string.IsNullOrWhiteSpace(Model.SellerFbPixel) && !pixelSet)
+        {
+            <script>
+                (function () {
+                    var _fbq = window._fbq || (window._fbq = []);
+                    if (!_fbq.loaded) {
+                        var fbds = document.createElement('script');
+                        fbds.async = true;
+                        fbds.src = '//connect.facebook.net/en_US/fbds.js';
+                        var s = document.getElementsByTagName('script')[0];
+                        s.parentNode.insertBefore(fbds, s);
+                        _fbq.loaded = true;
+                    }
+                    _fbq.push(['addPixelId', '@Model.SellerFbPixel']);
+                })();
+                window._fbq = window._fbq || [];
+                window._fbq.push(['track', '@Model.SellerFbPixel', { 'value': '@amount', 'currency': '@currency' }]);
+            </script>
+        }
+        if (!string.IsNullOrWhiteSpace(Model.SellerFbPixel) && !pixelSet)
+        {
+            <noscript><img height="1" width="1" alt="" style="display:none" src="https://www.facebook.com/tr?ev=@(Model.SellerFbPixel)&amp;cd[value]=@(amount)&amp;cd[currency]=@(currency)&amp;noscript=1&dt=ivmgtvlesuk3lon9t8ptnd55qytp1lrk" /></noscript>
+        }
+
+        <!--Code for Google ECommerce-->
+        @*<script>
+                $(document).ready(function () {
+                    ga('ecommerce:addTransaction', {
+                        'id': '@Model.Order.Id',                     // Transaction ID. Required.
+                        'affiliation': 'Teeyoot.com',   // Affiliation or store name.
+                        'revenue': '@Model.Order.TotalPrice.ToString("0.00")',               // Grand Total.
+                        'shipping': '@Model.Order.Delivery.ToString("0.00")',                  // Shipping.
+                        'tax': '0.00'                     // Tax.
+                    });
+                    ga('ecommerce:send');
+                });
+            </script>*@
+        <!--End-->
+    <script>
+    fbq('track', "PageView");
+    fbq('track', 'Purchase', {
+        value: '@amount.ToString("0.00").Replace(",", ".")',
+        currency: '@currency'
+    });
+    </script>
+
+
+
+        <script>
+            (function (i, s, o, g, r, a, m) {
+                i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+                    (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date(); a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+            })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+            ga('create', 'UA-67144532-1', 'auto');
+
+            ga('require', 'ecommerce', 'ecommerce.js');
+
+            ga('ecommerce:addTransaction', {
+                'id': '@Model.Order.Id', // Transaction ID. Required.
+                'affiliation': 'Teeyoot.com', // store name.
+                'revenue': '@Model.Order.TotalPrice.ToString("0.00").Replace(",", ".")', // total revenue.
+                'shipping': '@Model.Order.Delivery.ToString("0.00").Replace(",", ".")', // Shipping.
+                'currency': 'MYR'
+            });
+
+            ga('ecommerce:addItem', {
+                'id': '@Model.Order.Id', // Transaction ID. Required. Same as in the transaction data.
+                'name': '@Model.Order.Campaign.Title', // Product name. Required.
+                'price': '@Model.Order.Delivery.ToString("0.00").Replace(",", ".")',
+                'quantity': '@Model.Order.TotalSold.ToString()', // Product Quantity.
+                'currency': 'MYR'
+            });
+
+            ga('ecommerce:send');
+
+            ga('send', 'pageview');
+            ga('send', 'OrderCompleted');
+
+        </script>
+
+
+    }
+}
+<div class="reservation-complete-page">
+
+    <div class="reservation-complete-message">
+        <h1>@Model.Message</h1>
+    </div>
+
+    <div class="campaigns-list-container">
+        @foreach (var c in Model.Campaigns)
+        {
+            var daysRemaining = c.EndDate.Subtract(DateTime.UtcNow).Days;
+            <a href="~/@c.Alias" class="item">
+                <div class="campaign-card">
+
+                    <div class="campaign-card-image" style="background-image: url('/Media/campaigns/@c.Id/@c.FirstProductId/normal/@(!c.ShowBack ? "front.png" : "back.png")')">
+                        <a href="/@c.Alias"></a>
+
+                        <img src="@c.FlagFileName"
+                             style="width:25px; height:25px; margin-right:10px; position:relative; bottom:30px; float:right; border: black solid 1px;">
+                    </div>
+
+                    <div class="campaign-card-progress">
+                        <div class="campaign-card-progress-bar">
+                            <div class="campaign-card-progress-bar-completed" style="width:@(c.Goal != 0 ? c.Sold * 100 / @c.Goal : "0")%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="campaign-card-info">
+
+                        <div class="campaign-card-sold">@c.Sold  @T("sold")</div>
+
+                        <div class="campaign-card-left" title="@c.EndDate.ToString("dd.MM.yyyy")">
+                            <span>
+                                @if (daysRemaining > 0)
+                                {
+                                    @daysRemaining@:d @T("remaining")
+                                }
+                                else if (daysRemaining <= -1)
+                                {
+                                    @Math.Abs(daysRemaining)@:d @T("ago")
+                                }
+                                else
+                                {
+                                    var hours = c.EndDate.Subtract(DateTime.UtcNow).Hours;
+
+                                    if (hours > 0)
+                                    {
+                                        @hours@:h @T("remaining")
+                                    }
+                                    else
+                                    {
+                                        @Math.Abs(hours)@:h @T("ago")
+                                    }
+                                }
+
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div class="campaign-card-title"><a href="/@c.Alias" title="@c.Title">@c.Title</a></div>
+
+                </div>
+            </a>
+        }
+
+    </div>
+
+</div>
+

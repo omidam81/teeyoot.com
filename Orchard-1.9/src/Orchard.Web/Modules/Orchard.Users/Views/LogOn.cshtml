@@ -1,0 +1,103 @@
+﻿@using Orchard.ContentManagement
+
+@{
+    var userCanRegister = WorkContext.CurrentSite.As<Orchard.Users.Models.RegistrationSettingsPart>().UsersCanRegister;
+    var enableLostPassword = WorkContext.CurrentSite.As<Orchard.Users.Models.RegistrationSettingsPart>().EnableLostPassword;
+}
+
+<div class="login">
+    <div class="login-and-create">
+        <div id="login-into-teeyoot" class="login-into-teeyoot">
+
+            <h1 class="page-title">@Html.TitleForPage((string)Model.Title)</h1>
+            @using (Html.BeginFormAntiForgeryPost(Url.Action("LogOn", new { ReturnUrl = Request.QueryString["ReturnUrl"] }), FormMethod.Post, new { @id = "login_form" }))
+            {
+                <fieldset>
+                    <div class="password tb-height">
+                        <label for="username-email">@T("Username")</label>
+                        @Html.TextBox("userNameOrEmail", "", new { id = "username-email", autofocus = "autofocus" })
+                        @Html.ValidationMessage("userNameOrEmail")
+                    </div>
+                    <div class="password tb-height">
+                        <label for="password">@T("Password")</label>
+                        @Html.Password("password")
+                        @Html.ValidationMessage("password")
+                    </div>
+                    <div class="forgot">
+                       <a href="/Recover">@T("Forgot your password?")</a>
+                    </div>
+                    <div class="remember">
+                        @Html.CheckBox("rememberMe", new { id = "remember-me" })<label class="forcheckbox" for="remember-me">@T("Remember Me")</label>
+                    </div>
+                    <div>
+                        <button class="button-login" type="submit">@T("Log in now")</button>
+                    </div>
+                </fieldset>
+            }
+        </div>
+    </div>
+    <div class="login-with-social-network">
+        <div class="title">
+            <legend class="name">Or login with...</legend>
+        </div>
+        <div class="text">
+            Do you already have an account on Facebook or Google? <br>
+            Click the logo below to log in:
+        </div>
+        <div class="button-social-network">
+            <button class="button-facebook" onclick="location.href = 'https://www.facebook.com/dialog/oauth?client_id=107917566225562&amp;response_type=code&amp;scope=email&amp;redirect_uri=http%3a%2f%2flocalhost%3a30321%2fFacebookAuth&amp;state=http%3a%2f%2flocalhost%3a30321%2fLogin'">
+                <p style="display: inline; margin-right: 10px; font-size: 18px; font-weight: 800;">f</p>Login with Facebook
+            </button>
+        </div>
+        <div class="button-social-network">
+            <button class="button-google" onclick="location.href = 'https://accounts.google.com/o/oauth2/auth?response_type=code&amp;client_id=898677290207-1kcoccjhfge0mualrr95ac3g1m4qsr1f.apps.googleusercontent.com&amp;redirect_uri=http%3a%2f%2flocalhost%3a30321%2fGoogleAuth&amp;scope=https%3a%2f%2fwww.googleapis.com%2fauth%2fuserinfo.email&amp;state=http%3a%2f%2flocalhost%3a30321%2fLogin'">
+                <div style="display: inline-flex; display: -webkit-inline-box !important; display: -ms-inline-flexbox; margin-top: 5px; text-align: -webkit-auto;">
+                    <img style="width: 20px; margin-right: 10px;" src="/Media/Default/images/gogle_icon.png">
+                    <div style="margin-top: 2px;">Login with Google</div>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+
+@using (Script.Foot())
+{
+    Script.Require("jQuery");
+    Script.Include("/Modules/Teeyoot.Account/scripts/jquery.validate.min.js");
+    Script.Include("/Modules/Teeyoot.Account/scripts/additional-methods.min.js");
+}
+@{
+    Style.Include("/Modules/Teeyoot.Account/Styles/Login.css");
+}
+
+
+
+
+
+@using (Script.Foot())
+{
+
+    <script>
+        $("#login_form").validate({
+            rules: {
+                Email: {
+                    required: true,
+                    email: true
+                },
+                Password: {
+                    required: true,
+                    minlength: 8
+                }
+            },
+            submitHandler: function (form) { form.submit(); }
+        });
+
+
+    </script>
+
+    <script>
+        document.title = "@T("Login | Teeyoot")";
+    </script>
+}
+
+

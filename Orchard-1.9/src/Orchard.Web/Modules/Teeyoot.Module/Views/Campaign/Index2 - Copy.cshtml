@@ -1,0 +1,796 @@
+﻿@model Teeyoot.Module.ViewModels.CampaignIndexViewModel
+@using (Script.Head())
+{
+    <meta property="og:site_name" content="Teeyoot" />
+    <meta property="og:title" content="@Model.Campaign.Title" />
+    <meta property="og:image" content="@Request.Url.Scheme://@Request.Url.Authority@Request.ApplicationPath.TrimEnd('/')/Media/campaigns/@Model.Campaign.Id/@Model.Campaign.Products.First(c => c.WhenDeleted == null).Id/social/campaign.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="627" />
+    <meta property="og:description" content="@Model.FBDescription" />
+    <meta property="og:url" content="@Request.Url.Scheme://@Request.Url.Authority@Request.ApplicationPath.TrimEnd('/')/@Model.Campaign.Alias" />
+
+    <meta name="twitter:domain" content="Teeyoot.com">
+    <meta name="twitter:card" content="photo">
+    @*<meta name="twitter:description" content="@Model.Campaign.Description">*@
+    <meta name="twitter:title" content="@Model.Campaign.Title">
+    <meta name="twitter:site" content="teeyoot">
+    <meta name="twitter:image" content="@Request.Url.Scheme://@Request.Url.Authority@Request.ApplicationPath.TrimEnd('/')/Media/campaigns/@Model.Campaign.Id/@Model.Campaign.Products.First(c => c.WhenDeleted == null).Id/social/campaign.jpg" />
+    if (Model.Campaign.IsPrivate)
+    {
+        <meta name="Robots" content="NOINDEX,NOFOLLOW">
+    }
+
+
+    if (!string.IsNullOrWhiteSpace(Model.FacebookCustomAudiencePixel) ||
+       !string.IsNullOrWhiteSpace(Model.SellerFbPixel)
+        )
+    {
+        var pixelSet = false;
+        if (!string.IsNullOrWhiteSpace(Model.FacebookCustomAudiencePixel))
+        {
+            pixelSet = true;
+            <script>
+                !function (f, b, e, v, n, t, s) {
+                    if (f.fbq) return;
+                    n = f.fbq = function () {
+                        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                    };
+                    if (!f._fbq) f._fbq = n;
+                    n.push = n; n.loaded = !0;
+                    n.version = '2.0';
+                    n.queue = []; t =
+                        b.createElement(e);
+                    t.async = !0;
+                    t.src = v; s = b.getElementsByTagName(e)[0];
+                    s.parentNode.insertBefore(t, s)
+                }(window, document, 'script', '//connect.facebook.net/en_US/fbevents.js');
+                // Insert Your Custom Audience Pixel ID below.
+                fbq('init', '@Model.FacebookCustomAudiencePixel');
+                fbq('track', 'PageView');
+                fbq('track', 'ViewContent');
+            </script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=@Model.FacebookCustomAudiencePixel&ev=PageView&noscript=1" /></noscript>
+            <!-- End Custom Audience Pixel Code --><!-- Facebook Custom Audience Pixel Code -->
+            <!--End New Pixel-->
+        }
+        else
+        {
+         <!--Old Pixel-->
+            @*<script type="text/javascript">
+                    (function () {
+                        var _fbq = window._fbq || (window._fbq = []);
+                        if (!_fbq.loaded) {
+                            var fbds = document.createElement('script');
+                            fbds.async = true;
+                            fbds.src = '//connect.facebook.net/en_US/fbds.js';
+                            var s = document.getElementsByTagName('script')[0];
+                            s.parentNode.insertBefore(fbds, s);
+                            _fbq.loaded = true;
+                        }
+                        _fbq.push(['addPixelId', '@Model.SellerFbPixel']);
+                    })();
+                    window._fbq = window._fbq || [];
+                    window._fbq.push(['track', 'PixelInitialized', {}]);
+                </script>
+                if (!string.IsNullOrWhiteSpace(Model.SellerFbPixel) && !pixelSet)
+                {
+                    <noscript><img height="1" width="1" alt="" style="display:none" src="https://www.facebook.com/tr?ev=@(Model.SellerFbPixel)&amp;noscript=1&dt=ivmgtvlesuk3lon9t8ptnd55qytp1lrk" /></noscript>
+                }*@
+    <!--End Old Pixel-->
+        }
+
+    }
+    Style.Include("new-campaign.css");
+    Style.Include("n-campaign.css");
+
+    var firstProuct = Model.Campaign.Products.FirstOrDefault();
+    if (firstProuct == null)
+    {
+        Server.TransferRequest("~/404");
+    }
+
+    var jsonCode = "";
+    List<dynamic> products = new List<dynamic>();
+
+    foreach (var product in Model.Campaign.Products.Where(c => c.WhenDeleted == null))
+    {
+
+        //products.Add(
+
+        var x = new
+        {
+            name = product.ProductRecord.Name,
+            id = product.Id,
+            price = product.Price,
+            colors = new List<dynamic>(),
+            sizes = new List<dynamic>(), //product.ProductRecord.SizesAvailable.ToArray()
+        };
+
+        if (product.ProductColorRecord != null)
+        {
+            x.colors.Add(product.ProductColorRecord);
+        }
+
+        if (product.SecondProductColorRecord != null)
+        {
+            x.colors.Add(product.SecondProductColorRecord);
+        }
+
+        if (product.ThirdProductColorRecord != null)
+        {
+            x.colors.Add(product.ThirdProductColorRecord);
+        }
+
+        if (product.FourthProductColorRecord != null)
+        {
+            x.colors.Add(product.FourthProductColorRecord);
+        }
+
+        if (product.FifthProductColorRecord != null)
+        {
+            x.colors.Add(product.FifthProductColorRecord);
+        }
+
+        foreach (var size in product.ProductRecord.SizesAvailable)
+        {
+
+            dynamic new_size = new
+            {
+                id = size.Id,
+                cost = size.SizeCost,
+                sizeRecord = size.ProductSizeRecord,
+            };
+
+            x.sizes.Add(new_size);
+        }
+
+        products.Add(x);
+    }
+    jsonCode = Newtonsoft.Json.JsonConvert.SerializeObject(products, new Newtonsoft.Json.JsonSerializerSettings()
+    {
+        ContractResolver = new Teeyoot.Module.Controllers.NHibernateContractResolver()
+    });
+
+    <script>
+        window.products = @Html.Raw(@jsonCode);
+        window.campainID = @Model.Campaign.Id;
+        window.CampaignBaseCurrency = '@Model.Campaign.CurrencyRecord.ShortName';
+        window.ExchangeRates = @Html.Raw(Model.exchangeRate);
+    </script>
+}
+
+
+<div class="main">
+    <div class="campaign">
+        <div class="left">
+            <h1>@Model.Campaign.Title</h1>
+            <div class="tee">
+                <div class="colors">
+                    <ul>
+                        @{
+                            Teeyoot.Module.Models.CampaignProductRecord First = Model.Campaign.Products.FirstOrDefault();
+
+                            <li class="active" data-color-id="@First.ProductColorRecord.Id" style="background:@First.ProductColorRecord.Value;" title="@First.ProductColorRecord.Name"></li>
+                            if (First.SecondProductColorRecord != null)
+                            {
+                                <li data-color-id="@First.SecondProductColorRecord.Id" style="background:@First.SecondProductColorRecord.Value;" title="@First.SecondProductColorRecord.Name"></li>}
+                            if (First.ThirdProductColorRecord != null)
+                            {
+                                <li data-color-id="@First.ThirdProductColorRecord.Id" style="background:@First.ThirdProductColorRecord.Value;" title="@First.ThirdProductColorRecord.Name"></li>}
+                            if (First.FourthProductColorRecord != null)
+                            {
+                                <li data-color-id="@First.FourthProductColorRecord.Id" style="background:@First.FourthProductColorRecord.Value;" title="@First.FourthProductColorRecord.Name"></li>}
+                            if (First.FifthProductColorRecord != null)
+                            {
+                                <li data-color-id="@First.FifthProductColorRecord.Id" style="background:@First.FifthProductColorRecord.Value;" title="@First.FifthProductColorRecord.Name"></li>}
+
+                        }
+                    </ul>
+
+                </div>
+                <div class="teeviewer">
+                    <div class="front">
+                        <img id="zoomlensfront" src="/Media/campaigns/@Model.Campaign.Id/@Model.Campaign.Products.First(c => c.WhenDeleted == null).Id/normal/front.png" data-zoom-image="/Media/campaigns/@Model.Campaign.Id/@Model.Campaign.Products.First(c => c.WhenDeleted == null).Id/big/front.png" />
+                    </div>
+                    <div class="back">
+                        <img id="zoomlensback" src="/Media/campaigns/@Model.Campaign.Id/@Model.Campaign.Products.First(c => c.WhenDeleted == null).Id/normal/back.png" data-zoom-image="/Media/campaigns/@Model.Campaign.Id/@Model.Campaign.Products.First(c => c.WhenDeleted == null).Id/big/back.png" />
+                    </div>
+                </div>
+                <div class="turnbtns">
+                    <div class="turnfront">
+                        <img src="/Media/campaigns/@Model.Campaign.Id/@Model.Campaign.Products.First(c => c.WhenDeleted == null).Id/normal/front.png">
+                        <span>Front</span>
+                    </div>
+                    <div class="turnback">
+                        <img src="/Media/campaigns/@Model.Campaign.Id/@Model.Campaign.Products.First(c => c.WhenDeleted == null).Id/normal/back.png" />
+                        <span>Back</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right">
+            @if (Model.PromoSize > 0)
+            {
+                if (Model.PromoType == "%")
+                {
+                    var promosize = (Model.Campaign.Products.FirstOrDefault().Price / 100) * Model.PromoSize;
+
+                    <h2 class="price">
+                        <span style="text-decoration:line-through;">
+                            @Model.Campaign.CurrencyRecord.ShortName @Model.Campaign.Products.FirstOrDefault().Price.ToString("0.00").Replace(",", ".")
+                        </span>
+                        <span>
+                            @Model.Campaign.CurrencyRecord.ShortName @((Model.Campaign.Products.FirstOrDefault().Price - promosize).ToString("0.00").Replace(",", "."))
+                        </span>
+
+                    </h2>
+                }
+                else
+                {
+                    <h2 class="price">
+                        <span style="text-decoration:line-through;">
+                            @Model.Campaign.CurrencyRecord.ShortName @Model.Campaign.Products.FirstOrDefault().Price.ToString("0.00").Replace(",", ".")
+                        </span>
+                        <span>
+                            @Model.Campaign.CurrencyRecord.ShortName @((Model.Campaign.Products.FirstOrDefault().Price - Model.PromoSize).ToString("0.00").Replace(",", "."))
+                        </span>
+
+                    </h2>
+                }
+            }
+            else
+            {
+                <h2 class="price">@Model.Campaign.CurrencyRecord.ShortName @Model.Campaign.Products.FirstOrDefault().Price.ToString("0.00").Replace(",", ".")</h2>
+            }
+            <div class="des">
+                @Html.Raw(Model.Campaign.Description)
+            </div>
+            <h3 class="title">Styles</h3>
+            <span class="chcrncy">Change Currency</span>
+            <select class="products">
+                @foreach (var item in Model.Campaign.Products)
+                {
+                    <option id="@item.Id" value="@item.Id">@item.ProductRecord.Name - @Model.Campaign.CurrencyRecord.ShortName @item.Price.ToString("0.00").Replace(",", ".")</option>
+                }
+
+            </select>
+
+            <span class="info">
+                <div class="infobox">
+                    @Model.Campaign.Products.FirstOrDefault().ProductRecord.Details;
+                </div>
+            </span>
+
+            <span class="viewdetails">View Sizing Chart & Product Details</span>
+            <div style='display:none;' id="js-size-chart-wrap" class="product__size_chart_wrap product__size_chart_wrap--inch">
+                @foreach (var product in Model.Campaign.Products.Where(c => c.WhenDeleted == null))
+                {
+                    <div class="product__size_chart" data-product-id="@product.Id">
+                        <div class="size_chart__units">
+                            <span class="js-size-unit-toggle-inches size_chart__unit size_chart__unit--inch" data-unit="inch">@T("Inches")</span>
+                            <span class="js-size-unit-toggle-centimeters size_chart__unit size_chart__unit--cm" data-unit="cm">@T("Centimeters")</span>
+                        </div>
+                        <table class="product__size_chart__table">
+                            <thead>
+                                <tr class="product__size_chart__row">
+                                    <th class="product__size_chart__size_label">&nbsp;</th>
+                                    <th>@T("Length")</th>
+                                    <th>@T("Sleeve")</th>
+                                    <th>@T("Width")</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var size in product.ProductRecord.SizesAvailable)
+                                {
+                                    var sleaveCm = size.ProductSizeRecord.SleeveCm != null ? Math.Round((double)size.ProductSizeRecord.SleeveCm, 2) + " cm" : " ";
+                                    <tr class="product__size_chart__row">
+                                        <td class="product__size_chart__size_label">@size.ProductSizeRecord.SizeCodeRecord.Name</td>
+                                        <td>
+                                            <span class="product__size_chart__size product__size_chart__size--inch">@size.ProductSizeRecord.LengthInch"</span>
+                                            <span class="product__size_chart__size product__size_chart__size--cm">@Math.Round(size.ProductSizeRecord.LengthCm, 2) cm</span>
+                                        </td>
+                                        <td>
+                                            <span class="product__size_chart__size product__size_chart__size--inch">@size.ProductSizeRecord.SleeveInch"</span>
+                                            <span class="product__size_chart__size product__size_chart__size--cm">@sleaveCm</span>
+                                        </td>
+                                        <td>
+                                            <span class="product__size_chart__size product__size_chart__size--inch">@size.ProductSizeRecord.WidthInch"</span>
+                                            <span class="product__size_chart__size product__size_chart__size--cm">@Math.Round(size.ProductSizeRecord.WidthCm, 2) cm</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+            @{
+                var timeleft2 = Model.Campaign.EndDate - DateTime.Now;
+                if (timeleft2.TotalSeconds > 0)
+                {
+                    <h4>@Model.Campaign.ProductCountSold Sold, Buy until <span class="green">@Model.Campaign.EndDate.DayOfWeek !</span></h4>
+                    <a class="buyit" href="#reserve-it-now">Buy it Now</a>
+
+                }
+                else
+                {
+                    <h4>@Model.Campaign.ProductCountSold Sold, Buy until <span class="green">@Model.Campaign.EndDate.DayOfWeek !</span></h4>
+                    <a class="buyit requestit" href="#reserve-it-now">Request it</a>
+                }
+            }
+            <div class="payment">
+                <ul>
+                    <li class="paypal"><a href="#"></a></li>
+                    <li class="ipay88"><a href="#"></a></li>
+                    <li class="molpay"><a href="#"></a></li>
+                    <li class="braint"><a href="#"></a></li>
+                </ul>
+            </div>
+            @{
+                var timeleft = Model.Campaign.EndDate - DateTime.Now;
+                if (timeleft.TotalSeconds > 0)
+                {
+                    <div class="timeleft" data-time-left="@timeleft.TotalSeconds">
+
+                        <div class="blks days">@timeleft.Days</div>
+                        <div class="blks hours">@timeleft.Hours</div>
+                        <div class="blks mins">@timeleft.Minutes</div>
+                        <div class="blks secs">@timeleft.Seconds</div>
+
+                        <span class="timet">Days</span>
+                        <span class="timet">Hours</span>
+                        <span class="timet">Mins</span>
+                        <span class="timet">Secs</span>
+                    </div>
+                }
+            }
+
+            <ul class="social">
+                <li class="socialicon fb"><a href="#">Share</a></li>
+                <li class="socialicon tw"><a href="#">Tweet</a></li>
+                <li class="socialicon pn"><a href="#">Pin it</a></li>
+                <li class="socialicon em"><a href="#">Email</a></li>
+            </ul>
+        </div>
+
+        <div class="refund">
+            <h3>Refund Policy</h3>
+            <p>100% Satisfaction Guaranteed! If the quality is substandard, you can return it and get refunded. <a href="#">See FAQ</a></p>
+            <h3>Delivery Time</h3>
+            <p>T-shirts are printed and delivered when this campaign expires, on <span class="bold">December 30</span></p>
+        </div>
+    </div>
+    <div class="relatedcampaign campaignmargin hidden">
+        <h2>Related Campaigns</h2>
+        <div class="item">
+            <div class="daysleft">6 Days Left</div>
+            <img src="Themes/Teeyoot.theme/content/front.png" />
+            <h4>People Are Awesome</h4>
+            <p><span class="price">$23</span>|<span class="sold">354 Sold</span></p>
+        </div>
+        <div class="item">
+            <div class="daysleft">6 Days Left</div>
+            <img src="Themes/Teeyoot.theme/content/front.png" />
+            <h4>People Are Awesome</h4>
+            <p><span class="price">$23</span>|<span class="sold">354 Sold</span></p>
+        </div>
+        <div class="item">
+            <div class="daysleft">6 Days Left</div>
+            <img src="Themes/Teeyoot.theme/content/front.png" />
+            <h4>People Are Awesome</h4>
+            <p><span class="price">$23</span>|<span class="sold">354 Sold</span></p>
+        </div>
+        <div class="item">
+            <div class="daysleft">6 Days Left</div>
+            <img src="Themes/Teeyoot.theme/content/front.png" />
+            <h4>People Are Awesome</h4>
+            <p><span class="price">$23</span>|<span class="sold">354 Sold</span></p>
+        </div>
+    </div>
+</div>
+
+@using (Script.Foot())
+{
+    <script>
+        window.timeLeft = @((Model.Campaign.EndDate - DateTime.Now).TotalSeconds);
+        document.title = "Teeyoot | @Model.Campaign.Title";
+        window.setInterval(function () {
+            window.timeLeft = window.timeLeft -1;
+
+            $(".secs").text(Math.floor(window.timeLeft % 60));
+            $(".mins").text(Math.floor(window.timeLeft % 3600 /60));
+            $(".hours").text(Math.floor((window.timeLeft % 3600 * 24) /3600));
+            $(".days").text(Math.floor((window.timeLeft % (3600 * 365 * 24)) /(24 * 3600)));
+        }, 1000);
+
+        function Update(){
+            var color =  $(".colors li.active").data('color-id');
+            var productId =$(".products option:selected").val();
+            var campainId = window.campainID;
+            if(color) productId = productId + "_" + color;
+            var backImage = "/Media/campaigns/" +campainId + "/" +  productId + "/normal/back.png";
+            var frontImage = "/Media/campaigns/" +campainId + "/" +  productId + "/normal/front.png";
+
+
+            $("#zoomlensfront").attr('src', frontImage);
+            $("#zoomlensback").attr('src', backImage);
+
+            $("#zoomlensfront").data('zoom-image', frontImage);
+            $("#zoomlensback").data('zoom-image',backImage);
+
+            $(".turnback img").attr('src', backImage);
+            $(".turnfront img").attr('src', frontImage);
+            ///alert(color);
+
+            $('#zoomlensfront').elevateZoom();
+            $('#zoomlensback').elevateZoom();
+        }
+        $(document).ready(function(){
+
+            $(".products").change(Update);
+            $(".colors li").click(Update);
+
+            $(".buyit").click(function(){
+                fbq('track', 'InitiateCheckout');
+                if($(this).hasClass("requestit")) return;
+                $(".modal-main").show();
+
+                if($('.modal-main').find(".colors").length == 1){
+                    colorId = $(".tee").find(".colors .active").data('color-id');
+                    $("select.colors").find("option[data-color-id="+colorId+"]").attr('selected', 'selected')
+                }
+            });
+            $(".modal > div").click(function(e){
+                e.stopPropagation();
+            });
+            $(".modal, .close").click(function(e){
+                $(".modal-main").hide();
+            });
+
+            $("#add-row").click(function(){
+                x  = $(".modal .first-row").clone();
+                x.removeClass("first-row");
+                $(".modal table").append(x);
+
+                l = $(".data-row").length;
+
+                if(l > 1){
+                    $(".data-row").find("span.remove").removeClass("hidden");
+                }
+            });
+        });
+
+        function removeItem(e){
+            x = $(".data-row").length;
+            if(x == 1) return;
+            $(e).parents("tr").remove();
+            $(".data-row").removeClass("first-row");
+            $($(".data-row")[0]).addClass('first-row');
+            x = $(".data-row").length;
+            if(x == 1)
+                $(".data-row").find("span.remove").addClass("hidden");
+
+        }
+
+    </script>
+}
+<div class="modal-main">
+    <div class="overlay"></div>
+    <div class="modal">
+        <div>
+            <span class="close">X</span>
+            <table cellspacing="0">
+                <tr class="hidden-mobile">
+                    <th>
+                    </th>
+                    <th>
+                        @("Style")
+                    </th>
+                    <th>
+                        @("Qty")
+                    </th>
+                    <th>
+                        @("Size")
+                    </th>
+                    <th>
+                        @("Color")
+                    </th>
+                    <th>
+                        @("Price")
+                    </th>
+                    <th>
+
+                    </th>
+                </tr>
+                <tr class="first-row data-row">
+                    <td>
+                        <img />
+                    </td>
+                    <td>
+                        <span class="show-mobile">
+                            @("Style")
+                        </span>
+                        <select class="styles">
+                            @foreach (var product in Model.Campaign.Products.Where(aa => aa.WhenDeleted == null))
+                            {
+                                <option value="@product.Id">@product.ProductRecord.Name</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <span class="show-mobile">
+                            @("Qty")
+                        </span>
+                        <input value="1" class='qunitity' />
+                    </td>
+                    <td>
+                        <span class="show-mobile">
+                            @("Size")
+                        </span>
+                        @{
+                            var first = Model.Campaign.Products.FirstOrDefault();
+
+                            <select class="sizes">
+                                @foreach (var size in first.ProductRecord.SizesAvailable)
+                                {
+                                    <option value="@size.ProductSizeRecord.Id" id="@size.ProductSizeRecord.Id" data-product-size-id="@size.Id">@size.ProductSizeRecord.SizeCodeRecord.Name</option>
+                                }
+                            </select>
+                        }
+                    </td>
+
+                    <td>
+                        <span class="show-mobile">
+                            @("Color")
+                        </span>
+                        @{
+                            var first2 = Model.Campaign.Products.FirstOrDefault();
+
+                            <select class="colors">
+                                <option data-color-id="@first2.ProductColorRecord.Id">@first.ProductColorRecord.Name</option>
+                                @if (first2.SecondProductColorRecord != null)
+                                {
+                                    <option data-color-id="@first2.SecondProductColorRecord.Id">@first.SecondProductColorRecord.Name</option>
+                                }
+                                @if (first2.ThirdProductColorRecord != null)
+                                {
+                                    <option data-color-id="@first2.ThirdProductColorRecord.Id">@first.ThirdProductColorRecord.Name</option>
+                                }
+                                @if (first2.FourthProductColorRecord != null)
+                                {
+                                    <option data-color-id="@first2.FourthProductColorRecord.Id">@first.FourthProductColorRecord.Name</option>
+                                }
+                                @if (first2.FifthProductColorRecord != null)
+                                {
+                                    <option data-color-id="@first2.FifthProductColorRecord.Id">@first.FifthProductColorRecord.Name</option>
+                                }
+                            </select>
+                        }
+                    </td>
+
+                    <td>
+                        <span class="show-mobile">
+                            @("Price")
+                        </span>
+                        <label class="price">
+                            <span class="code">
+                                @Model.Campaign.CurrencyRecord.ShortName
+                            </span>
+                            <span class="value">
+                                @first.Price.ToString("0.00")
+                            </span>
+                        </label>
+
+                    </td>
+                    <td class="remove">
+                        <span class="remove hidden" onclick="removeItem(this)">remove</span>
+                    </td>
+                </tr>
+            </table>
+            <hr />
+            <br />
+            <br />
+            <p>
+                <span id="add-row" class="add-another">+ Add another size, colour or style where applicable</span>
+            </p>
+            <hr />
+            <a class="checkout" href="#reserve-it-now">Checkout</a>
+        </div>
+    </div>
+</div>
+
+
+@using (Script.Foot())
+{
+    <script>
+
+
+        function addAntiForgeryToken(data) {
+            data.__RequestVerificationToken = "@Html.AntiForgeryTokenValueOrchard()";
+            return data;
+        };
+        var allowPromo = false;
+        $(document).ready(function(){
+
+            $(".front").show();
+            $(".back").hide();
+            $('#zoomlensfront').elevateZoom();
+
+            $('.turnback').click(function(){
+                $('.front').css({'transform':'rotateY(90deg)'}, 300);
+                setTimeout(function(){
+                    $('.back').show();
+                    $('.back').css({'transform':'rotateY(0deg)'}, 300);
+                    $('.front').hide();
+                }, 300);
+                $(this).css({'opacity':'1'});
+                $('.turnfront').css({'opacity':'0.5'});
+                $('#zoomlensback').elevateZoom();
+            });
+
+
+            $('.turnfront').click(function(){
+                $('.back').css({'transform':'rotateY(-90deg)'}, 300);
+                setTimeout(function(){
+                    $('.front').show();
+                    $('.front').css({'transform':'rotateY(0deg)'}, 300);
+                    $('.back').hide();
+                }, 300);
+                $(this).css({'opacity':'1'});
+                $('.turnback').css({'opacity':'0.5'});
+                $('#zoomlensfront').elevateZoom();
+            });
+            //
+
+            //
+
+
+            $('.checkout').click(function(){
+                sendData();
+            });
+
+        });
+
+
+
+
+        $(document).on('change', 'select', function(e) {
+
+            //console.log(e);
+            if($(e.target).hasClass('products')) return;
+            row = $(e.target).parents('tr');
+
+            if($(e.target).hasClass('styles')){
+                UpdateRow(row);
+            }
+            UpdateAmount(row);
+        });
+        $(document).on('change', '.qunitity', function(e){
+            row = $(e.target).parents('tr');
+            UpdateAmount(row);
+        });
+        function UpdateAmount (row){
+            count = row.find('.qunitity').val();
+            if(!Number(count)) count = 1;
+            count = Number(count);
+
+            var productID = row.find('.styles option:checked').val();//data('style-id');
+            var sizeID = row.find('.sizes  option:checked').data('size-id');
+            var colorId = row.find('.colors  option:checked').data('color-id');
+
+
+            var productId = row.find('.styles option:checked').val();
+            product = findProductById(productId);
+
+
+
+            count = row.find('.qunitity').val();
+            if(!Number(count)) count = 1;
+            count = Number(count);
+
+
+            $(row).find('.price .code').text(window.CampaignBaseCurrency);
+            $(row).find('.price .value').text((count*  product.price).toFixed(2));
+        }
+        function UpdateRow(row){
+            var productId = row.find('.styles option:checked').val();
+            product = findProductById(productId);
+
+            row.find(".sizes option").remove();
+            row.find(".colors option").remove();
+
+            var select_color = row.find('.colors');
+            var select_size = row.find('.sizes');
+
+            $(product.colors).each(function(index, item){
+                select_color.append("<option data-color-id='" +item.Id+ "'>" + item.Name + "</option>");
+            });
+
+            $(product.sizes).each(function(index, item){
+                select_size.append("<option value='" + item.sizeRecord.Id + "' id='" + item.sizeRecord.Id + "' data-product-size-id='" +item.id+ "'>" + item.sizeRecord.SizeCodeRecord.Name + "</option>");
+            });
+
+
+            count = row.find('.qunitity').val();
+            if(!Number(count)) count = 1;
+            count = Number(count);
+
+
+            $(row).find('.price .code').text(window.CampaignBaseCurrency);
+            $(row).find('.price .value').text((count*  product.price).toFixed(2));
+        }
+        function findProductById(productid){
+            if(window.products == null) return;
+            if(window.products.length == 1) return window.products[0];
+
+            for (var i = 0; i < window.products.length; i++) {
+                product = window.products[i];
+                if(product.id == productid) return product;
+            }
+            return null;
+        }
+        function sendData() {
+            allowPromo= true;
+            var promoId = '@Model.PromoId';
+            var products = [];
+            var tableRows = $('.data-row');
+            var count;
+            var productId;
+            var sizeId;
+            var price;
+            var colorId;
+            var currencyId = @Model.Campaign.Products.First().CurrencyRecord.Id;
+            var productSizeId;
+
+            tableRows.each(function(index, el) {
+
+                var items = $(el).find('.styles')[0];
+                productId = items[items.selectedIndex].value;
+                items = $(el).find('.sizes')[0];
+                productSizeId = $(items).find('option:selected').data('product-size-id');
+                sizeId = items[items.selectedIndex].value;
+                count = $(el).find('.qunitity')[0].value;
+                price = $(el).find('.price .value')[0].title;
+                items = $(el).find('.colors')[0];
+                colorId = items[items.selectedIndex].value;
+                //productSizeId = $(el).find().attr('id'); //$(el).find('.modal-price.shown').data('product-size-id');
+
+                products.push({
+                    ProductId: productId,
+                    SizeId: sizeId,
+                    Count: count,
+                    Price: price,
+                    ColorId: colorId,
+                    CurrencyId: currencyId,
+                    ProductSizeId: productSizeId
+                });
+            });
+            $.ajax({
+                async: true,
+                cache: false,
+                type: "POST",
+                url: "@(Url.Action("CreateOrder", "Home"))",
+                data: addAntiForgeryToken({
+                    "products": products
+                }),
+                success: function(data, status, resp) {
+                    if (resp.status === 200) {
+                        if (promoId) {
+                            window.location.href = '/Buy/' + data + "?promo=" + promoId;
+                        } else {
+                            window.location.href = '/Buy/' + data;
+                        }
+                    }
+                },
+                error: function(data, status, resp) {
+                    alert('Status: ' + data.status + '. Error message: ' + data.statusText);
+                }
+            });
+
+
+        }
+
+
+
+    </script>
+}

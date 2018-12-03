@@ -1,0 +1,466 @@
+﻿@model Teeyoot.Module.ViewModels.PaymentViewModel
+@{
+    Style.Include("campaign.css");
+    Style.Include("checkout.css");
+    Script.Require("jQuery");
+    Script.Include("jquery.validate.min.js");
+    Script.Include("additional-methods.min.js");
+    Script.Include("bignumber.min.js");
+    Script.Include("Payment.js");
+
+    var resourceManager = WorkContext.Resolve<Orchard.UI.Resources.IResourceManager>();
+    resourceManager.SetMeta(new Orchard.UI.Resources.MetaEntry
+    {
+        Name = "Cache-control",
+        Content = "no-cache"
+    });
+
+    resourceManager.SetMeta(new Orchard.UI.Resources.MetaEntry
+    {
+        Name = "Expires",
+        Content = "-1"
+    });
+}
+
+<script>
+    window.AjaxRefresh = true;
+
+</script>
+
+<div class="site__content_container">
+    <div class="site__wrapper">
+        <div>@Html.ValidationSummary()</div>
+        <div class="form__message form__message--error hidden" style="padding: 15px"></div>
+        <div class="checkout__wrapper">
+            <div class="checkout__container_main">
+                <div class="checkout_form js_checkout_form">
+                    <div class="checkout_form__header">
+                        <h2 class="checkout__title">@T("Checkout")</h2>
+                    </div>
+                    <div class="order_summary__wrapper js_order_summary">
+                        <h2 class="checkout__title checkout__title--small">@T("Order Summary")</h2>
+                        <table class="order_summary">
+                            <tbody class="order_summary__items">
+                                @foreach (var item in Model.Order.Products)
+                                {
+                                    var index = Model.Order.Products.IndexOf(item);
+                                    var idSize = item.OrderRecord.Products[index].ProductSizeRecord.Id;
+                                    var costSize = item.CampaignProductRecord.ProductRecord.SizesAvailable.First(c => c.ProductSizeRecord.Id == idSize).SizeCost;
+                                    var price = (float)item.CampaignProductRecord.Price + costSize;
+                                    var colorName = item.ProductColorRecord == null ? item.CampaignProductRecord.ProductColorRecord.Name : item.ProductColorRecord.Name;
+                                    var colorValue = item.ProductColorRecord == null ? item.CampaignProductRecord.ProductColorRecord.Value : item.ProductColorRecord.Value;
+                                    var colorImage = (item.ProductColorRecord == null || item.ProductColorRecord.Id == item.CampaignProductRecord.ProductColorRecord.Id) ? item.CampaignProductRecord.Id.ToString() : item.CampaignProductRecord.Id + "_" + item.ProductColorRecord.Id;
+                                    if (item.CampaignProductRecord.SecondProductColorRecord == null)
+                                    {
+                                        colorImage = item.CampaignProductRecord.Id.ToString();
+                                    }
+                                    <tr>
+                                        <td>
+                                            <div class="order_summary__item_image ">
+                                                <img src="/Media/campaigns/@item.CampaignProductRecord.CampaignRecord_Id/@colorImage/normal/front.png" alt="">
+                                            </div>
+                                        </td>
+                                        <td class="order_summary__item_name">
+                                            @item.Count x @item.CampaignProductRecord.ProductRecord.Name
+                                            <ul class="order_summary__item_options">
+                                                <li>@item.ProductSizeRecord.SizeCodeRecord.Name</li>
+                                                <li>
+                                                    <span class="order_summary__item_color_label">@colorName</span>
+                                                    <span class="order_summary__item_color" style="background-color:@colorValue"></span>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                        <td class="order_summary__item_price">
+                                            <span class="currency-code-placeholder">
+                                                @Model.CurrencyCode
+                                            </span>
+                                            <span class="item-price-value-placeholder">
+                                                @((price * item.Count * Model.ExchangeRate).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <div class="order_summary__breakdown_container">
+                            <dl class="order_summary__breakdown">
+                                @if (Model.Promotion != null && Model.Order.TotalPriceWithPromo != 0)
+                                {
+                                    <dt>
+                                        @T("Discount")
+                                    </dt>
+                                    <dd>
+                                        <span class="order_summary__total">-@Model.Order.CurrencyRecord.Code @Model.Order.Promotion</span>
+                                    </dd>
+                                }
+                            </dl>
+                            <dl class="order_summary__breakdown">
+                                <dt>
+                                    @T("Delivery")
+                                </dt>
+                                <dd id="parentDelivery" style="display: none">
+                                    <span class="currency-code-placeholder">
+                                        @Model.CurrencyCode
+                                    </span>
+                                    <span id="deliveryCost">1000.oo</span>
+                                </dd>
+                            </dl>
+                            <dl class="order_summary__breakdown">
+                                <dt class="order_summary__total_label">
+                                    @T("Total")
+                                </dt>
+                                <dd>
+                                    @if (Model.Order.TotalPriceWithPromo > 0)
+                                    {
+                                        <span class="order_summary__total">
+                                            <span class="currency-code-placeholder">
+                                                @Model.CurrencyCode
+                                            </span>
+                                            <span id="ordTotal">
+                                                @((Model.Order.TotalPriceWithPromo * Model.ExchangeRate).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))
+                                            </span>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="order_summary__total">
+                                            <span class="currency-code-placeholder">
+                                                @Model.CurrencyCode
+                                            </span>
+                                            <span id="ordTotal">
+                                                @((Model.Order.TotalPrice * Model.ExchangeRate).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))
+                                            </span>
+                                        </span>
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="order_summary--offset js_order_summary--offset"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="order_summary__container">
+                <div class="mobile-question">
+                    <h2>+ @T("Questions and answers")</h2>
+                </div>
+                <div class="order_summary__help">
+                    <div class="order_summary__help__container">
+                        @Html.Raw(Model.CheckoutPageRightSideContent)
+                    </div>
+                </div>
+                <br>
+                @if (string.IsNullOrEmpty(Model.CreditCardNote))
+                {
+                    <div class="message_Mol" style="display: none;">
+                        <span style="color: red" id="message_Mol_span">@Model.CreditCardNote</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="message_Mol">
+                        <span style="color: red" id="message_Mol_span">@Model.CreditCardNote</span>
+                    </div>
+                }
+                <dl class="order_summary__breakdown" id="message_err" style="display: none">
+                    <span style="color: red;">
+                        @Model.CashOnDeliveryAvailabilityMessage
+                    </span>
+                </dl>
+            </div>
+            <form action="@Url.Action("CreateTransaction", "Home" )" method="POST" id="braintree-payment-form">
+                @Html.AntiForgeryToken()
+                @if (Model.Promotion != null)
+                {
+                    <input type="hidden" id="PromoId" name="PromoId" value=@Model.Promotion.PromoId>
+                }
+                <input type="hidden" id="seller_country_id" value="@Model.SellerCountryId" />
+                <input type="hidden" id="OrderId" name="OrderId" value=@Model.Order.Id>
+                <input type="hidden" id="OrderPublicId" name="OrderPublicId" value=@Model.Order.OrderPublicId>
+                <div class="checkout__container">
+                    <div class="checkout__legend">@T("Contact Info")</div>
+                    <div class="inp-fix">
+                        <input autofocus="autofocus" class="form__textfield " id="Email" name="Email" placeholder="@T(" email address")" type="text">
+                        <label id="Email-error" class="error valid" for="Email"></label>
+                    </div>
+                    <input type="hidden" name="paumentMeth" id="paymentMethod">
+                    <input type="hidden" name="paumentState" id="paymentState">
+                    <div>
+                        <ul class="payment-method-list">
+                            @if (Model.CreditCard)
+                            {
+                                <li>
+                                    <a href="javascript:;" class="payment-method" data-payment-method="creditcard">
+                                        <p>@Model.CreditCardTabName</p>
+                                    </a>
+                                    <p class="recom">Recommended</p>
+                                </li>
+                            }
+                            @if (Model.PayPal)
+                            {
+                                <li>
+                                    <a href="javascript:;" class="payment-method" data-payment-method="paypal">
+                                        <p>@Model.PayPalTabName</p>
+                                    </a>
+                                </li>
+                            }
+                            @if (Model.Mol)
+                            {
+                                <li>
+                                    <a href="javascript:;" class="payment-method" data-payment-method="mol">
+                                        <p>@Model.MolTabName</p>
+                                    </a>
+                                </li>
+                            }
+                            @if (Model.CashDeliv)
+                            {
+                                <li>
+                                    <a href="javascript:;" class="payment-method" data-payment-method="cash">
+                                        <p>@Model.CashDelivTabName</p>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    <div style="clear: both;">
+                    </div>
+                    <div class="checkout__legend">
+                        <div class="checkout__tool_tip--lock" data-tooltip="@T(" all transactions are secure and encrypted.")">
+                            <i class="checkout__lock_icon"></i>
+                        </div>@T("Payment Info")
+                    </div>
+                    <div class="payment-method-container" id="payment_method_credit_card" style="display: none;">
+                        <div id="accordion" class="credit_card_accordion accordion_min accordion">
+                            <div class="contLable">
+                                <label class="accordion__label_text" for="new-credit-card">
+                                    @T("Credit Card")
+                                    <div class="accordion__sub_label accordion__sub_label--sticky">
+                                        <ul class="credit_card_list js_credit_card_list">
+                                            <li>
+                                                <div class="credit_card credit_card--visa js-credit-card-visa credit_card--disabled"></div>
+                                            </li>
+                                            <li>
+                                                <div class="credit_card credit_card--amex js-credit-card-amex credit_card--disabled"></div>
+                                            </li>
+                                            <li>
+                                                <div class="credit_card credit_card--mastercard js-credit-card-mastercard credit_card--disabled"></div>
+                                            </li>
+                                            <li>
+                                                <div class="credit_card credit_card--discover js-credit-card-discover credit_card--disabled"></div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </label>
+                                <div class="accordion__content">
+                                    <div class="inp-fix">
+                                        <input class="form__textfield  js-cc-number" name="number" data-stripe="number" id="cc-number" inputmode="numeric" pattern="\d*" placeholder="@T(" credit card number")" type="text">
+                                        <label id="cc-number-error" class="error valid" for="cc-number"></label>
+                                    </div>
+                                    <div class="checkout_form__row">
+                                        <div class="checkout__input--medium form-field-pair">
+                                            <div class="mmYYYY">
+                                                <div class="checkout_cell inp-fix">
+                                                    <input class="form__textfield form-field-pair__field" style="display: inline; border-radius: 5px 0 0 5px;" name="month" data-stripe="exp-month" id="cc-month" inputmode="numeric" max="12" maxlength="2" min="1" pattern="\d*" placeholder="MM" type="text">
+                                                    <label id="cc-month-error" class="error valid" for="cc-month"></label>
+                                                </div>
+                                                <div class="inp-year checkout_cell inp-fix">
+                                                    <input class="form__textfield form-field-pair__field" style="display: inline; margin-left: -5px; margin-right: 9px; border-radius: 0px 5px 5px 0px" data-stripe="exp-year" name="year" id="cc-year" inputmode="numeric" max="2024" maxlength="4" min="2015" minlength="4" pattern="\d*" placeholder="YYYY" type="text">
+                                                    <label id="cc-year-error" class="error valid" for="cc-year"></label>
+                                                </div>
+                                                <div class="cvc_cell checkout_cell inp-fix">
+                                                    <input class="form__textfield form-field-pair__field" style="display: inline; width: 29%" name="cvv" data-stripe="cvc" id="cc-cvv" inputmode="numeric" maxlength="4" pattern="\d*" placeholder="CVC" type="text">
+                                                    <label id="cc-cvv-error" class="error valid" for="cc-cvv"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="checkout__input--small">
+                                            <div class="checkout__tool_tip_container">
+                                                <div class="checkout__tool_tip--cvc" data-tooltip="@T(" 3 or 4 digit security code usually located on the back of the card.")">
+                                                    <i class="ss-icon ss-standard tool_tip__toggle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-method-container" id="payment_method_paypal" style="display: none;">
+                        <div class="accordion_min accordion">
+                            <p>
+                                <div id="paypal-container"></div>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="payment-method-container" id="payment_method_mol" style="display: none;">
+                    </div>
+                    <div class="payment-method-container" id="payment_method_cash" style="display: none;">
+                    </div>
+                    <div class="form__group js-checkout-shipping">
+                        <div class="checkout__legend">@T("Shipping Info")</div>
+                        <div class="inp-half">
+                            <input class="form__textfield " data-default="" data-type="name" id="FirstName" maxlength="30" name="FirstName" placeholder="@T(" first name")" size="30" type="text">
+                        </div>
+                        <div class="inp-half-right">
+                            <input class="form__textfield " data-default="" data-type="name" id="LastName" maxlength="30" name="LastName" placeholder="@T(" last name")" size="30" type="text">
+                        </div>
+                        <div class="input-address">
+                            <input class="form__textfield " data-default="" id="StreetAddress" maxlength="50" name="StreetAddress" placeholder="@T(" address line 1")" size="50"  type="text">
+                        </div>
+                        <div class="input-address">
+                            <input class="form__textfield " data-default="" id="StreetAddress2" maxlength="50" name="StreetAddress2" placeholder="@T(" address line 2")" size="50" type="text">
+                        </div>
+                        <div class="checkout_form__row">
+                            <div class="inp-half">
+                                <input class="form__textfield " data-default="" id="City" maxlength="30" name="City" placeholder="@T(" city")" size="30"  type="text">
+                                <label id="City-error" class="error valid" for="City"></label>
+                            </div>
+                            <div class="inp-half-right">
+                                <input class="form__textfield " data-default="" id="PostalCode" name="PostalCode" placeholder="@T(" postal code")"  type="text">
+                                <label id="PostalCode-error" class="error valid" for="PostalCode"></label>
+                            </div>
+                        </div>
+                        <div class="checkout_form__row">
+                            <div>
+                                <div class="inp-half smarty-streets-container">
+                                    <select class="form__textfield " style="font-size: 17px" data-default="43" id="State" placeholder="@T(" state")" name="State"  type="text">
+                                        <option value="">@T("Select State")</option>
+                                    </select>
+                                    <label id="State-error" class="error valid" for="State"></label>
+                                </div>
+                                <div class="inp-half-right">
+                                    <select class="form__textfield" id="Country" >
+                                        @foreach (var deliverableCountry in Model.DeliverableCountries)
+                                        {
+                                            <option value="@deliverableCountry.Id"
+                                                    data-currency-code="@deliverableCountry.CurrencyCode"
+                                                    data-exchange-rate="@Json.Encode(deliverableCountry.ExchangeRate)"
+                                                    @if (deliverableCountry.Id == Model.BuyerCountryId) { @: selected="selected"
+                                                                                                        }>
+                                                @deliverableCountry.Name
+                                            </option>
+                                        }
+                                    </select>
+                                    <input type="hidden" id="hidden_country" name="Country" value="@Model.BuyerCountryId" />
+                                    <label id="Country-error" class="error valid" for="Country"></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="checkout_form__row">
+                            <div class="form-phone inp-half">
+                                <input class="form__textfield  js-shipping-phone" id="PhoneNumber" placeholder="@T(" phone number")" type="text" value="" name="PhoneNumber">
+                                <label id="PhoneNumber-error" class="error valid" for="PhoneNumber"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="checkout_form_footer" style="margin-top: 10px">
+                        <div class="checkout_form_footer__submit_wrap js_submit_wrap_cc">
+                            <p class="info-text tos_agreement">
+                                @T("By clicking 'Place Your Order' you agree to our")
+                                <a href='/Privacy' target="_blank">@T("privacy policy")</a>
+                                @T("and") <a href='/Terms' target="_blank">@T("terms of service")</a>
+                                .
+                            </p>
+                            <button id="transaction" class="button button--transaction--flat checkout_form_footer__submit js_checkout_submit" data-disable-with="Placing Your Order" type="submit" value="@T(" place your order")">@T("Place Your Order")</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <input type="hidden" id="Token" value="@Model.ClientToken">
+        </div>
+    </div>
+</div>
+<input type="hidden" id="credit_card_note" value="@Model.CreditCardNote" />
+<input type="hidden" id="paypal_note" value="@Model.PayPalNote" />
+<input type="hidden" id="mol_note" value="@Model.MolNote" />
+<input type="hidden" id="cash_deliv_note" value="@Model.CashDelivNote" />
+
+@using (Script.Foot())
+{
+    <script type="text/javascript" src="https://js.braintreegateway.com/v1/braintree.js"></script>
+    <script type="text/javascript">
+        var braintree = Braintree.create("MIIBCgKCAQEA7ip7pligm7Ncb/KirwXTtZy4PrVM59+NyNwiSydzNBW49QaYQv60XoPHAquih1q1y4vb8+uVjr6RMUhQu70KszzL+az3YGwifipQuAhPliHQOvtf9HaraR4ca8shywaj6vI9R7icxL06ZuwhZPAV4VsNSHpaFug+FZ6JZVYAgQIsRwEaySm57YEY1lgAYC10gamM4d5rwpxLDjoQJwWUIUyf1WSS7yL3/ix3cQmfphlE/PkPg2l8CAc/uEqRZZRFF8YXhsbMg+ILyxD3t4NjaeyMjXYlboI/tBZm7jQCRblq/mN3Z2WzmFsOTloNLTOI9yXNd9Ep+SsIUgspbCLUDwIDAQAB");
+        braintree.onSubmitEncryptForm('braintree-payment-form');
+    </script>
+    <script type="text/javascript" src="https://js.braintreegateway.com/v2/braintree.js"></script>
+    <script>
+
+        window.ExchangeRate = @Model.ExchangeRate;
+        jQuery.validator.setDefaults({
+            debug: true,
+            success: "valid"
+        });
+        $("#braintree-payment-form").validate({
+            rules: {
+                Email: {
+                    required: true,
+                    email: true
+                },
+                FirstName: {
+                    required: true
+                },
+                LastName: {
+                    required: true
+                },
+                City: {
+                    required: true
+                },
+                State: {
+                    required: true
+                },
+                StreetAddress: {
+                    required: true
+                },
+                PostalCode: {
+                    required: true
+                },
+                PhoneNumber: {
+                    required: true
+                }
+            },
+            submitHandler: function (form) {
+                var elem = document.getElementById('transaction');
+                elem.disabled = 'disabled';
+                $(elem).addClass('waiting');
+                form.submit();
+            }
+        });
+    </script>
+
+    <script>
+        document.getElementById("transaction").disabled = "";
+        var token = document.getElementById("Token").value;
+        braintree.setup(token, "paypal",
+        {
+            container: "paypal-container",
+            onPaymentMethodReceived: function () {
+            },
+            onCancelled: function () {
+                document.getElementById("accordion").className = "credit_card_accordion accordion_min accordion";
+                document.querySelector(".contLable").style.display = "inline";
+            }
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            Payment.init();
+        });
+    </script>
+
+    <script>
+        $(".mobile-question").click(function () {
+            var text = "@T("Questions and answers")";
+            if ($(".order_summary__help").css("display") === "none") {
+                $(".order_summary__help").css("display", "block");
+                $(".mobile-question").css("border-radius", "5px 5px 0 0");
+                $(".mobile-question").css("border-bottom", "0");
+                $(".mobile-question")[0].innerHTML = "<h2>&ndash; " + text + "</h2>";
+            } else {
+                $(".order_summary__help").css("display", "none");
+                $(".mobile-question").css("border-radius", "5px 5px 5px 5px");
+                $(".mobile-question").css("border-bottom", "1px solid #c2c9cc");
+                $(".mobile-question")[0].innerHTML = "<h2>+ " + text + "</h2>";
+            }
+        });
+    </script>
+}

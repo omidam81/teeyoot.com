@@ -1,0 +1,9 @@
+Name: Code Generation Extensions
+AntiForgery: enabled
+Author: Piotr Szmyd
+Website: http://www.szmyd.com.pl
+Version: 1.1
+OrchardVersion: 1.1.30
+Description: Tools providing additional code generation features.
+FeatureDescription: Tools providing additional code generation features (codegen part, codegen typesettings).
+Category: Developer

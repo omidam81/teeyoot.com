@@ -1,0 +1,314 @@
+﻿@model Teeyoot.FeaturedCampaigns.ViewModels.AdminCampaignViewModel
+@{
+    ViewBag.Title = "Index";
+}
+<style>
+    td {
+        text-align: left !important;
+    }
+
+    .search-options > div {
+        display: inline-block;
+    }
+
+    th {
+        padding: 0px 10px;
+        border-right: solid 1px #737373;
+    }
+
+    td {
+        border-right: solid 1px #737373;
+        padding: 0 10px;
+    }
+</style>
+
+@using (Script.Foot())
+{
+    <script>
+        function searchBy(strordr, up, event) {
+            current_orderby = '@Model.Search.sortBy';
+            search = document.location.search.toString();
+            if (search.indexOf("Search.sortBy") > 0) {
+                new_searchQuery = "";
+                search_array = search.split("&");
+                $(search_array).each(function (index, item) {
+                    name = item.split("=")[0];
+                    val = item.split("=")[1];
+                    if (name.indexOf("Search.orderbyOrder") >= 0) return;
+                    if (name.indexOf("Search.sortBy") >= 0) {
+                        if (new_searchQuery) {
+                            new_searchQuery += "&" + name + "=" + strordr;
+                            if (up == 1) {
+                                new_searchQuery += "&Search.orderbyOrder=asc";
+                            }
+                        } else {
+                            new_searchQuery = name + "=" + strordr;
+                            if (strordr == current_orderby) {
+                                new_searchQuery += "&Search.orderbyOrder=asc";
+                            }
+                        }
+                    } else {
+                        if (new_searchQuery) { new_searchQuery += "&" + name + "=" + val; } else { new_searchQuery = name + "=" + val; }
+                    }
+
+                });
+                $(event.target).attr("href", document.location.toString().replace(search, new_searchQuery));
+            } else {
+                if (search) {
+                    $(event.target).attr("href", document.location.toString() + "&Search.sortBy=" + strordr);
+                }
+                else {
+                    $(event.target).attr("href", document.location.toString() + "?Search.sortBy=" + strordr);
+                }
+            }
+
+            //document.location = $(this).attr("href");
+
+            return;
+        }
+
+        $(document).ready(function () {
+            $(".action-link-private").click(function () {
+                _this = this;
+                $.get($(this).attr("href"), function (e) {
+                    if (e) {
+                        $(_this).parent().hide();
+                        $(_this).parent().siblings().show();
+                    }
+                    else {
+                        $(_this).parent().hide();
+                        $(_this).parent().siblings().show();
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+}
+
+@using (Html.BeginForm("Index", "AdminFeaturedCampaigns", FormMethod.Get))
+{
+    <fieldset class="filters">
+        <legend>Filter Result</legend>
+        <div class="search-options">
+            <div>
+                @T("Active :")
+                @Html.DropDownList("Search.Active", Model.Search.ActiveOption)
+            </div>
+
+            <div>
+                @T("Approved :")
+                @Html.DropDownList("Search.Approved", Model.Search.ActiveOption)
+            </div>
+
+            <div>
+                @T("Featured :")
+                @Html.DropDownList("Search.Featured", Model.Search.ActiveOption)
+            </div>
+
+            <div>
+                @T("Ready To Print :")
+                @Html.DropDownList("Search.ReadyToPrint", Model.Search.ActiveOption)
+            </div>
+
+            <div>
+                @T("Currency :")
+                @Html.DropDownList("Search.Currency", Model.Search.CurrecnyOption)
+            </div>
+            <div>
+                @T("Seller: ")
+                @Html.TextBoxFor(aa => aa.Search.Seller)
+            </div>
+
+            <div>
+                @T("Campaign:")
+                @Html.TextBoxFor(aa => aa.Search.campaignName)
+            </div>
+            <br />
+            <br />
+            <div>
+
+                @if (Model.Search.IsSuccessfull == "on")
+                {
+                    <input type="checkbox" name="Search.IsSuccessfull" id="search.issuccessfull" checked="checked" />
+                }
+                else
+                {
+                    <input type="checkbox" name="Search.IsSuccessfull" id="search.issuccessfull" />
+                }
+                @T("Is Successfull")
+            </div>
+            <div>
+                @T("Start Date")
+                <input type="date" name="Search.StartDate" id="Search.StartDate" value="@Model.Search.StartDate" />
+            </div>
+
+            <div>
+                @T("End Date")
+                <input type="date" name="Search.EndDate" id="Search.EndDate" value="@Model.Search.EndDate" />
+            </div>
+
+
+        </div>
+        <button type="submit">@T("Filter")</button>
+    </fieldset>
+}
+
+
+<div class="data">
+    <table>
+        <thead>
+            <tr>
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "Campaign" })" onclick="searchBy('Campaign', @(Model.Search.sortBy == "Campaign" ? "1" : "0"), event)">Campaign</a></th>
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "Create" })" onclick="searchBy('Create', @(Model.Search.sortBy == "Create" ? "1" : "0"), event)">Create</a></th>
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "Active" })" onclick="searchBy('Active', @(Model.Search.sortBy == "Active" ? "1" : "0"), event)">Active</a></th>
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "Soldlast24" })" onclick="searchBy('Soldlast24', @(Model.Search.sortBy == "Soldlast24" ? "1" : "0"), event)">Sold last 24 hours</a></th>
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "Sold" })" onclick="searchBy('Sold', @(Model.Search.sortBy == "Sold" ? "1" : "0"), event)">Sold / Minimum / Goal</a></th>
+
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "successfull" })" onclick="searchBy('successfull', @(Model.Search.sortBy == "successfull" ? "1" : "0"), event)">Successfull</a></th>
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "enddate" })" onclick="searchBy('enddate', @(Model.Search.sortBy == "enddate" ? "1" : "0"), event)">End Date</a></th>
+
+
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "Approved" })" onclick="searchBy('Approved', @(Model.Search.sortBy == "Approved" ? "1" : "0"), event)">Approved</a></th>
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "Featured" })" onclick="searchBy('Featured', @(Model.Search.sortBy == "Featured" ? "1" : "0"), event)">Featured</a></th>
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "Ready" })" onclick="searchBy('Ready', @(Model.Search.sortBy == "Ready" ? "1" : "0"), event)">Ready to print</a></th>
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "Private" })" onclick="searchBy('Private', @(Model.Search.sortBy == "Private" ? "1" : "0"), event)">Private</a></th>
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "Seller" })" onclick="searchBy('Seller', @(Model.Search.sortBy == "Seller" ? "1" : "0"), event)">Seller</a></th>
+                <th><a calss="sort-by" href="@Url.Action("Index", "AdminFeaturedCampaigns", new { sortBy = "Currency" })" onclick="searchBy('Currency', @(Model.Search.sortBy == "Currency" ? "1" : "0"), event)">Currency</a></th>
+                <th>Modify</th>
+                <th>Export</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>
+                        <span class="cmpaign-name">
+                            <a target="_blank" href="~/@item.Alias">@item.Title</a>
+                        </span> ( @item.Id )
+                    </td>
+                    <td>@item.StartDate.ToLocalTime()</td>
+                    <td>@(item.IsActive ? "Yes" : "No")</td>
+                    <td>@item.SoldLast24Hours</td>
+                    <td>@item.ProductCountSold / @item.ProductMinimumGoal / @item.Tareget</td>
+
+                    <td>@((item.ProductCountSold >= item.ProductMinimumGoal) ? "Yes" : "No")</td>
+                    <td>@item.EndDate.ToLocalTime()</td>
+                    <td>
+                        @if (item.IsApproved)
+                        {
+                            <span style="font-weight:600">@T("Yes")</span>
+                            <span> / </span>
+                            <a style="text-decoration:underline" href="@Url.Action("Reject", new { id = item.Id, PagerParameters = Model.PagerParameters })" title="@T("Reject") ">@T("No")</a>
+                        }
+                        else
+                        {
+                            if (item.Rejected)
+                            {
+                                <span style="font-weight:600">@T("No")</span>
+                                <span> / </span>
+                                <a style="text-decoration:underline" class="action-link" href="@Url.Action("Approve", new { id = item.Id, PagerParameters = Model.PagerParameters })" title="@T("Approve") ">@T("Yes")</a>
+                            }
+                            else
+                            {
+                                <a style="text-decoration:underline" class="action-link" href="@Url.Action("Approve", new { id = item.Id, PagerParameters = Model.PagerParameters })" title="@T("Approve")">@T("Yes")</a>
+                                <span> / </span>
+                                <a style="text-decoration:underline" class="action-link" href="@Url.Action("Reject", new { id = item.Id, PagerParameters = Model.PagerParameters })" title="@T("Reject")">@T("No")</a>
+                            }
+                        }
+                    </td>
+                    <td>
+                        @if (item.IsActive)
+                        {
+                            if (item.IsFeatured)
+                            {
+                                <span style="font-weight:600">@T("Yes")</span>
+                                <span> / </span>
+                                <a class="action-link" href="@Url.Action("ChangeVisible", new { id = item.Id, visible = false, PagerParameters = Model.PagerParameters })" title="@T("Unmark as featured")">@T("No")</a>
+
+                            }
+                            else
+                            {
+                                <span style="font-weight:600">@T("No")</span>
+                                <span> / </span>
+                                <a class="action-link" href="@Url.Action("ChangeVisible", new { id = item.Id, visible = true, PagerParameters = Model.PagerParameters })" title="@T("Mark as featured")">@T("Yes")</a>
+
+                            }
+                        }
+                    </td>
+                    <td>
+                        @if (item.ProductMinimumGoal <= item.ProductCountSold)
+                        {
+
+                            <span>@T("Yes")</span>
+                        }
+                        else
+                        {
+                            <span>@T("No")</span>
+                        }
+                    </td>
+                    <td>
+                        <div class="private-is-private" style="display:@(item.IsPrivate ? "block" : "none")">
+                            <span style="font-weight:600">@T("Yes")</span>
+                            <span> / </span>
+                            <a class="action-link action-link-private" href="@Url.Action("ChangePublic", new { id = item.Id, change = false, PagerParameters = Model.PagerParameters })" title="@T("Mark as Public")">@T("No")</a>
+                        </div>
+                        <div class="private-is-public" style="display:@(item.IsPrivate ? "none" : "block")">
+                            <span style="font-weight:600">@T("No")</span>
+                            <span> / </span>
+                            <a class="action-link action-link-private" href="@Url.Action("ChangePublic", new { id = item.Id, change = true, PagerParameters = Model.PagerParameters })" title="@T("Mark as Private")">@T("Yes")</a>
+                        </div>
+                    </td>
+
+
+
+                    <td>
+                        @if (item.Seller != null)
+                        {
+                            <span>@item.Seller.Email (@item.Seller.Id)</span>
+                        }
+                    </td>
+                    <td>@item.CurrencyRecord.Code</td>
+                    <td>
+                        <a class="button" href="@Url.Action("ChangeInformation", "AdminCampaignsSettings", new { Id = item.Id, PagerParameters = Model.PagerParameters })" title="@T("Modify")">@T("Modify")</a>
+                        @if (!item.IsActive)
+                        {
+                            @*@T(" | ")*@
+                            <a class="button" href="@Url.Action("DeleteCampaign", new { id = item.Id, PagerParameters = Model.PagerParameters })" title="@T("Delete")">@T("Delete")</a>
+                        }
+                    </td>
+
+                    <td>
+                        <a class="button" href="@Url.Action("ExportToExcel", new { id = item.Id })" title="@T("Export")">@T("Export CO")</a>
+                        <a class="button" href="@Url.Action("ExportToExcel2", new { id = item.Id })" title="@T("Export(2)")">@T("Export PO")</a>
+
+                        <a class="button showprofit" href="@Url.Action("CalculateProfit", new { id = item.Id })" title="@T("Show Profit")">@T("Show Profit")</a>
+
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<fieldset class="contentItems bulk-items">
+    @Display(Model.Pager)
+</fieldset>
+
+@using (Script.Foot())
+{
+    <script>
+
+        $(document).ready(function () {
+            $(".showprofit").click(function () {
+                $.get($(this).attr("href"), function (e) {
+                    str = "Claimable Profit:" + e.ClaimableProfit + "\n Unclaimable Profit:" + e.UnclaimableProfit + "\n Total Profit:" + e.TotalProfit;
+                    alert(str);
+                });
+                return false;
+            });
+        });
+    </script>
+}
+

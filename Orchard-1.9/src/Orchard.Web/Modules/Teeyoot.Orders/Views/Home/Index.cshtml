@@ -1,0 +1,751 @@
+﻿@using Teeyoot.Module.Common.ExtentionMethods
+@{
+    Style.Include("AdminOrders.css");
+    Style.Include("jquery.dataTables.css");
+    Script.Require("jQuery");
+    Script.Include("jquery.form.js");
+
+    Teeyoot.Module.Services.Interfaces.IPriceConversionService PriceConversionService = (Teeyoot.Module.Services.Interfaces.IPriceConversionService)ViewBag.PriceConversionService;
+}
+
+
+
+@model IEnumerable<Teeyoot.Orders.Controllers.OrderViewModel>
+@using (Script.Foot())
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".savebuyerinfo").parents('form').submit(function () {
+                infotoUpdate = {
+                    firstName: $("#firstName").val(),
+                    lastName: $("#lastName").val(),
+                    streetAdress: $("#streetAdress").val(),
+                    city: $("#city").val(),
+                    country: $("#country").val(),
+                    phoneNumber: $("#phoneNumber").val(),
+                    state: $("#state").val(),
+                    postalCode: $("#postalCode").val(),
+                    id: $("#hiddenId").val()
+                };
+                infotoUpdate.__RequestVerificationToken = "@Html.AntiForgeryTokenValueOrchard()";
+                $.ajax(
+                    {
+                        data: $(this).serialize(),
+                        url: $(this).attr('action'),
+                    }).done(function () {
+                        $('#overlay').hide();
+                        $("#modal_form").hide();
+                    }).fail(function () {
+
+                    });
+
+                return false;
+            });
+            $("#bulk-action").submit(function () {
+                //return false;
+                paid = $("#bulk-paid option:selected").text()// $("bulk-status").val();
+                status = $("#bulk-status option:selected").text()// bulk-status
+                ids = $("input.checkbox:checked").map(function () { return this.value; }).get().join(",");
+                public_ids = $("input.checkbox:checked").map(function () { return $(this).data("public-id"); }).get().join(",");
+                sellerids = $("input.checkbox:checked").map(function () { return $(this).data("sellerid"); }).get().join(",");
+                profits = $("input.checkbox:checked").map(function () { return $(this).data("profit").toString().replace(",", "."); }).get().join(",");
+
+                form = $(this);
+                var url = $(this).attr("action");
+                form.find('.message').show();
+                $.ajax({
+                    url: url,
+                    data: "paid=" + paid + "&status=" + status + "&ids=" + ids + "&public_ids=" + public_ids + "&sellerids=" + sellerids + "&profits=" + profits,
+                }).done(function () {
+                    form.find('.message').text("Successfully updated order(s) status");
+                    setTimeout(function () {
+                        form.find('.message').hide().text("Working!");
+                    }, 4000);
+                }).fail(function () {
+                    form.find('.message').text("unable to updated order(s) status");
+                    setTimeout(function () {
+                        form.find('.message').hide(); form.find('.message').text("Working!");
+                    }, 4000);
+                });
+
+                return false;
+
+            });
+
+            $('.go').click(function (event) {
+                event.preventDefault();
+                /* Запрос на сервак */
+                var orderId = this.value;
+
+                function getes(request, response) {
+                    var result = new Array();
+                    $.ajax({
+                        cache: false,
+                        type: "GET",
+                        url: "@(Url.Action("GetBuyerInfirmation", "Home"))",
+                        data: { "orderId": orderId },
+                        success: function (data) {
+                            $("#firstName").val(data.firstName);
+                            $("#lastName").val(data.lastName);
+                            $("#streetAdress").val(data.streetAdress);
+                            $("#city").val(data.city);
+                            $("#country").val(data.country);
+                            $("#phoneNumber").val(data.phoneNumber);
+                            $("#state").val(data.state);
+                            $("#postalCode").val(data.postalCode);
+                            $("#hiddenId").val(data.id);
+                            $("#email").val(data.email);
+                        },
+                        error: function (data, status, resp) {
+                            alert('Status: ' + data.status + '. Error message: ' + data.statusText);
+                        }
+                    });
+                };
+
+                /* End Запрос на сервак */
+                console.log(getes())
+                $('#overlay').fadeIn(400,
+                    function () {
+                        $('#modal_form')
+                            .css('display', 'block')
+                            .animate({ opacity: 1, top: '50%' }, 200);
+                    });
+            });
+
+
+            $('.ordNumber').click(function (event) {
+                event.preventDefault();
+                /* Запрос на сервак */
+                var orderId = this.innerHTML;
+
+                function getesOrder(request, response) {
+                    var result = new Array();
+
+
+
+                    $.get("@(Url.Action("GetOrderInfo", "Home"))" + "?orderID=" + orderId  , function (result) {
+                        // alert(result);
+                        $('#modal_form_order').html(result).css('display', 'block').animate({ opacity: 1, top: '50%' }, 200);
+
+                        $('#modal_form_order').find("#update-order").ajaxForm(function(){
+                            $('#modal_form_order').hide();
+                            $("#overlay_order").hide();
+                        });
+                    });
+
+                    return;
+
+
+
+
+                    $.ajax({
+                        cache: false,
+                        type: "GET",
+                        url: "@(Url.Action("GetOrderInfirmation", "Home"))",
+                        data: { "publicId": orderId },
+                        success: function (data) {
+                            var modal = document.getElementById("modalOrderTable");
+                            var trs = modal.querySelectorAll("tr");
+                            if (trs.length > 1) {
+                                for (var i = 1; i < trs.length; i++) {
+                                    trs[i].parentNode.removeChild(trs[i]);
+                                }
+
+                            }
+
+                            data.products.forEach(function (item, i, arr) {
+
+                                var tr = document.createElement("tr");
+                                var tdName = document.createElement("td")
+                                var tdColor = document.createElement("td")
+                                var tdSize = document.createElement("td");
+                                var tdCount = document.createElement("td");
+                                var tdPrice = document.createElement("td");
+
+                                var pName = document.createElement("p");
+                                pName.innerHTML = item.Name;
+
+                                var divColor = document.createElement("div");
+                                divColor.style.height = "18px";
+                                divColor.style.width = "60px";
+                                divColor.innerText = item.Color;
+                                divColor.style.fontWeight = "bold";
+                                //divColor.style.border = "solid 1px";
+
+                                var pSize = document.createElement("p");
+                                pSize.innerHTML = item.Size;
+                                var pCount = document.createElement("p");
+                                pCount.innerHTML = item.Count;
+                                var pPrice = document.createElement("p");
+                                pPrice.innerHTML = item.Currency + " " + item.Price;
+
+
+                                tdName.appendChild(pName);
+                                tdColor.appendChild(divColor);
+                                tdSize.appendChild(pSize);
+                                tdCount.appendChild(pCount);
+                                tdPrice.appendChild(pPrice);
+
+                                tr.appendChild(tdName);
+                                tr.appendChild(tdColor);
+                                tr.appendChild(tdSize);
+                                tr.appendChild(tdCount);
+                                tr.appendChild(tdPrice);
+
+                                modal.appendChild(tr);
+                            });
+                            var totalPrice = document.getElementById("totalPrice");
+                            totalPrice.innerHTML = "Total price : ";
+                            totalPrice.innerHTML = totalPrice.innerHTML + data.products[0].Currency + " " + data.totalPrice.toFixed(2);
+
+                            //$("#firstName").html(data.firstName);
+                            //$("#lastName").html(data.lastName);
+                            //$("#streetAdress").html(data.streetAdress);
+                            //$("#city").html(data.city);
+                            //$("#country").html(data.country);
+                            //$("#phoneNumber").html(data.phoneNumber);
+
+                        },
+                        error: function (data, status, resp) {
+                            alert('Status: ' + data.status + '. Error message: ' + data.statusText);
+                        }
+                    });
+                };
+
+                /* End Запрос на сервак */
+                console.log(getesOrder())
+                $('#overlay_order').fadeIn(400,
+                    function () {
+                        $('#modal_form_order')
+                            .css('display', 'block')
+                            .animate({ opacity: 1, top: '50%' }, 200);
+                    });
+            });
+
+
+            /* Зaкрытие мoдaльнoгo oкнa, тут делaем тo же сaмoе нo в oбрaтнoм пoрядке */
+            $('#modal_close, #overlay').click(function () {
+                $('#modal_form')
+                    .animate({ opacity: 0, top: '45%' }, 200,
+                        function () { // пoсле aнимaции
+                            $(this).css('display', 'none');
+                            $('#overlay').fadeOut(400);
+                        }
+                    );
+            });
+
+
+            /* Зaкрытие мoдaльнoгo oкнa, тут делaем тo же сaмoе нo в oбрaтнoм пoрядке */
+            $('#modal_close_order, #overlay_order').click(function () {
+                $('#modal_form_order')
+                    .animate({ opacity: 0, top: '45%' }, 200,
+                        function () { // пoсле aнимaции
+                            $(this).css('display', 'none');
+                            $('#overlay_order').fadeOut(400);
+                        }
+                    );
+            });
+        });
+
+        $(document).ready(function () {
+            $(document).ready(function () {
+                $("#selecctall").change(function () {
+                    $(".checkbox").prop('checked', $(this).prop("checked"));
+                });
+            });
+        });
+    </script>
+}
+<div class="options">
+
+    @using (Html.BeginForm("bulkAction", "Home", FormMethod.Get, new { id = "bulk-action" }))
+    {
+        <fieldset class="bulk-actions">
+            <legend>
+                @("Bulk Action")
+            </legend>
+            @T("Order Status")
+            <select name="status2" id="bulk-status">
+                <option value="-1">@T("Don't Change")</option>
+                @foreach (var orderStatus in ViewBag.OrderStatuses)
+                {
+                    <option value="@orderStatus.Id">@orderStatus.Name</option>
+                }
+            </select>
+
+            @T("Payment Status")
+            <select name="paid" id="bulk-paid">
+                <option value="-1">@T("Don't Change")</option>
+                <option value="paid">@T("Paid")</option>
+                <option value="notpaid">@T("Not Paid")</option>
+            </select>
+            @*ViewBag.status = status;
+                ViewBag.filterCurrencyId = filterCurrencyId;
+                ViewBag.paymentStatus = paymentStatus;
+                ViewBag.pageID = pageID;
+                ViewBag.orderby = orderby;
+                ViewBag.pageSize = pageSize;*@
+
+            <button type="submit">@T("Apply")</button>
+
+            <span class="message" style="display:none;">Working!</span>
+        </fieldset>
+    }
+
+    @using (Html.BeginForm("Index", "Home", FormMethod.Get))
+    {
+        <fieldset class="filters">
+            <legend>Filter Result</legend>
+
+            @T("Order Status")
+            <select name="status">
+                <option>@T("All")</option>
+                @foreach (var orderStatus in ViewBag.OrderStatuses)
+                {
+                    <option value="@orderStatus.Id" @if (orderStatus.Id == ViewBag.status) { @: selected="selected"
+                                                                                                                                                                                                                                                                     }>
+                        @orderStatus.Name
+                    </option>
+                }
+            </select>
+            @T("Currency")
+            <select name="FilterCurrencyId">
+                <option>@T("All")</option>
+                @foreach (var currency in ViewBag.Currencies)
+                {
+                    <option value="@currency.Id" @if (currency.Id == ViewBag.SelectedCurrencyFilterId) { @: selected="selected"
+                                                                                                                                                                                                                                         }>
+                        @currency.Name
+                    </option>
+                }
+            </select>
+
+            @T("Payment Status")
+            <select name="paymentStatus">
+                <option value="-1" @if (-1 == ViewBag.paymentStatus) { @: selected="selected"
+                                                                                                                                                                                                                                                                             }>
+                    @T("ALL")
+                </option>
+
+                <option value="0" @if (0 == ViewBag.paymentStatus) { @: selected="selected"
+                                                                                                                                                                                                                                                                             }>
+                    @T("Paid")
+                </option>
+
+                <option value="1" @if (1 == ViewBag.paymentStatus) { @: selected="selected"
+                                                                                                                                                                                                                                                                             }>
+                    @T("Not Paid")
+                </option>
+
+            </select>
+
+            @T("PaymentType")
+            <select name="search_payment_type">
+                <option value="">Select One</option>
+                <option value="Paypal" @(ViewBag.search_payment_type == "Paypal" ? "selected=selected" : "")>Paypal</option>
+                <option value="IPay88" @(ViewBag.search_payment_type == "IPay88" ? "selected=selected" : "")>IPay88</option>
+                <option value="COD" @(ViewBag.search_payment_type == "COD" ? "selected=selected" : "")>COD</option>
+                <option value="MOL" @(ViewBag.search_payment_type == "MOL" ? "selected=selected" : "")>MOL</option>
+            </select>
+
+            @T("Order ID:")
+            <input type="text" name="search_order_id" value="@ViewBag.search_order_id" id="search_order_id" class="search-text" />
+            @T("Order Number:")
+            <input type="text" name="search_order_number" value="@ViewBag.search_order_number" id="search_order_number" class="search-text" />
+            @T("Buyer:")
+            <input type="text" name="search_order_buyer" value="@ViewBag.search_order_buyer" id="search_order_buyer" class="search-text" />
+            @T("Campaign:")
+            <input type="text" name="search_order_campaign" value="@ViewBag.search_order_campaign" id="search_order_campaign" class="search-text" />
+            @T("Seller :")
+            <input type="text" name="search_order_seller" value="@ViewBag.search_order_seller" id="search_order_seller" class="search-text" />
+
+            <input type="hidden" name="orderby" value="@ViewBag.orderby" />
+            <input type="hidden" name="pageSize" value="@ViewBag.pageSize" />
+
+            <button type="submit">@T("Filter")</button>
+        </fieldset>
+    }
+    @using (Html.BeginForm("ExpotToExcelType2", "Home", FormMethod.Get))
+    {
+        <fieldset class="export">
+            <legend>Export</legend>
+
+            @T("Currency")
+            <select name="FilterCurrencyId">
+                <option>@T("All")</option>
+                @foreach (var currency in ViewBag.Currencies)
+                {
+                    <option value="@currency.Id">
+                        @currency.Name
+                    </option>
+                }
+            </select>
+            @T("Order Status")
+            <select name="status">
+                <option>@T("All")</option>
+                @foreach (var orderStatus in ViewBag.OrderStatuses)
+                {
+                    <option value="@orderStatus.Id">@orderStatus.Name</option>
+                }
+            </select>
+            @T("Campaign ID") <input type="text" name="campaignID" />
+
+            @T("from:")
+            <input type="date" name="fromDate" />
+            @T("To:")
+            <input type="date" name="toDate" />
+            @T("Payment Status")
+            <select name="paymentStatus">
+                <option value="-1">@T("ALL")</option>
+                <option value="0">@T("Paid")</option>
+                <option value="1">@T("Not Paid")</option>
+            </select>
+
+            <button type="submit">@T("Export to Excel")</button>
+
+        </fieldset>
+    }
+
+</div>
+<div class="data">
+    <div class="checkbox">
+        <label>
+            <input type="checkbox"  id="selecctall" />
+            Select All
+        </label>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Select</th>
+                <th>
+                    <a class="order-by-link" data-orderby="orderid" href="@Url.Action("Index", "Home", new { orderby="orderid" })">
+                        
+                        Order ID @((@ViewBag.orderby == "orderid") ? "▲" : "▼")
+                    </a>
+                </th>
+                <th>Order Number</th>
+                <th>
+                    <a class="order-by-link" data-orderby="date" href="@Url.Action("Index", "Home", new { orderby="date" })">
+                        Order Date @((@ViewBag.orderby == "date") ? "▲" : "▼")
+                    </a>
+                </th>
+                <th>
+                    <a class="order-by-link" data-orderby="Buyer" href="@Url.Action("Index", "Home", new { orderby = "Buyer" })">
+                        Buyer @((@ViewBag.orderby == "Buyer") ? "▲" : "▼")
+                    </a> 
+                </th>
+                <th>
+                    <a class="order-by-link" data-orderby="Campaign" href="@Url.Action("Index", "Home", new { orderby = "Campaign" })">
+                        Campaign @((@ViewBag.orderby == "Campaign") ? "▲" : "▼")
+                    </a>
+                </th>
+                <th>
+                    <a class="order-by-link" data-orderby="Seller" href="@Url.Action("Index", "Home", new { orderby = "Seller" })">
+                        Seller@((@ViewBag.orderby == "Seller") ? "▲" : "▼")
+                    </a>
+                </th>
+                <th>
+                    <a class="order-by-link" data-orderby="TotalAmount"  href="@Url.Action("Index", "Home", new { orderby = "TotalAmount" })">
+                         Total Amount @((@ViewBag.orderby == "Order Amount") ? "▲" : "▼")
+                    </a>
+                </th>
+                <th>
+                    <a class="order-by-link" data-orderby="Status" href="@Url.Action("Index", "Home", new { orderby = "Status" })">
+                        Status @((@ViewBag.orderby == "Status") ? "▲" : "▼")
+                    </a>
+                </th>
+                <th>
+                    <a class="order-by-link" data-orderby="SoldCount" href="@Url.Action("Index", "Home", new { orderby = "SoldCount" })">
+                        SoldCount @((@ViewBag.orderby == "SoldCount") ? "▲" : "▼")
+                    </a>
+                </th>
+                <th>
+                    <a class="order-by-link" data-orderby="Payment Status" href="@Url.Action("Index", "Home", new { orderby = "Payment Status" })">
+                        Payment Status @((@ViewBag.orderby == "Payment Status") ? "▲" : "▼")
+                    </a>
+                </th>
+                <th>
+                    <a class="order-by-link" data-orderby="Currency" href="@Url.Action("Index", "Home", new { orderby = "Currency" })">
+                        Currency @((@ViewBag.orderby == "Currency") ? "▲" : "▼")
+                    </a>
+                </th>
+
+                <th>
+                    <a class="order-by-link" data-orderby="paymentType" href="@Url.Action("Index", "Home", new { orderby = "paymentType" })">
+                        Payment Type @((@ViewBag.orderby == "paymentType") ? "▲" : "▼")
+                    </a>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                //var campaignID = order.Products.First().CampaignProductRecord.CampaignRecord_Id;
+                //var campaign = ViewBag.CampaignService.GetCampaignById(campaignID);
+                //var Userid = campaign.TeeyootUserId;
+                //Orchard.Core.Containers.Extensions.ContentQueryExtensions manager = ViewBag.ContentManager;
+
+                //var seller = manager.Query<Orchard.Users.Models.UserPart, Orchard.Users.Models.UserPartRecord>()
+                //        .Where(user => user.Id == campaign.TeeyootUserId)
+                //        .List()
+                //        .First();
+                <tr>
+                    <td>
+                        <input type="checkbox" class='checkbox' value="@item.Order.Id" data-public-id="@item.Order.OrderPublicId" data-profit="@item.Order.TotalPrice" data-sellerid="@(item.Seller == null? 0:item.Seller.Id)" />
+                    </td>
+                    <td>
+                        @item.Order.Id (<a href="/Teeyoot.Orders/Home/ExportToExcel?orderID=@item.Order.Id">Invoice</a>)
+                    </td>
+                    <td><a class="ordNumber">@item.Order.OrderPublicId</a></td>
+                    <td>@item.Order.Created.ToLocalTime()</td>
+                    <td>
+                        @item.Order.Email
+                        <button class="go" type="submit" value="@item.Order.Id">
+                            @T("inf")
+                        </button>
+                    </td>
+                    @if (item.Campaign != null)
+                    {
+                        <td><a target="_blank" href="/@item.Campaign.Alias">@item.Campaign.Title</a> (<a target="_blank" href="@Url.Action("ChangeInformation", "AdminCampaignsSettings", new { Id = item.Campaign.Id , area= "Teeyoot.FeaturedCampaigns"})">@item.Campaign.Id</a>)</td>
+                    }
+                    else
+                    {
+
+                        <td></td>
+                    }
+                    <td>
+                        @(item.Seller != null ? item.Seller.Id : 0)
+
+                        ( <a href="mailto:@item.Seller.Email">@item.Seller.UserName</a> )
+                    </td>
+                    <td>
+                        @{
+
+                            var amount = ((item.Order.TotalPriceWithPromo > 0 ? item.Order.TotalPriceWithPromo : item.Order.TotalPrice) + item.Order.Delivery);
+                            try
+                            {
+                                if (item.Order.Campaign != null && item.Order.Campaign.CurrencyRecord != null)
+                                {
+                                    amount = PriceConversionService.ConvertPrice(amount, item.Order.Campaign.CurrencyRecord, "USD").Value;
+                                }
+                                else if (item.Order.CurrencyRecord != null)
+                                {
+                                    amount = PriceConversionService.ConvertPrice(amount, item.Order.CurrencyRecord, "USD").Value;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                
+                            }
+                            
+                        }
+                        $@amount.ToString("0.00")
+                    </td>
+                    <td>
+                        @using (Html.BeginForm("ApplyStatus", "Home", FormMethod.Get, new { @class = "ApplyStatus" }))
+                        {
+                            <input type="hidden" name="status" value="@ViewBag.status" />
+                            <input type="hidden" name="filterCurrencyId" value="@ViewBag.filterCurrencyId" />
+                            <input type="hidden" name="search_payment_type" value="@ViewBag.search_payment_type" />
+                            <input type="hidden" name="pageID" value="@ViewBag.pageID" />
+                            <input type="hidden" name="orderby" value="@ViewBag.orderby" />
+                            <input type="hidden" name="pageSize" value="@ViewBag.pageSize" />
+                            <input type="hidden" name="pageSize" value="@ViewBag.pageSize" />
+                            <input type="hidden" value="0" name="pageID" id="pageID" />
+
+
+                            bool hasStatus = true;
+                            foreach (Teeyoot.Module.Common.Enums.OrderStatus s in Enum.GetValues(typeof(Teeyoot.Module.Common.Enums.OrderStatus)))
+                            {
+                                if (s.ToString() == @item.Order.OrderStatusRecord.Name)
+                                {
+                                    hasStatus = false;
+                                    <label style="display: none">@s.ToString().SplitCamelCase()</label>
+                                }
+                            }
+                            if (hasStatus)
+                            {
+                                <label style="display: none">@item.Order.OrderStatusRecord.Name</label>
+                            }
+                            <input type="hidden" value="@item.Order.Id" name="orderId" />
+
+                            <select name="orderStatus">
+                                @foreach (Teeyoot.Module.Common.Enums.OrderStatus s in Enum.GetValues(typeof(Teeyoot.Module.Common.Enums.OrderStatus)))
+                                {
+                                    if (s.ToString() == item.Order.OrderStatusRecord.Name)
+                                    {
+                                        <option selected value="@s">
+                                            @s.ToString().SplitCamelCase()
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@s">
+                                            @s.ToString().SplitCamelCase()
+                                        </option>
+                                    }
+                                }
+                            </select>
+                            <button class="apply" type="submit">
+                                @T("Apply")
+                            </button>
+                        }
+                    </td>
+                    <td>
+                        @item.SoldCount
+                    </td>
+                    <td>
+                        <div style='display:@(item.Order.ProfitPaid?"block":"none")' class="profit-div">
+                            <a href="@Url.Action("DeletePayout", new { publicId = item.Order.OrderPublicId })" class="paid">@T("Not paid")</a>
+                            <span class="paid-span">@T("| Paid ")</span>
+                        </div>
+                        <div style='display:@(!item.Order.ProfitPaid?"block":"none")' class="profit-div">
+                            <span class="paid-span">@T("Not paid | ")</span>
+                            <a href="@Url.Action("EditStatusPayout", new { publicId = item.Order.OrderPublicId, profit = item.OrderProfit, sellerId = (item.Seller == null)? 0:  item.Seller.Id })" class="paid">@T("Paid")</a>
+                        </div>
+                    </td>
+                    <td>@item.Order.CurrencyRecord.Code</td>
+                    @if (item.Order.PaymentMethod == "BlueSnap")
+                    {
+                        <td>@item.Order.PaymentMethod (@item.Order.BlueSnapTransationId)</td>
+
+                    }
+                    else
+                    {
+                        <td>@item.Order.PaymentMethod</td>
+                    }
+                </tr>
+            }
+        </tbody>
+
+    </table>
+</div>
+<div class="pagger">
+
+    @{
+        int current = ViewBag.Cuurent;
+        int datacount = ViewBag.DataCount;
+        int pageSize = ViewBag.PageSize;
+
+    }
+    @if (datacount / pageSize < 0)
+    {
+
+    }
+    else
+    {
+        for (int i = 0; i < datacount / pageSize + 1; i++)
+        {
+            if (i == current)
+            {
+                <span class="page-number">@(i + 1)</span>
+            }
+            else
+            {
+                <a class="page-number" data-page-number="@i" href="@Url.Action("Index", "Home", new { pageID  = i })">@(i + 1)</a>
+            }
+
+        }
+    }
+
+
+
+</div>
+
+<fieldset>
+    <div id="modal_form" style="">
+        @Html.Partial("ModalBuyer")
+    </div>
+    <div id="overlay"></div>
+</fieldset>
+
+<fieldset>
+    <div id="modal_form_order" style="">
+        @Html.Partial("ModalOrder")
+    </div>
+    <div id="overlay_order"></div>
+</fieldset>
+
+@using (Script.Foot())
+{
+    <script>
+        $(document).ready(function () {
+            $(".page-number").click(function (e) {
+                //$(this).attr("href", "http://google.com");
+                _currentPage = @current;
+                _currentPageStr = "pageID=" + _currentPage;
+                nextPageString = "pageID=" + $(this).data("page-number");
+
+                xStr = document.location.toString();//
+                if(xStr.indexOf(_currentPageStr) > 0){
+                    xStr = xStr.replace(_currentPageStr, nextPageString);
+                }else{
+                    if(document.location.search){
+                        xStr = document.location.toString() + "&" + nextPageString;
+                    }
+                    else{
+                        xStr = document.location.toString() + "?" + nextPageString;
+                    }
+                }
+                $(this).attr( "href" , xStr);
+            });
+
+            $(".ApplyStatus").ajaxForm(function(e){
+                alert(e.Text);
+            });
+
+            $(".order-by-link").click(function(){
+                //return false;
+                search = document.location.search.toString();
+                current_orderby = "@(ViewBag.orderby == null? "": ViewBag.orderby)";
+                new_orderby = $(this).data("orderby");
+
+                if(search.indexOf("orderby")> 0){
+                    new_searchQuery = "";
+                    search_array = search.split("&");
+                    $(search_array).each(function(index ,item){
+                        name = item.split("=")[0];
+                        val = item.split("=")[1];
+                        if(name.indexOf("orderbyOrder") >= 0) return;
+                        if(name.indexOf("orderby") >= 0){
+                            if(new_searchQuery){
+                                new_searchQuery +=  "&"+name + "=" + new_orderby;
+                                if(new_orderby == current_orderby){
+                                    new_searchQuery += "&orderbyOrder=asc"; 
+                                }
+                            }else{
+                                new_searchQuery = name + "=" + new_orderby;
+                                if(new_orderby == current_orderby){
+                                    new_searchQuery += "&orderbyOrder=asc"; 
+                                }
+                            }
+                        }else{
+                            if(new_searchQuery){new_searchQuery += "&" + name + "=" + val; }else{new_searchQuery = name + "="  + val; }
+                        }
+                        
+                    });
+                    $(this).attr("href", document.location.toString().replace(search, new_searchQuery));
+                }else{
+                    if(search) {
+                        $(this).attr("href", document.location.toString() + "&orderby=" + new_orderby);
+                    }
+                    else{
+                        $(this).attr("href", document.location.toString() + "?orderby=" + new_orderby);
+                    }
+                }
+            });
+
+            $(".paid").click(function(){
+                _parent_div = $(this).parents(".profit-div");
+                $.get($(this).attr("href"), function(){
+                    _parent_div.hide();
+                    _parent_div.siblings(".profit-div").show();
+                });
+                return false;
+            });
+
+           
+        });
+    </script>
+}

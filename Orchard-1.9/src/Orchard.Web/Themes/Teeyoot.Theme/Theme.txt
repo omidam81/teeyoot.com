@@ -1,0 +1,4 @@
+Name: Teeyoot.Theme
+Author: Teeyoot, Omid Amiri
+Website: http://Teeyoot.com
+Zones: TimeAndLanguage

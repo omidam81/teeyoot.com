@@ -1,0 +1,11 @@
+﻿@model Teeyoot.Module.Models.MailChimpSettingsPart
+
+<fieldset>
+    @Html.LabelFor(m => m.ApiKey, T("Api Key"))
+    @Html.TextBoxFor(m => m.ApiKey, new { @class = "text large" })
+    @Html.ValidationMessageFor(m => m.ApiKey)
+</fieldset>
+
+
+
+

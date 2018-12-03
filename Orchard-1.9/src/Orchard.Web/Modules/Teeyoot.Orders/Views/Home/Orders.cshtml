@@ -1,0 +1,24 @@
+﻿@using Teeyoot.Module.Common.ExtentionMethods
+@{
+    Style.Include("AdminOrders.css");
+    Style.Include("ui-grid.min.css");
+    Script.Require("jQuery");
+    Script.Include("angular.min.js");
+    Script.Include("ui-grid.js");
+    Script.Include("amin-orders.js");
+}
+
+
+
+@using (Script.Foot())
+{
+    <script>
+       
+    </script>
+}
+<div ng-app="AdminOrders">
+    <div ng-controller="OrderController">
+        <div ui-grid="gridOptions" class="ngGrid">
+        </div>
+    </div>
+</div>

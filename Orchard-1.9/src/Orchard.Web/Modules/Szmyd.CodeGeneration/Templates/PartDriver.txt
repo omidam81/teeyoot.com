@@ -1,0 +1,51 @@
+﻿using JetBrains.Annotations;
+using Orchard.ContentManagement;
+using Orchard.ContentManagement.Drivers;
+using Orchard.Localization;
+using Orchard.UI.Notify;
+using $$ModuleName$$.Models;
+
+namespace $$ModuleName$$.Drivers
+{
+    [UsedImplicitly]
+	$$PartFeatureAttribute$$
+    public class $$PartName$$Driver : ContentPartDriver<$$PartName$$>
+    {
+        private readonly INotifier _notifier;
+        private const string TemplateName = "Parts/$$PartShapeFileName$$";
+
+        public Localizer T { get; set; }
+
+        public $$PartName$$Driver(INotifier notifier)
+        {
+            _notifier = notifier;
+            T = NullLocalizer.Instance;
+        }
+
+        protected override DriverResult Display($$PartName$$ part, string displayType, dynamic shapeHelper)
+        {
+            return ContentShape("$$PartShapeName$$",
+                () => shapeHelper.$$PartShapeName$$(ContentItem: part.ContentItem));
+        }
+
+        protected override DriverResult Editor($$PartName$$ part, dynamic shapeHelper)
+        {
+            return ContentShape("$$PartShapeName$$",
+                    () => shapeHelper.EditorTemplate(TemplateName: TemplateName, Model: part, Prefix: Prefix));
+        }
+
+        protected override DriverResult Editor($$PartName$$ part, IUpdateModel updater, dynamic shapeHelper)
+        {
+            if (updater.TryUpdateModel(part, Prefix, null, null))
+            {
+                _notifier.Information(T("$$PartName$$ edited successfully"));
+            }
+            else
+            {
+                _notifier.Error(T("Error during $$PartName$$ update!"));
+            }
+            return Editor(part, shapeHelper);
+        }
+
+    }
+}

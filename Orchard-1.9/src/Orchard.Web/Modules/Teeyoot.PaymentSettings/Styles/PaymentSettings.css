@@ -1,0 +1,64 @@
+﻿
+.method {
+font-size:20px;
+}
+
+.black {
+color:black;
+}
+
+.pointer {
+cursor:pointer
+}
+
+.inp {
+    width:50%;
+}
+
+.marg1 {
+    margin-left:1.6%;
+}
+.marg2 {
+    margin-left:1.2%;
+}
+.marg3 {
+    margin-left:0.6%;
+}
+.marg4 {
+    margin-left:0.4%;
+}
+
+.marg5 {
+    margin-left:0.4%;
+}
+
+.marg6 {
+    margin-left:1.6%;
+}
+
+
+
+.marg7 {
+    margin-left:3.3%;
+}
+.marg8 {
+    margin-left:0.3%;
+}
+
+
+
+.margb {
+margin-top:1%;
+}
+
+.setting fieldset {
+    border: solid 1px #ABABAB;
+    padding: 10px;
+    margin-top: 23px;
+}
+
+.setting fieldset legend {
+    border: solid 1px #ABABAB;
+    padding: 4px;
+    /* margin: initial; */
+}

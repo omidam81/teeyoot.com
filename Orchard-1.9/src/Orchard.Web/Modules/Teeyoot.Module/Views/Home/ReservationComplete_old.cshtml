@@ -1,0 +1,142 @@
+﻿@{
+    @model Teeyoot.Module.ViewModels.ReservationCompleteViewModel
+    Style.Include("reservationcomplete.css");
+
+    //var _user = Teeyoot.Module.Models.TeeyootUserPart T_user =
+
+    var amount = Model.Order.TotalPriceWithPromo > 0 ? Model.Order.TotalPriceWithPromo : Model.Order.TotalPrice;
+    var currency = Model.Order.CurrencyRecord.Code;
+}
+
+@if (!Model.Oops)
+{
+    var pixelSet = false;
+    using (Script.Head())
+    {
+        if (!string.IsNullOrWhiteSpace(Model.FacebookCustomAudiencePixel))
+        {
+            pixelSet = true;
+          <!-- New Pixel -->
+            <script>
+                !function (f, b, e, v, n, t, s) {
+                    if (f.fbq) return;
+                    n = f.fbq = function () {
+                        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                    };
+                    if (!f._fbq) f._fbq = n;
+                    n.push = n; n.loaded = !0;
+                    n.version = '2.0';
+                    n.queue = []; t =
+                        b.createElement(e);
+                    t.async = !0;
+                    t.src = v; s = b.getElementsByTagName(e)[0];
+                    s.parentNode.insertBefore(t, s)
+                }(window, document, 'script', '//connect.facebook.net/en_US/fbevents.js');
+                // Insert Your Custom Audience Pixel ID below.
+                fbq('init', @Model.FacebookCustomAudiencePixel);
+                fbq('track', 'PageView');
+                fbq('track', 'Purchase',{value: '@amount.ToString("0.00")', currency: '@currency'});
+            </script> <!-- End Custom Audience Pixel Code --><!-- Facebook Custom Audience Pixel Code -->
+    <!--End New Pixel-->
+        }
+    <!--Old Pixel-->
+        <script>
+            (function() {
+                var _fbq = window._fbq || (window._fbq = []);
+                if (!_fbq.loaded) {
+                    var fbds = document.createElement('script');
+                    fbds.async = true;
+                    fbds.src = '//connect.facebook.net/en_US/fbds.js';
+                    var s = document.getElementsByTagName('script')[0];
+                    s.parentNode.insertBefore(fbds, s);
+                    _fbq.loaded = true;
+                }
+            })();
+            window._fbq = window._fbq || [];
+            window._fbq.push(['track', '6029914398108', {'value':'@amount','currency':'@currency'}]);
+            @if (!string.IsNullOrWhiteSpace(Model.SellerFbPixel) && !pixelSet)
+            {
+                 <text> window._fbq.push(['track', '@Model.SellerFbPixel', {'value':'@amount','currency':'@currency'}]); </text>
+            }
+
+        </script>
+        <noscript><img height="1" width="1" alt="" style="display:none" src="https://www.facebook.com/tr?ev=6029914398108&amp;cd[value]=@(amount)&amp;cd[currency]=@(currency)&amp;noscript=1&dt=ivmgtvlesuk3lon9t8ptnd55qytp1lrk" /></noscript>
+        if (!string.IsNullOrWhiteSpace(Model.SellerFbPixel) && !pixelSet)
+        {
+            <noscript><img height="1" width="1" alt="" style="display:none" src="https://www.facebook.com/tr?ev=@(Model.SellerFbPixel)&amp;cd[value]=@(amount)&amp;cd[currency]=@(currency)&amp;noscript=1&dt=ivmgtvlesuk3lon9t8ptnd55qytp1lrk" /></noscript>
+        }
+    <!--End Old Pixel-->
+
+    }
+}
+<div class="reservation-complete-page">
+
+    <div class="reservation-complete-message">
+        <h1>@Model.Message</h1>
+    </div>
+
+    <div class="campaigns-list-container">
+        <div>
+            @foreach (var c in Model.Campaigns)
+            {
+                var daysRemaining = c.EndDate.Subtract(DateTime.UtcNow).Days;
+
+                <div class="campaign-card">
+
+                    <div class="campaign-card-image" style="background-image: url('/Media/campaigns/@c.Id/@c.FirstProductId/normal/@(!c.ShowBack ? "front.png" : "back.png")')">
+                        <a href="/@c.Alias"></a>
+
+                        <img src="@c.FlagFileName"
+                             style="width:25px; height:25px; margin-right:10px; position:relative; bottom:30px; float:right; border: black solid 1px;">
+                    </div>
+
+                    <div class="campaign-card-progress">
+                        <div class="campaign-card-progress-bar">
+                            <div class="campaign-card-progress-bar-completed" style="width:@(c.Goal != 0 ? c.Sold * 100 / @c.Goal : "0")%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="campaign-card-info">
+
+                        <div class="campaign-card-sold">@c.Sold / @(c.Goal == 0 ? "1" : c.Goal) @T("sold")</div>
+
+                        <div class="campaign-card-left" title="@c.EndDate.ToString("dd.MM.yyyy")">
+                            <span>
+                                @if (daysRemaining > 0)
+                                {
+                                    @daysRemaining@:d @T("remaining")
+                                }
+                                else if (daysRemaining <= -1)
+                                {
+                                    @Math.Abs(daysRemaining)@:d @T("ago")
+                                }
+                                else
+                                {
+                                    var hours = c.EndDate.Subtract(DateTime.UtcNow).Hours;
+
+                                    if (hours > 0)
+                                    {
+                                        @hours@:h @T("remaining")
+                                    }
+                                    else
+                                    {
+                                        @Math.Abs(hours)@:h @T("ago")
+                                    }
+                                }
+
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div class="campaign-card-title"><a href="/@c.Alias" title="@c.Title">@c.Title</a></div>
+
+                </div>
+
+            }
+        </div>
+    </div>
+
+</div>
+

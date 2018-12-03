@@ -1,0 +1,211 @@
+﻿@model Teeyoot.Search.ViewModels.AdminSearchViewModel
+@{
+    Layout.Title = T("Edit сategory \"").ToString() + Model.CategoryName + "\"";
+    Style.Include("Search.css");
+    Script.Require("jQuery");
+    Script.Require("jQueryUI");
+}
+@using Teeyoot.Module.Models
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+}
+@using (Script.Foot())
+{
+    <script type="text/javascript">
+        jQuery.fn.outerHTML = function () {
+            return jQuery('<div />').append(this.eq(0).clone()).html();
+        };
+        function addCampaign(btnObj, campId, cateId) {
+            var cur_tr = $(btnObj).parent().parent();
+            $.ajax({
+                async: false,
+                cache: false,
+                type: "Get",
+                url: "@(Url.Action("AddCampaign", "AdminSearch"))",
+                data: { "idCamp": campId, "idCateg": cateId },
+                success: function (data) {
+                    $("#tbCampaigns tbody").append($(cur_tr).outerHTML().replace(">Add</button>",">Delete</button>").replace("addCampaign(","deleteCampaign("));
+                    $(cur_tr).remove();
+                }, error: function (data, status, resp) {
+                    alert('Status: ' + data.status + '. Error message: ' + data.statusText);
+                }
+            });
+        }
+        function deleteCampaign(btnObj, campId, cateId) {
+            var cur_tr = $(btnObj).parent().parent();
+            $.ajax({
+                async: false,
+                cache: false,
+                type: "Get",
+                url: "@(Url.Action("DeleteCampaignsFromCategory", "AdminSearch"))",
+                data: { "idCamp": campId, "idCateg": cateId },
+            success: function (data) {
+                $("#tbCampaignsOther tbody").append($(cur_tr).outerHTML().replace(">Delete</button>", ">Add</button>").replace("deleteCampaign(","addCampaign("));
+                $(cur_tr).remove();
+            }, error: function (data, status, resp) {
+                alert('Status: ' + data.status + '. Error message: ' + data.statusText);
+            }
+        });
+        }
+
+        function addAntiForgeryToken(data) {
+            var antiForgeryTokenValue = $('#anti_forgery_token').val();
+            data.__RequestVerificationToken = antiForgeryTokenValue;
+            return data;
+        };
+
+
+    </script>
+}
+
+
+<fieldset>
+    <div class="admin-categories-menu">
+        <div class="left-box category-box">
+            @using (Html.BeginForm("ChangeNameCategory", "AdminSearch", FormMethod.Get))
+            {
+                <fieldset class="bulk-actions">
+                    @Html.LabelFor(m => m.NewCategory, T("Change name for category")):
+                    @Html.TextBoxFor(m => m.NewCategory, new { @placeholder = @T("New name") })
+                    @Html.HiddenFor(m => m.CategoryId)
+                    @Html.HiddenFor(m => m.SearchString)
+                    @Html.HiddenFor(m => m.SearchStringOther)
+                    <button type="submit">@T("Change")</button>
+                </fieldset>
+            }
+        </div>
+        @*<div class="right-box">
+                <fieldset class="bulk-actions">
+                    <a class="button primaryAction" href="@Url.Action("AddCampaignForCategory", new { id = Model.CategoryId })">@T("Add Campaign")</a>
+                </fieldset>
+            </div>*@
+
+        <div class="left-box left-searchbox">
+            @using (Html.BeginForm("SearchCampaigns", "AdminSearch", FormMethod.Get))
+            {
+                <fieldset class="bulk-actions">
+                    @Html.LabelFor(m => m.SearchString, T("Filter")):
+                    @Html.TextBoxFor(m => m.SearchString)
+                    @Html.HiddenFor(m => m.CategoryId)
+                    @Html.HiddenFor(m => m.SearchStringOther)
+                    <button type="submit">@T("Search")</button>
+                    <a href="@Url.Action("EditCategory", new { id = Model.CategoryId, searchStringOther = Model.SearchStringOther})">@T("By Default")</a>
+                </fieldset>
+            }
+        </div>
+
+        <div class="right-box right-searchbox">
+            @using (Html.BeginForm("SearchCampaigns", "AdminSearch", FormMethod.Get))
+            {
+                <fieldset class="bulk-actions">
+                    @Html.LabelFor(m => m.SearchStringOther, T("Filter")):
+                    @Html.TextBoxFor(m => m.SearchStringOther)
+                    @Html.HiddenFor(m => m.CategoryId)
+                    @Html.HiddenFor(m => m.SearchString)
+                    <button type="submit">@T("Search")</button>
+                    <a href="@Url.Action("EditCategory", new { id = Model.CategoryId, searchString = Model.SearchString})">@T("By Default")</a>
+                </fieldset>
+            }
+        </div>
+
+
+
+    </div>
+</fieldset>
+
+@{
+    <fieldset>
+        <div class="two-box">
+            <div class="items">
+                <h2>@T("Campaigns in the category")</h2>
+                <table class="items" id="tbCampaigns">
+                    <thead>
+                        <tr class="admin-categories">
+                            <th class="visible">
+                                <h3>@T("Sold")</h3>
+                            </th>
+                            <th class="name">
+                                <h3>@T("Title")</h3>
+                            </th>
+                            <th class="related"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var camp in Model.Camapigns)
+                        {
+                            <tr data-record-text="camp.Id" class="admin-categories-tr">
+                                <td class="visible">
+                                    <h3>
+                                        @camp.ProductCountSold/@camp.ProductCountGoal
+                                    </h3>
+                                </td>
+                                <td class="name">
+                                    <h3>@camp.Title</h3>
+                                </td>
+                                <td class="related">
+                                    <button type="submit" onclick="deleteCampaign(this, @camp.Id, @Model.CategoryId)">@T("Delete")</button>
+                                    @*<a href="@Url.Action("DeleteCampaignsFromCategory", new { id = camp.Id, categId = Model.CategoryId, searchString = Model.SearchString, searchStringOther = Model.SearchStringOther })" itemprop="RemoveUrl UnsafeUrl">@T("Delete")</a>*@
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="items">
+                <h2>@T("Rest campaigns")</h2>
+                <table class="items" id="tbCampaignsOther">
+                    <thead>
+                        <tr class="admin-categories">
+                            <th class="visible">
+                                <h3>@T("Sold")</h3>
+                            </th>
+                            <th class="name">
+                                <h3>@T("Title")</h3>
+                            </th>
+                            <th class="related"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var camp in Model.OtherCampaigns)
+                        {
+                            <tr data-record-text="camp.Id" class="admin-categories-tr">
+                                <td class="visible">
+                                    <h3>
+                                        @camp.ProductCountSold/@camp.ProductCountGoal
+                                    </h3>
+                                </td>
+                                <td class="name">
+                                    <h3>@camp.Title</h3>
+                                </td>
+                                <td class="related">
+                                    <button type="submit" onclick="addCampaign(this, @camp.Id, @Model.CategoryId)">@T("Add")</button>
+                                    @*<a href="@Url.Action("AddCampaign", new { idCamp = camp.Id, idCateg = Model.CategoryId, searchString = Model.SearchString, searchStringOther = Model.SearchStringOther })">@T("Add")</a>*@
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @Display(Model.Pager)
+            </div>
+
+        </div>
+    </fieldset>
+}
+
+
+
+
+<fieldset>
+    <div class="admin-categories-menu">
+        <div class="right-box">
+            @using (Html.BeginForm("Index", "AdminSearch", FormMethod.Get))
+            {
+                <fieldset class="bulk-actions">
+                    <button type="submit">@T("Back")</button>
+                </fieldset>
+            }
+        </div>
+    </div>
+</fieldset>

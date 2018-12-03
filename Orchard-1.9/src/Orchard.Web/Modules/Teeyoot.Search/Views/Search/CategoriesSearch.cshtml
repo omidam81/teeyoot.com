@@ -1,0 +1,204 @@
+﻿@model Teeyoot.Search.ViewModels.SearchViewModel
+@{
+    Style.Include("Search.css");
+}
+
+<div class="tb- return-result relatedcampaign">
+    @if (Model.NotFoundCategories)
+    {
+        <h1>@T("Сategory ")@Model.Filter@T(" does not exist!")</h1>
+
+        <div class="row categories-row">
+            <div class="title-categories">
+                <h2>@T("Browse Other Categories:")</h2>
+            </div>
+            <div class="categories">
+                <ul class="menu menu-tags">
+                    @foreach (var categ in Model.CampCategList)
+                    {
+                        if (categ.IsVisible)
+                        {
+                    <li>
+                        <a href="~/CategoriesSearch?categoriesName=@categ.Name">@categ.Name</a>
+                    </li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+    else
+    {
+        if (!Model.NotResult)
+        {
+            <div class="row categories-row">
+                <div class="title-categories">
+                    <h2>@T("Browse Other Categories:")</h2>
+                </div>
+                <div class="categories">
+                    <ul class="menu menu-tags">
+                        @foreach (var categ in Model.CampCategList)
+                        {
+                            if (categ.IsVisible)
+                            {
+                                <li>
+                                    <a href="~/CategoriesSearch?categoriesName=@categ.Name">@categ.Name</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+
+
+        if (Model.NotResult)
+        {
+            <h1>@T("No search results for the category") "@Model.Filter"!</h1>
+            <div class="row categories-row">
+                <div class="title-categories">
+                    <h2>@T("Browse Other Categories:")</h2>
+                </div>
+                <div class="categories">
+                    <ul class="menu menu-tags">
+                        @foreach (var categ in Model.CampCategList)
+                        {
+                            if (categ.IsVisible)
+                            {
+                                <li>
+                                    <a href="~/CategoriesSearch?categoriesName=@categ.Name">@categ.Name</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+
+        }
+        else
+        {
+            var countPrice = 0;
+            foreach (var campaign in Model.Campaigns)
+            {
+                var min = campaign.ProductMinimumGoal == 0 ? 1 : campaign.ProductMinimumGoal;
+                var sold = campaign.ProductCountSold;
+
+                var now = DateTime.Now;
+                var dif = campaign.EndDate.Subtract(now);
+                string dateLeft;
+                if (dif.Days < 0)
+                {
+                    dateLeft = T("Ended").ToString();
+                }
+                else if (dif.Days <= 1)
+                {
+                    dateLeft = T("Ends Today").ToString();
+                }
+                else
+                {
+                    dateLeft = dif.Days + T(" days left").ToString();
+                }
+
+                float widthResult;
+                if ((min - campaign.ProductCountSold) <= 0)
+                {
+                    widthResult = 100;
+                }
+                else
+                {
+                    if (campaign.ProductCountSold != 0)
+                    {
+                        var procent = (float)min / 100;
+                        widthResult = campaign.ProductCountSold / procent;
+                    }
+                    else
+                    {
+                        widthResult = 0;
+                    }
+                }
+                var width = (int)widthResult + "% !important";
+
+                var maxSize = 8;
+                if (Model.Campaigns.Count() < 8)
+                {
+                    maxSize = Model.Campaigns.Count();
+                }
+                Model.NewRow++;
+
+                var path = "/Media/campaigns/" + campaign.Id + "/" + campaign.CampaignFirstProductId + "/";
+                string backImg;
+                string frontImg;
+                if (campaign.BackSideByDefault)
+                {
+                    backImg = path + "normal/front.png";
+                    frontImg = path + "normal/back.png";
+                }
+                else
+                {
+                    backImg = path + "normal/back.png";
+                    frontImg = path + "normal/front.png";
+                }
+
+                @*<a href="~/@campaign.Alias" class="item">
+                    <div class="daysleft @((dif.Days) > 0 ? "active" : "ended")">@dateLeft</div>
+                    <img onmouseover="this.src = '@backImg'" onmouseout="this.src = '@frontImg'" src="@frontImg" alt="">
+                    <h4>@campaign.Title</h4>
+                    <p><span class="price">@Model.CampaignFirstProductPrices[countPrice].CurrencyCode @Model.CampaignFirstProductPrices[countPrice].Price.ToString("F", System.Globalization.CultureInfo.InvariantCulture)</span>|<span class="sold">@sold Sold</span></p>
+                </a>*@
+
+
+                <a href="~/@campaign.Alias" class="item">
+                    <div class="daysleft @((dif.Days) > 0 ? "active" : "ended")">@dateLeft</div>
+                    <img onmouseover="this.src = '@backImg'" onmouseout="this.src = '@frontImg'" src="@frontImg" alt="">
+                    <h4>@campaign.Title</h4>
+                    <p>
+                        <span class="price price-currency-code" data-bc="@Model.CampaignFirstProductPrices[countPrice].CurrencyCode" data-price="@Model.CampaignFirstProductPrices[countPrice].Price" data-string-format="{0}">
+                            @Model.CampaignFirstProductPrices[countPrice].CurrencyCode
+                            @Model.CampaignFirstProductPrices[countPrice].Price.ToString("F", System.Globalization.CultureInfo.InvariantCulture)
+                        </span>|
+                        <span class="sold">@campaign.ProductCountSold Sold</span>
+                    </p>
+                </a>
+        
+        
+
+                countPrice++;
+                if (Model.NewRow == maxSize)
+                {
+                    <div class="row categories-row">
+                        <div class="title-categories">
+                            <h2>@T("Browse Other Categories:")</h2>
+                        </div>
+                        <div class="categories">
+                            <ul class="menu menu-tags">
+                                @foreach (var categ in Model.CampCategList)
+                                {
+                                    if (categ.IsVisible)
+                                    {
+                                        <li>
+                                            <a href="~/CategoriesSearch?categoriesName=@categ.Name">@categ.Name</a>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    }
+</div>
+
+@using (Script.Foot())
+{
+    <script type="text/javascript">
+        var height = $('.tee-preview:first-child img').height();
+        $('.tee-preview img').css("height", height + "px !important");
+
+        window.onresize = function (e) {
+            $('.tee-preview:first-child img').css("height", "100% !important");
+            var heightNew = $('.tee-preview:first-child img').height();
+            $('.tee-preview img').css("height", heightNew + "px !important");
+        }
+    </script>
+}

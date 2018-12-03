@@ -1,0 +1,97 @@
+﻿@model Teeyoot.Module.ViewModels.CommonSettingsIndexViewModel
+@{
+    Layout.Title = T("Common Settings");
+}
+
+<table class="items" style="width: 70%;">
+    <thead>
+    <tr>
+        <td>
+            @T("Setting")
+        </td>
+        <td>
+            @T("Value")
+        </td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            @T("Do not accept any new campaigns")
+        </td>
+        <td >
+            @using (Html.BeginFormAntiForgeryPost(Url.Action("EditDoNotAcceptAnyNewCampaigns", "AdminCommonSettings")))
+            {
+                <input type="hidden" name="sendEmails" value="@Html.Raw(Json.Encode(false))"/>
+                @Html.CheckBoxFor(model => model.DoNotAcceptAnyNewCampaigns, new {id = "do_not_accept_any_new_campaigns"})
+            }
+        </td>
+    </tr>
+    <tr>
+        <td>
+            @T("Number of checkout requests with not sent emails.")
+        </td>
+        <td>
+            @Model.NumberOfNotSentEmailCheckoutRequests
+        </td>
+    </tr>
+
+
+
+    <tr>
+        <td>
+            @T("Cash on delivery availability message")
+        </td>
+        <td>
+            @using (Html.BeginFormAntiForgeryPost(Url.Action("EditCashOnDeliveryAvailabilityMessage", "AdminCommonSettings")))
+            {
+                @Html.TextBoxFor(model => model.CashOnDeliveryAvailabilityMessage, new { @class = "text large" })
+                <button class="margb" id="SendData">@T("Apply")</button>
+            }
+        </td>
+    </tr>
+    <tr>
+        <td>
+            @T("Checkout page right side content")
+            <br /><br />
+            @using (Html.BeginFormAntiForgeryPost(Url.Action("EditCheckoutPageRightSideContent", "AdminCommonSettings")))
+            {
+                <textarea name="CheckoutPageRightSideContent" id="CheckoutPageRightSideContent" rows="10" cols="80">
+                    @Model.CheckoutPageRightSideContent
+                </textarea>
+                <button class="margb" id="SendData">@T("Apply")</button>
+            }
+        </td>
+        <td></td>
+    </tr>
+
+
+
+    </tbody>
+</table>
+
+@using (Script.Foot())
+{
+    <script src="/Modules/Teeyoot.Module/Content/ckeditor/ckeditor.js"></script>
+    <script src="/Modules/Teeyoot.Module/Content/ckeditor/adapters/jquery.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            $('#do_not_accept_any_new_campaigns').change(function() {
+                if (!$(this).is(':checked')) {
+                    if (confirm('@T("Do you want to send {0} emails to clients?", Model.NumberOfNotSentEmailCheckoutRequests)')) {
+                        $('input[name="sendEmails"]').val(true);
+                    } else {
+                        $('input[name="sendEmails"]').val(false);
+                    }
+                }
+                $(this).closest('form').submit();
+            });
+            //
+            //
+            $('#CheckoutPageRightSideContent').ckeditor();
+            //
+            //
+        });
+    </script>
+}

@@ -1,0 +1,63 @@
+﻿@{
+    Script.Require("jQuery");
+    Script.Include("jquery.validate.min.js");
+    Script.Include("additional-methods.min.js");
+    @model Teeyoot.Account.ViewModels.LogOnViewModel
+}
+@using (Html.BeginFormAntiForgeryPost(Url.Action("LogOn", "Account", new { area = "Teeyoot.Account", returnUrl = Model.ReturnUrl }), FormMethod.Post, new { @id = "login_form" }))
+{
+    <fieldset>
+        <div class="title">
+            
+        </div>
+        <div class="password tb-height">
+            <label>@T("Email address")</label>
+            @Html.TextBoxFor(model => model.Email)
+        </div>
+        <div class="password tb-height">
+            <label>@T("Password")</label>
+            @Html.PasswordFor(model => model.Password)
+        </div>
+        <div class="forgot">
+            <legend class="link">
+                <a href="@Url.Action("Recover", "Account")">@T("Forgot your password?")</a>
+            </legend>
+        </div>
+        <div class="remember">
+            @Html.CheckBoxFor(model => model.RememberMe)
+            <label>@T("Remember me on this computer")</label>
+        </div>
+        <div>
+            <button class="button-login" type="submit">@T("Log in now")</button>
+        </div>
+    </fieldset>
+}
+@using (Script.Foot())
+{
+
+    <script>
+        jQuery.validator.setDefaults({
+            debug: true,
+            success: "valid"
+        });
+        $("#login_form").validate({
+            rules: {
+                Email: {
+                    required: true,
+                    email: true
+                },
+                Password: {
+                    required: true,
+                    minlength: 8
+                }
+            },
+            submitHandler: function (form) { form.submit(); }
+        });
+
+
+    </script>
+
+    <script>
+        document.title = "@T("Login | Teeyoot")";
+    </script>
+}

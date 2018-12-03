@@ -1,0 +1,4 @@
+﻿        public $$PropertyType$$ $$PropertyName$$ {
+            get { return Record.$$PropertyName$$; }
+            set { Record.$$PropertyName$$ = value; }
+        }

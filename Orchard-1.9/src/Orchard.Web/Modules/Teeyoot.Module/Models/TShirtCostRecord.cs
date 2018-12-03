@@ -1,0 +1,26 @@
+﻿using System;
+namespace Teeyoot.Module.Models
+{
+    // ReSharper disable once InconsistentNaming
+    public class TShirtCostRecord
+    {
+        public virtual int Id { get; set; }
+        public virtual float FirstScreenCost { get; set; }
+        public virtual float AdditionalScreenCosts { get; set; }
+        public virtual float InkCost { get; set; }
+        public virtual int PrintsPerLitre { get; set; }
+        public virtual float LabourCost { get; set; }
+        public virtual int LabourTimePerColourPerPrint { get; set; }
+        public virtual int LabourTimePerSidePrintedPerPrint { get; set; }
+        public virtual float PercentageMarkUpRequired { get; set; }
+        public virtual float DTGPrintPrice { get; set; }
+        public virtual int SalesGoal { get; set; }
+        public virtual int MaxColors { get; set; }
+        public virtual string CostCulture { get; set; }
+        public virtual int CostRevision { get; set; }
+        public virtual DateTime DateCreated { get; set; }
+
+        public virtual int MinimumTarget { get; set; }
+
+    }
+}

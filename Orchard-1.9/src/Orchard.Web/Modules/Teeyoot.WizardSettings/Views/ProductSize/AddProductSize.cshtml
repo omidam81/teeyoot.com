@@ -1,0 +1,70 @@
+﻿@model Teeyoot.Module.Models.ProductSizeRecord
+@{
+    Layout.Title = T("Add Product Size");
+}
+
+<h2>@T("Add New Product Size")</h2>
+
+@using (Html.BeginFormAntiForgeryPost(Url.Action("AddProductSize", "ProductSize"), FormMethod.Post, new { id = "product_size_form" }))
+{
+    <fieldset>
+
+        <div class="textfeild">
+            <h4>@T("Width(cm)")</h4>
+            @Html.TextBoxFor(aa => aa.WidthCm)
+        </div>
+        <div class="textfeild">
+            <h4>@T("Width(in)")</h4>
+            @Html.TextBoxFor(aa => aa.WidthInch)
+        </div>
+        <div class="textfeild">
+            <h4>@T("Length(cm)")</h4>
+            @Html.TextBoxFor(aa => aa.LengthCm)
+        </div>
+        <div class="textfeild">
+            <h4>@T("Length(in)")</h4>
+            @Html.TextBoxFor(aa => aa.LengthInch)
+        </div>
+        <div class="textfeild">
+            <h4>@T("Sleeve(cm)")</h4>
+            @Html.TextBoxFor(aa => aa.SleeveCm)
+        </div>
+        <div class="textfeild">
+            <h4>@T("Sleeve(in)")</h4>
+            @Html.TextBoxFor(aa => aa.SleeveInch)
+        </div>
+        <div class="textfeild">
+            <h4>@T("Size Code")</h4>
+            @Html.DropDownListFor(m => m.SizeCodeRecord.Id, new SelectList(ViewBag.SizeCodes, "Id", "Name"), T("Select Size ...").ToString(), new { id = "product_size_codes" })
+        </div>
+        <div class="textfeild">
+            <h4>@T("Remarks")</h4>
+            @Html.TextBoxFor(aa => aa.Remarks)
+        </div>
+
+    </fieldset>
+    
+    
+    <fieldset class="save-button">
+        <button type="submit" class="primaryAction">@T("Save")</button>
+        <a class="button" href="@Url.Action("Index", "ProductSize")">@T("Cancel")</a>
+    </fieldset>
+}
+
+@using (Script.Foot())
+{
+    <script>
+        $(document).ready(function() {
+            $('#product_size_form').submit(function() {
+                var selectedProductSize = $('#product_size_codes option:selected').val();
+
+                if (!selectedProductSize) {
+                    alert('Please select Size Code.');
+                    return false;
+                }
+
+                return true;
+            });
+        });
+    </script>
+}

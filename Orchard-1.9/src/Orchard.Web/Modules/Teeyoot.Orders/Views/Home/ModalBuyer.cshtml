@@ -1,0 +1,103 @@
+﻿<h1>@T("Buyer information")</h1>
+@using (@Html.BeginForm("UpdaeBuyerInfirmation", "Home"))
+{
+
+    <input id="__requesttoken" type="hidden" name="" value="@Html.AntiForgeryTokenValueOrchard()" />
+    <input type="hidden" id="hiddenId" name="hiddenId" value="" />
+<table class="bord">
+    <tr>
+        <td class="note1">
+            <p class="val">@T("First Name: ")</p>
+        </td>
+        <td>
+            <input type="text" class="val" name="firstName" id="firstName" />
+        </td>
+
+    </tr>
+    <tr>
+        <td class="note1">
+            <p class="val">@T("Last Name: ")</p>
+        </td>
+        <td>
+            <input type="text" class="val" id="lastName" name="lastName" />
+        </td>
+    </tr>
+    <tr>
+        <td class="note">
+            <p class="val">@T("Street Adress: ")</p>
+        </td>
+        <td>
+            <input type="text" class="val" id="streetAdress" name="streetAdress" />
+        </td>
+    </tr>
+
+    <tr>
+        <td class="note">
+            <p class="val">@T("City: ")</p>
+        </td>
+        <td>
+            <input type="text" class="val" id="city" name="city" />
+        </td>
+    </tr>
+    <tr>
+        <td class="note">
+            <p class="val">@T("Postal code: ")</p>
+        </td>
+        <td>
+            <input type="text" class="val" id="postalCode" name="postalCode" />
+        </td>
+    </tr>
+    <tr>
+        <td class="note">
+            <p class="val">@T("State: ")</p>
+        </td>
+        <td>
+            <input type="text" class="val" id="state" name="state" />
+        </td>
+    </tr>
+
+    <tr>
+        <td class="note">
+            <p class="val">@T("Country: ")</p>
+        </td>
+        <td>
+            <input type="text" class="val" id="country" name="country" />
+        </td>
+    </tr>
+
+    <tr>
+        <td class="note">
+            <p class="val">@T("Phone Number: ")</p>
+        </td>
+        <td>
+            <input type="text" class="val" id="phoneNumber" name="phoneNumber" />
+        </td>
+
+
+    </tr>
+    <tr>
+        <td class="note">
+            <p class="val">@T("email: ")</p>
+        </td>
+        <td>
+            <input type="text" class="val" id="email" name="email" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+
+        </td>
+        <td style="text-align:right;     padding-top: 14px;">
+            <button class="savebuyerinfo" type="submit">
+                @T("save")
+            </button>
+        </td>
+    </tr>
+
+</table>
+   
+}
+
+
+
+

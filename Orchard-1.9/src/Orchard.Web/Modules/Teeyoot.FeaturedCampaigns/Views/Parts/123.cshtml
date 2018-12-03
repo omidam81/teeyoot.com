@@ -1,0 +1,91 @@
+﻿@{
+    Style.Include("FeaturedCampaigns.css");
+}
+@if (Model.Campaigns != null)
+{
+
+
+    <div class="row">
+          <div class="featured-campaigns-title"><h1 class="section__subheading" style="text-align: center;" data-mce-style="text-align: center;">@T("Featured Campaigns")</h1></div>
+    </div>
+    <div class="container">
+        <div class="row featured-campaigns-list">
+
+            @foreach (var camp in Model.Campaigns)
+            {
+                //var localizationInfo = Teeyoot.Localization.LocalizationInfoFactory.GetCurrentLocalizationInfo();
+                //var xcurrency = Teeyoot.Localization.LocalizationInfoFactory.GetCurrency();
+
+                //var currency = _countryService.GetCurrency(localizationInfo, xcurrency);
+                float widthResult = 0;
+                string width = string.Empty;
+                int min = camp.ProductMinimumGoal == 0 ? 1 : camp.ProductMinimumGoal;
+                if ((min - camp.ProductCountSold) <= 0)
+                {
+                    widthResult = 100;
+                }
+                else
+                {
+                    if (camp.ProductCountSold != 0)
+                    {
+                        float procent = (float)min / 100;
+                        widthResult = camp.ProductCountSold / procent;
+                    }
+                    else
+                    {
+                        widthResult = 0;
+                    }
+                }
+                width = (int)widthResult + "% !important";
+
+                string productId = string.Empty;
+                for (int i = 0; i < camp.Products.Count; i++)
+                {
+                    if (camp.Products[i].WhenDeleted == null)
+                    {
+                        productId = camp.Products[i].Id.ToString();
+                        break;
+                    }
+                }
+
+                string path = "/Media/campaigns/" + camp.Id.ToString() + "/" + productId + "/";
+                string backIMG;
+                string frontIMG;
+                if (camp.BackSideByDefault)
+                {
+                    backIMG = path + "normal/front.png";
+                    frontIMG = path + "normal/back.png";
+                }
+                else
+                {
+                    backIMG = path + "normal/back.png";
+                    frontIMG = path + "normal/front.png";
+                }
+
+                string sold = camp.ProductCountSold.ToString() + T(" of ").ToString() + min.ToString() + T(" sold").ToString();
+
+                <div class="col-md-3">
+                    <div class="">
+                        <div class="featurde-compaigns">
+
+                            <div class="preview-img">
+                                <div class="product-price">
+                                    @camp.CurrencyRecord.Code    @((camp.Products.Count > 0 ? camp.Products[0].Price : 0).ToString("F", System.Globalization.CultureInfo.InvariantCulture))
+                                </div>
+                                <p>
+                                    <a href="~/@camp.Alias"><img onmouseover="this.src='@backIMG'" onmouseout="this.src = '@frontIMG'" src="@frontIMG"></a>
+                                </p>
+                                @*<img src="@camp.CurrencyRecord.FlagFileName"
+                                    style="width:25px; height:25px; margin-right:10px; position:relative; bottom:30px; float:right; border: black solid 1px;">*@
+                            </div>
+                            <div class="product-sold-count">@camp.ProductCountSold Sold</div>
+                            <div class="campaigns-text">
+                                <h1><a href="~/@camp.Alias">@camp.Title</a></h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}  

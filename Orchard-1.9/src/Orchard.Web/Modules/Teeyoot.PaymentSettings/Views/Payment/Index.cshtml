@@ -1,0 +1,516 @@
+﻿@model Teeyoot.Module.ViewModels.PaymentSettingsViewModel
+@{
+    Layout.Title = T("Payment Settings").ToString();
+    Style.Include("PaymentSettings.css");
+    Script.Require("jQuery");
+}
+
+<style type="text/css">
+    input[type='text'] {
+        padding: 10px;
+        margin: 5px;
+    }
+</style>
+@using (Script.Head())
+{
+    <script>
+
+
+        window.addEventListener("load", function () {
+            var checked;
+
+
+            var inp1 = document.getElementById("manual");
+            var inp2 = document.getElementById("brain");
+            var inp3 = document.getElementById("credit");
+            var inp4 = document.getElementById("mol");
+
+            var inp5 = document.getElementById("Ipay88");
+            var inp6 = document.getElementById("Paypal_");
+            var inp7 = document.getElementById("BlueSnap");
+
+            if (inp2.hasAttribute("checked")) {
+                //checked = 1;
+                enableInputs();
+            } else {
+                disableInputs();
+            }
+
+            if (inp4.hasAttribute("checked")) {
+
+                enableInputsMol();
+            } else {
+                disableInputsMol();
+            }
+
+
+            inp1.addEventListener("click", function () {
+                if (inp1.hasAttribute("checked")) {
+                    inp1.removeAttribute("checked");
+                } else {
+                    inp1.setAttribute("checked", "checked");
+                }
+
+            });
+
+            inp2.addEventListener("click", function () {
+                if (inp2.hasAttribute("checked")) {
+                    disableInputs();
+                    inp2.removeAttribute("checked");
+                } else {
+                    enableInputs();
+                    inp2.setAttribute("checked", "checked");
+                }
+
+            });
+
+            inp3.addEventListener("click", function () {
+                if (inp3.hasAttribute("checked")) {
+                    inp3.removeAttribute("checked");
+                } else {
+                    inp3.setAttribute("checked", "checked");
+                }
+
+            });
+
+            inp4.addEventListener("click", function () {
+                if (inp4.hasAttribute("checked")) {
+                    disableInputsMol();
+                    inp4.removeAttribute("checked");
+                } else {
+                    enableInputsMol();
+                    inp4.setAttribute("checked", "checked");
+                }
+
+            });
+
+
+            document.getElementById("SendData").addEventListener("click", function () {
+                //if (checked == 2) {
+
+                //if (!inp1.hasAttribute("checked") && !inp2.hasAttribute("checked") && !inp3.hasAttribute("checked") && !inp4.hasAttribute("checked") &&
+                //    !inp4.hasAttribute("checked") && !inp5.hasAttribute("checked") && !inp6.hasAttribute("checked") && !inp7.hasAttribute("checked")) {
+                //    alert("Choose at least one of the following payment methods");
+                //} else {
+
+
+
+                    var publicKey = document.getElementById("textPublic").value;
+                    var privateKey = document.getElementById("textPrivate").value;
+                    var merchantId = document.getElementById("textMerchant").value;
+                    var clientToken = document.getElementById("textToken").value;
+                    var merchantIdMol = document.getElementById("textMerchMol").value;
+                    var verifyKey = document.getElementById("textKey").value;
+
+
+                    var CashDelivTabName = document.getElementById("CashDelivTabName").value;
+                    var PayPalTabName = document.getElementById("PayPalTabName").value;
+                    var MolTabName = document.getElementById("MolTabName").value;
+                    var CreditCardTabName = document.getElementById("CreditCardTabName").value;
+                    var CashDelivNote = document.getElementById("CashDelivNote").value;
+                    var PayPalNote = document.getElementById("PayPalNote").value;
+                    var MolNote = document.getElementById("MolNote").value;
+                    var CreditCardNote = document.getElementById("CreditCardNote").value;
+
+
+                    var result = new Array();
+                    $.ajax({
+                        async: false,
+                        cache: false,
+                        type: "POST",
+                        url: "@(Url.Action("SaveSettings", "Payment"))",
+                        data: addAntiForgeryToken({
+                            "CashDeliv": inp1.hasAttribute("checked"),
+                            "PayPal": inp2.hasAttribute("checked"),
+                            "Mol": inp4.hasAttribute("checked"),
+                            "CreditCard": inp3.hasAttribute("checked"),
+
+                            "PrivateKey": privateKey.toString(),
+                            "PublicKey": publicKey.toString(),
+                            "MerchantId": merchantId.toString(),
+                            "ClientToken": clientToken.toString(),
+                            "MerchantIdMol": merchantIdMol.toString(),
+                            "VerifyKey": verifyKey.toString(),
+
+                            "CashDelivTabName": CashDelivTabName.toString(),
+                            "PayPalTabName": PayPalTabName.toString(),
+                            "MolTabName": MolTabName.toString(),
+                            "CreditCardTabName": CreditCardTabName.toString(),
+                            "CashDelivNote": CashDelivNote.toString(),
+                            "PayPalNote": PayPalNote.toString(),
+                            "MolNote": MolNote.toString(),
+                            "CreditCardNote": CreditCardNote.toString(),
+                            "Ipay88": $(Ipay88).is(":checked"),
+                            "Ipay88MerchantCode": Ipay88MerchantCode.value.toString(),
+                            "Ipay88PaymentId": Ipay88PaymentId.value.toString(),
+                            "Ipay88TabName": Ipay88TabName.value.toString(),
+                            "Ipay88MerchantKey": Ipay88MerchantKey.value.toString(),
+                            "Paypal_": $("#Paypal_").is(":checked"),
+                            "PaypalTabName_": $("#PaypalTabName_").val().toString(),
+                            "PaypalClientID_": $("#PaypalClientID_").val().toString(),
+                            "PaypalSecret_": $("#PaypalSecret_").val().toString(),
+                            "Ipay88Note": $("#Ipay88Note").val().toString(),
+                            "PayPalNote_": $("#PayPalNote_").val().toString(),
+                            "CountryId": "@ViewBag.CountryId",
+                            "BlueSnap": $(BlueSnap).is(":checked"),
+                            "BlueSnapTabName": $("#BlueSnapTabName").val().toString(),
+                            "BlueSnapKey": $("#BlueSnapKey").val().toString(),
+                            "BlueSnapPass": $("#BlueSnapPass").val().toString(),
+                            "BlueSnapDesc": $("#BlueSnapDesc").val().toString(),
+
+                        }),
+                        success: function (data) {
+                            alert("Settings updated");
+                        }, error: function (data, status, resp) {
+                            alert('Status: ' + data.status + '. Error message: ' + data.statusText);
+                        }
+                    });
+
+                //}
+            })
+
+            function addAntiForgeryToken(data) {
+                var antiForgeryTokenValue = $('#anti_forgery_token').val();
+                data.__RequestVerificationToken = antiForgeryTokenValue;
+                return data;
+            };
+
+            function enableInputs() {
+                document.getElementById("textPublic").removeAttribute("disabled");
+                document.getElementById("textPrivate").removeAttribute("disabled");
+                document.getElementById("textMerchant").removeAttribute("disabled");
+                document.getElementById("textToken").removeAttribute("disabled");
+            }
+
+            function disableInputs() {
+                document.getElementById("textPublic").disabled = "disabled";
+                document.getElementById("textPrivate").disabled = "disabled";
+                document.getElementById("textMerchant").disabled = "disabled";
+                document.getElementById("textToken").disabled = "disabled";
+            }
+
+            function enableInputsMol() {
+                document.getElementById("textMerchMol").removeAttribute("disabled");
+                document.getElementById("textKey").removeAttribute("disabled");
+            }
+
+            function disableInputsMol() {
+                document.getElementById("textMerchMol").disabled = "disabled";
+                document.getElementById("textKey").disabled = "disabled";
+            }
+
+
+        })
+    </script>
+
+}
+
+@using (Html.BeginForm("Index", "Payment", FormMethod.Get))
+{
+    <select name="CountryId" id="CountryId">
+        @foreach (var item in ViewBag.Countries)
+        {
+            <option value="@item.Id" @(ViewBag.CountryId == item.Id ? "selected='selected'" : "")>@item.Name</option>
+        }
+    </select>
+    <button type="submit" class="margb">@T("Show Setting")</button>
+}
+
+
+<div class="setting">
+    @if (Model != null)
+    {
+        <input type="hidden" id="anti_forgery_token" value="@Html.AntiForgeryTokenValueOrchard()" />
+        if (Model.SettingEmpty == false)
+        {
+
+            <div>
+                <fieldset>
+                    <legend>
+                        @if (Model.CashDeliv)
+                        {
+                            <input type="checkbox" id="manual" name="@Model.CashDeliv" checked>
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="manual" name="@Model.CashDeliv">
+                        }
+
+                        <font class="method black">
+                            @T("Cash on delivery")
+                        </font>
+                    </legend>
+                    <div>
+                        <p style="margin-left:20px" class="method black">
+                            <br /><label>@T("Tab name ")</label>
+                            <input type="text" id="CashDelivTabName" class="inp marg7" value="@Model.CashDelivTabName" />
+                            <br /><label>@T("Note message")</label>
+                            <input type="text" id="CashDelivNote" class="inp marg8" value="@Model.CashDelivNote" />
+                        </p>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>
+                        @if (Model.PayPal)
+                        {
+                            <input type="checkbox" id="brain" name="@Model.PayPal" checked>
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="brain" name="@Model.PayPal">
+                        }
+                        <font class="method black">
+                            @T("Braintree PayPal")
+                        </font>
+                    </legend>
+                    <div>
+                        <p style="margin-left:20px" class="method black">
+                            <label> @T("Public Key")</label>
+                            <input type="text" id="textPublic" class="inp marg1" value="@Model.publicKey" />
+                            <br>
+                            <label>@T("Private Key ")</label>
+                            <input type="text" id="textPrivate" class="inp marg2" value="@Model.privateKey" />
+                            <br>
+                            <label>@T("Merchant Id")</label>
+                            <input type="text" id="textMerchant" class="inp marg3" value="@Model.merchantId" />
+                            <br>
+                            <label> @T("Client Token  ")</label>
+                            <input type="text" id="textToken" class="inp marg4" value="@Model.clientToken" />
+                            <br /><label>
+                                @T("Tab name ")
+                            </label>
+                            <input type="text" id="PayPalTabName" class="inp marg7" value="@Model.PayPalTabName" />
+                            <br /><label>
+                                @T("Note message")
+                            </label>
+                            <input type="text" id="PayPalNote" class="inp marg8" value="@Model.PayPalNote" />
+                        </p>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>
+                        @if (Model.CreditCard)
+                        {
+                            <input type="checkbox" id="credit" name="@Model.CreditCard" checked>
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="credit" name="@Model.CreditCard">
+                        }
+                        <font class="method black">
+                            @T("  Braintree Debit/Credit Card")
+                        </font>
+                    </legend>
+                    <div>
+                        <p style="margin-left:20px" class="method black">
+                            <br /><label>
+                                @T("Tab name ")
+                            </label>
+                            <input type="text" id="CreditCardTabName" class="inp marg7" value="@Model.CreditCardTabName" />
+                            <br /><label>
+                                @T("Note message")
+                            </label>
+                            <input type="text" id="CreditCardNote" class="inp marg8" value="@Model.CreditCardNote" />
+                        </p>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>
+                        @if (Model.Mol)
+                        {
+                            <input type="checkbox" id="mol" name="@Model.Mol" checked>
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="mol" name="@Model.Mol">
+                        }
+                        <font class="method black">
+                            @T("  Molpay Online Banking")
+                        </font>
+                    </legend>
+                    <div>
+                        <p style="margin-left:20px" class="method black">
+                            <label>
+                                @T("Tab name ")
+                            </label>
+                            <input type="text" id="MolTabName" class="inp marg7" value="@Model.MolTabName" />
+                            <br />
+                            <label>@T("Merchant Id")</label>
+                            <input type="text" id="textMerchMol" class="inp marg5" value="@Model.merchantIdMol" />
+                            <br>
+                            <label> @T("Verify Key")</label>
+                            <input type="text" id="textKey" class="inp marg6" value="@Model.verifyKey" />
+                            <br />
+                            <label>
+                                @T("Note message")
+                            </label>
+                            <input type="text" id="MolNote" class="inp marg8" value="@Model.MolNote" />
+                        </p>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>
+                        @if (Model.Ipay88)
+                        {
+                            <input type="checkbox" id="Ipay88" name="Ipay88" checked>
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="Ipay88" name="Ipay88">
+                        }
+                        <font class="method black">
+                            @T("Ipay88")
+                        </font>
+                    </legend>
+                    <div>
+                        <p style="margin-left:20px" class="method black Ipay88">
+                            <br /><label>
+                                @T("Tab name ")
+                            </label>
+                            <input type="text" id="Ipay88TabName" class="inp marg7" value="@Model.Ipay88TabName" />
+                            <br /><label>
+                                @T("Ipay88 Merchant Code")
+                            </label>
+                            <input type="text" id="Ipay88MerchantCode" name="Ipay88MerchantCode" class="inp marg8" value="@Model.Ipay88MerchantCode" />
+
+                            <br /><label>
+                                @T("Default Ipay88 Payment Id")
+                            </label>
+                            <input type="text" id="Ipay88PaymentId" name="Ipay88PaymentId" class="inp marg8" value="@Model.Ipay88PaymentId" />
+
+                            <br /><label>
+                                @T("Ipay88 Payment Key")
+                            </label>
+                            <input type="text" id="Ipay88MerchantKey" name="Ipay88MerchantKey" class="inp marg8" value="@Model.Ipay88MerchantKey" />
+
+
+                            <br /><label>
+                                @T("Ipay88 Note")
+                            </label>
+                            <input type="text" id="Ipay88Note" name="Ipay88Note" class="inp marg8" value="@Model.Ipay88Note" />
+
+
+                        </p>
+                    </div>
+                </fieldset>
+
+
+                <fieldset>
+                    <legend>
+                        @if (Model.Paypal_)
+                        {
+                            <input type="checkbox" id="Paypal_" name="Paypal_" checked>
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="Paypal_" name="Paypal_">
+                        }
+
+                        <font class="method black">
+                            @T("PayPal")
+                        </font>
+                    </legend>
+                    <div>
+                        <p style="margin-left:20px" class="method black Paypal_">
+                            <br /><label>
+                                @T("Tab name:")
+                            </label>
+                            <input type="text" id="PaypalTabName_" name="PaypalTabName_" class="inp marg7" value="@Model.PaypalTabName_" />
+                            <br /><label>
+                                @T("Client Id:")
+                            </label>
+                            <input type="text" id="PaypalClientID_" name="PaypalClientID_" class="inp marg8" value="@Model.PaypalClientID_" />
+
+                            <br /><label>
+                                @T("Paypal Secret")
+                            </label>
+                            <input type="text" id="PaypalSecret_" name="PaypalSecret_" class="inp marg8" value="@Model.PaypalSecret_" />
+
+                            <br /><label>
+                                @T("Paypal Note")
+                            </label>
+                            <input type="text" id="PayPalNote_" name="PayPalNote_" class="inp marg8" value="@Model.PayPalNote_" />
+                        </p>
+                    </div>
+                </fieldset>
+
+
+                <fieldset>
+                    <legend>
+                        @if (Model.BlueSnap)
+                        {
+                            <input type="checkbox" id="BlueSnap" name="BlueSnap" checked>
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="BlueSnap" name="BlueSnap">
+                        }
+
+                        <font class="method black">
+                            @T("BlueSnap Cridit Card")
+                        </font>
+                    </legend>
+                    <div>
+                        <p style="margin-left:20px" class="method black BlueSnap">
+                            <br /><label>
+                                @T("Tab name:")
+                            </label>
+                            <input type="text" id="BlueSnapTabName" name="BlueSnapTabName" class="inp marg7" value="@Model.BlueSnapTabName" />
+                            <br /><label>
+                                @T("Key:")
+                            </label>
+                            <input type="text" id="BlueSnapKey" name="BlueSnapKey" class="inp marg8" value="@Model.BlueSnapKey" />
+
+                            <br /><label>
+                                @T("Secret")
+                            </label>
+                            <input type="text" id="BlueSnapPass" name="BlueSnapPass" class="inp marg8" value="@Model.BlueSnapPass" />
+
+                            <br /><label>
+                                @T("Note")
+                            </label>
+                            <input type="text" id="BlueSnapDesc" name="BlueSnapDesc" class="inp marg8" value="@Model.BlueSnapDesc" />
+                        </p>
+                    </div>
+                </fieldset>
+
+
+
+                <hr>
+                <br>
+                <button class="margb" id="SendData">@T("Apply")</button>
+
+            </div>
+        }
+        else
+        {
+            <div><h3>@T("There are no setting to this language")</h3></div>
+            <a class="button primaryAction" style="margin-right:5px" href="@Url.Action("AddSetting", new { @CountryId = ViewBag.countryID })" title="@T("Add")">@T("Add")</a>
+        }
+    }
+
+    @using (Script.Foot())
+    {
+        <script>
+            function toggleStatus(name) {
+                if ($('#' + name).is(':checked')) {
+                    $('.' + name + ' :input').removeAttr('disabled');
+                } else {
+                    $('.' + name + ' :input').attr('disabled', true);
+                }
+            };
+            $(document).ready(function () {
+                $("#Ipay88, #Paypal_, #BlueSnap").change(function () {
+                    toggleStatus($(this).attr("id"));
+                });
+                toggleStatus("Paypal_");
+                toggleStatus("Ipay88");
+                toggleStatus("BlueSnap");
+
+            });
+        </script>
+
+    }
+</div>

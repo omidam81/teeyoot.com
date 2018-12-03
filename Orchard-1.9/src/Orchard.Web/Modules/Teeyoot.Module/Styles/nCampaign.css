@@ -1,0 +1,16 @@
+﻿.loading img {
+    line-height: 100%;
+    display: block;
+    margin: 400px auto;
+}
+
+.loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    z-index: 100;
+    line-height: 100%;
+}

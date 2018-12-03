@@ -1,0 +1,43 @@
+﻿@model Teeyoot.Account.ViewModels.RecoverViewModel
+
+@{
+    Style.Include("bootstrap.min.css");
+    Style.Include("Login.css");
+}
+
+@using (Script.Foot())
+{
+    <script>
+        document.title = "@T("Request a Password Reset | Teeyoot")";
+    </script>
+}
+<div class="login">
+    <div class="login-and-create">
+        @if (Model.RecoverFailed)
+        {
+            <div class="recover-login login-valid">
+                @Model.RecoverIssueSummary
+            </div>
+        }
+
+        @using (Html.BeginFormAntiForgeryPost(Url.Action("Recover", "Account")))
+        {
+            if (Model.RecoverEmailSent)
+            {
+                <p class="msg"> @T("An email containing a link that will allow you to change your password has been sent to you. If you do not receive an email in the next ten minutes, please email us.")</p>
+            }
+            <fieldset>
+                <div class="title">
+                    <legend class="name">@T("Request a Password Reset")</legend>
+                </div>
+                <div class="password tb-height">
+                    <label>@T("Email address")</label>
+                    @Html.TextBoxFor(model => model.Email)
+                </div>
+                <br />
+                <br />
+                <button class="button-login" type="submit">@T("Request")</button>
+            </fieldset>
+        }
+    </div>
+</div>

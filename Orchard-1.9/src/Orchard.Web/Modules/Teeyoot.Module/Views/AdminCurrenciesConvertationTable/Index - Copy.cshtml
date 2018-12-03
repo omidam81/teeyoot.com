@@ -1,0 +1,67 @@
+﻿@model Teeyoot.Module.ViewModels.CurrencyExchangeMatrixViewModel
+@{
+    Layout.Title = T("Convertation Table");
+    Style.Include("/WizardSettings/Styles/crosstable.css");
+}
+
+
+@using (Html.BeginFormAntiForgeryPost(
+            Url.Action("Edit", "AdminCurrenciesConvertationTable"), FormMethod.Post))
+{
+    <br />
+    <table>
+        <thead>
+            @* Creating the horizontal header of the currencies-to. *@
+            <tr>
+                <th class="crosscell"></th>
+                @for (int x = 0; x < Model.Columns.Count; x++)
+                {
+                    <th class="headercell">
+                        To @Model.Columns[x][0].CurrencyToCode
+                        <br /><img src="@Model.Columns[x][0].CurrencyToFlagFileName" style="width:25px; height:25px; border: solid 1px black; margin-top:5px;">
+                    </th>
+                }
+            </tr>
+        </thead>
+        @for (int y = 0; y < Model.Columns[0].Count; y++)
+        {
+            <tr>
+                @* Creating the vertical header of the currencies-from. *@
+                <td class="headercell">
+                    From @Model.Columns[0][y].CurrencyFromCode
+                    <br /><img src="@Model.Columns[0][y].CurrencyFromFlagFileName" style="width:25px; height:25px; border: solid 1px black; margin-top:5px;">
+                </td>
+
+                @* Creating cells. *@
+                @for (int x = 0; x < Model.Columns.Count; x++)
+                {
+                    if (x != y)
+                    {
+                        <td class="cell">
+                            @Html.LabelFor(m => m.Columns[x][y].RateForBuyer, T("Rate for buyer"))
+                            @Html.TextBoxFor(m => m.Columns[x][y].RateForBuyer, new { style = "float: right;" } )
+                            <br /><br />
+                            @Html.LabelFor(m => m.Columns[x][y].RateForSeller, T("Rate for seller"))
+                            @Html.TextBoxFor(m => m.Columns[x][y].RateForSeller, new { style = "float: right;" })
+                            <br /><br />
+                            @Html.HiddenFor(m => m.Columns[x][y].CurrencyFromId)
+                            @Html.HiddenFor(m => m.Columns[x][y].CurrencyToId)
+                        </td>
+                    }
+                    else
+                    {
+                        <td class="crosscell">
+                            @Html.HiddenFor(m => m.Columns[x][y].RateForBuyer)
+                            @Html.HiddenFor(m => m.Columns[x][y].RateForSeller)
+                        </td>
+                    }
+                }
+            </tr>
+        }
+
+    </table>
+    <br /><br />
+    <button type="submit" class="primaryAction">@T("Save settings")</button>
+
+}
+

@@ -1,0 +1,46 @@
+﻿@using Teeyoot.WizardSettings.Common
+
+@model NHibernate.Linq.NhQueryable<Teeyoot.Module.Models.SizeCodeRecord>
+@{
+    Layout.Title = T("Edit Sizes");
+}
+
+<h2>@T("Edit Sizes")</h2>
+
+<hr />
+@Html.ActionLink("Add New Sizes",  "Add")
+<hr />
+
+<table>
+    <thead>
+        <tr>
+            <th>
+                @T("Name")
+            </th>
+            <th>
+                @T("Order")
+            </th>
+            <th>
+                @T("Edit")
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var sizeCode in Model)
+        {
+            <tr>
+                
+                <td>@sizeCode.Name</td>
+                
+                <td>@sizeCode.xOrder</td>
+
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = sizeCode.Id })
+
+                    @Html.ActionLink("Delete", "Delete", new { id = sizeCode.Id})
+                </td>
+            </tr>
+            
+        }
+    </tbody>
+</table>

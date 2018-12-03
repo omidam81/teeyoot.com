@@ -1,0 +1,1246 @@
+﻿@charset 'utf-8';
+/* KEYHAN CSS Document */
+
+@import url(https://fonts.googleapis.com/css?family=Ubuntu:400,700,300);
+
+* {
+    margin: 0 auto;
+    padding: 0;
+    border: none;
+    outline: none;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    transition: all 300ms;
+    font-family: 'Ubuntu', Tahoma;
+}
+
+body {
+    background: #f1f1f1;
+}
+
+.main {
+    background: #fff;
+    width: 1420px;
+    box-shadow: rgba(0,0,0,0.08) 0px 0px 15px;
+    overflow: hidden;
+}
+
+header {
+    width: 100%;
+    min-height: 60px;
+    border-bottom: 1px solid #f2f2f2;
+    float: left;
+}
+
+    header .logo {
+        background: url(../images/logo.png) no-repeat left;
+        width: 260px;
+        height: 40px;
+        margin: 10px 0 10px 18px;
+        float: left;
+    }
+
+    header .login {
+        float: right;
+        background: #ff6e2e;
+        height: 40px;
+        margin: 10px 18px 10px 0px;
+        line-height: 40px;
+        font-weight: 700;
+        text-align: center;
+        color: #fff;
+        text-transform: uppercase;
+        padding: 0 15px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+    header nav {
+        float: right;
+        transition: none;
+    }
+
+        header nav ul {
+            list-style: none;
+        }
+
+            header nav ul li {
+                float: left;
+                padding: 0 15px;
+            }
+
+                header nav ul li a {
+                    font-size: 13px;
+                    color: #444;
+                    text-transform: uppercase;
+                    line-height: 60px;
+                    font-weight: 700;
+                    text-decoration: none;
+                }
+
+    header .navbtn {
+        width: 45px;
+        height: 40px;
+        margin-top: 10px;
+        margin-right: 10px;
+        float: right;
+        display: none;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+        header .navbtn div {
+            background: #ff6622;
+            width: 45px;
+            height: 7px;
+            margin-bottom: 4px;
+        }
+
+            header .navbtn div:last-child {
+                margin-bottom: 0;
+            }
+
+
+.campaign {
+    width: 1300px;
+    margin-top: 10px;
+}
+
+    .campaign .right {
+        width: 36%;
+        float: right;
+    }
+
+        .campaign .right h2.price {
+            font-size: 28px;
+            color: #444;
+            margin: 20px 0 10px;
+        }
+
+        .campaign .right .des {
+            max-height: 380px;
+            overflow: hidden;
+            overflow-y: scroll;
+            padding-right: 5px;
+        }
+
+            .campaign .right .des::-webkit-scrollbar {
+                width: 6px;
+                cursor: pointer !important;
+            }
+
+            .campaign .right .des::-webkit-scrollbar-track {
+                background: #f8f8f8;
+                border-radius: 1px;
+            }
+
+            .campaign .right .des::-webkit-scrollbar-thumb {
+                background: #ff4f00;
+                border-radius: 1px;
+            }
+
+            .campaign .right .des .camphoto {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
+            .campaign .right .des p {
+                font-size: 14px;
+                color: #444;
+                line-height: 22px;
+            }
+
+        .campaign .right h3.title {
+            font-size: 17px;
+            color: #6c7478;
+            margin: 10px 0 8px;
+            float: left;
+        }
+
+        .campaign .right span.chcrncy {
+            font-size: 14px;
+            float: right;
+            margin: 14px 30px 0px 0;
+            cursor: pointer;
+            color: #19678E;
+        }
+
+        .campaign .right select {
+            background: url(../images/select.png) no-repeat right 4px top 50%;
+            background-size: 14px 16px;
+            float: left;
+            width: 94%;
+            border: 1px solid #eaeeef;
+            height: 38px;
+            border-radius: 4px;
+            padding-left: 18px;
+            color: #6C7495;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .campaign .right span.info {
+            background: url(../images/info.png) no-repeat center;
+            width: 23px;
+            height: 23px;
+            float: right;
+            display: block;
+            margin-top: 7px;
+            cursor: pointer;
+        }
+
+        .campaign .right .viewdetails {
+            cursor: pointer;
+            color: #19678E;
+            font-size: 15px;
+            text-align: center;
+            display: block;
+            font-weight: bold;
+            float: left;
+            width: 100%;
+            margin: 18px 0 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .campaign .right h4 {
+            font-size: 20px;
+            color: #484848;
+            width: 100%;
+            margin: 6px auto 18px;
+            float: left;
+        }
+
+            .campaign .right h4 span.green {
+                color: #4bb232;
+            }
+
+        .campaign .right .buyit {
+            background: #4bb232;
+            font-size: 24px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            height: 70px;
+            line-height: 70px;
+            text-decoration: none;
+            display: block;
+            border-radius: 4px;
+            border-bottom: 4px solid #3a8a27;
+            margin-bottom: 24px;
+            float: left;
+            width: 100%;
+        }
+        .payment { display:none; }
+        .campaign .right .payment {
+            list-style: none;
+            margin: 15px auto;
+            width: 400px;
+            overflow: hidden;
+            text-align: center;
+            display: block;
+        }
+
+            .campaign .right .payment li.pay {
+                float: left;
+                background: url(../images/payment.png) no-repeat;
+                width: 60px;
+                height: 38px;
+                margin: 0 3px;
+            }
+
+                .campaign .right .payment li.pay.maestro {
+                    background-position: 0 0;
+                }
+
+                .campaign .right .payment li.pay.cirrus {
+                    background-position: -65px 0;
+                }
+
+                .campaign .right .payment li.pay.discover {
+                    background-position: -129px 0;
+                }
+
+                .campaign .right .payment li.pay.mastercard {
+                    background-position: -193px 0;
+                }
+
+                .campaign .right .payment li.pay.visa {
+                    background-position: -257px 0;
+                }
+
+                .campaign .right .payment li.pay.paypal {
+                    background-position: -320px 0;
+                }
+
+        .campaign .right .timeleft {
+            width: 400px;
+            margin: 22px auto;
+        }
+
+            .campaign .right .timeleft .blks {
+                background: #eee;
+                width: 80px;
+                height: 80px;
+                border-radius: 3px;
+                float: left;
+                margin-right: 24px;
+                text-align: center;
+                line-height: 80px;
+                font-size: 40px;
+                color: #777;
+                font-weight: bold;
+            }
+
+                .campaign .right .timeleft .blks:nth-child(4) {
+                    margin-right: 0;
+                }
+
+            .campaign .right .timeleft .timet {
+                width: 80px;
+                float: left;
+                margin-right: 24px;
+                text-align: center;
+                line-height: 28px;
+                font-size: 14px;
+                color: #999;
+            }
+
+                .campaign .right .timeleft .timet:last-child {
+                    margin-right: 0;
+                }
+
+        .campaign .right .social {
+            list-style: none;
+            float: left;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+            .campaign .right .social li.socialicon {
+                float: left;
+                width: 24%;
+                margin-right: 1.333%;
+                height: 30px;
+                border-radius: 2px;
+                padding-left: 20px;
+            }
+
+                .campaign .right .social li.socialicon:last-child {
+                    margin-right: 0;
+                }
+
+                .campaign .right .social li.socialicon.fb {
+                    background: #39579a url(../images/fb.png) no-repeat;
+                    background-position: 16px center;
+                }
+
+                .campaign .right .social li.socialicon.tw {
+                    background: #50abf1 url(../images/tw.png) no-repeat;
+                    background-position: 16px center;
+                }
+
+                .campaign .right .social li.socialicon.pn {
+                    background: #c8232c url(../images/pn.png) no-repeat;
+                    background-position: 16px center;
+                }
+
+                .campaign .right .social li.socialicon.em {
+                    background: #888888 url(../images/em.png) no-repeat;
+                    background-position: 16px center;
+                }
+
+                .campaign .right .social li.socialicon a {
+                    text-decoration: none;
+                    text-align: center;
+                    color: #fff;
+                    font-size: 14px;
+                    line-height: 30px;
+                    display: block;
+                }
+
+    .campaign .left {
+        width: 64%;
+        float: left;
+        padding-left: 10px;
+    }
+
+        .campaign .left h1 {
+            font-size: 36px;
+            color: #444;
+            margin: 12px auto 10px;
+            float: left;
+            letter-spacing: -0.04em;
+            font-weight: 700;
+        }
+
+        .campaign .left .tee {
+            width: 100%;
+            position: relative;
+            clear: both;
+        }
+
+            .campaign .left .tee .colors {
+                width: 40px;
+                float: left;
+                margin-top: 40px;
+            }
+
+                .campaign .left .tee .colors ul {
+                    list-style: none;
+                }
+
+                    .campaign .left .tee .colors ul li {
+                        cursor: pointer;
+                        width: 32px;
+                        height: 32px;
+                        border: 4px solid #fff;
+                        border-radius: 2px;
+                        background: #ff6e2e;
+                        margin: 3px auto;
+                    }
+
+                        .campaign .left .tee .colors ul li.active {
+                            box-shadow: rgba(0,0,0,0.2) 0px 0px 6px;
+                        }
+
+            .campaign .left .tee .teeviewer {
+                position: relative;
+                width: 530px;
+                height: 630px;
+                margin-top: 80px;
+            }
+
+                .campaign .left .tee .teeviewer .front {
+                    position: absolute;
+                    width: 100%;
+                    transform-style: preserve-3d;
+                    transform: rotateY(0deg);
+                    transition: all 300ms linear;
+                }
+
+                    .campaign .left .tee .teeviewer .front img {
+                        display: block;
+                    }
+
+                .campaign .left .tee .teeviewer .back {
+                    position: absolute;
+                    width: 100%;
+                    transform-style: preserve-3d;
+                    transform: rotateY(-90deg);
+                    transition: all 300ms linear;
+                }
+
+                    .campaign .left .tee .teeviewer .back img {
+                        display: block;
+                    }
+
+            .campaign .left .tee .turnbtns {
+                width: 140px;
+                height: 64px;
+            }
+
+                .campaign .left .tee .turnbtns .turnfront {
+                    z-index: 100;
+                    width: 64px;
+                    height: 64px;
+                    border: 3px solid #555;
+                    border-radius: 4px;
+                    float: left;
+                    margin: 0 2px;
+                    position: relative;
+                    cursor: pointer;
+                    opacity: 1;
+                }
+
+                .campaign .left .tee .turnbtns .turnback {
+                    z-index: 101;
+                    width: 64px;
+                    height: 64px;
+                    border: 3px solid #555;
+                    border-radius: 4px;
+                    float: left;
+                    margin: 0 2px;
+                    position: relative;
+                    cursor: pointer;
+                    opacity: 0.5;
+                }
+
+                    .campaign .left .tee .turnbtns .turnfront img, .campaign .left .tee .turnbtns .turnback img {
+                        width: 75%;
+                        margin: 2px auto;
+                        display: block;
+                    }
+
+                    .campaign .left .tee .turnbtns .turnfront span, .campaign .left .tee .turnbtns .turnback span {
+                        position: absolute;
+                        bottom: -18px;
+                        text-align: center;
+                        display: block;
+                        font-size: 12px;
+                        width: 64px;
+                        color: #888;
+                    }
+
+    .campaign .refund {
+        margin-top: 50px;
+        float: left;
+        margin-left: 15px;
+    }
+
+        .campaign .refund h3 {
+            font-size: 15px;
+            color: #777;
+            font-weight: 700;
+            line-height: 22px;
+        }
+
+        .campaign .refund p {
+            font-size: 14px;
+            color: #777;
+            font-weight: 300;
+            line-height: 22px;
+            margin-bottom: 5px;
+        }
+
+            .campaign .refund p .bold {
+                font-weight: 700;
+            }
+
+            .campaign .refund p a {
+                text-decoration: none;
+                font-weight: 400;
+                color: #666;
+            }
+
+.relatedcampaign {
+    width: 98%;
+    clear: both;
+    margin: 150px 1% 50px;
+    float: left;
+}
+
+    .relatedcampaign h2 {
+        font-size: 15px;
+        font-weight: 700;
+        color: #444;
+        text-align: center;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+    }
+
+    .relatedcampaign .item {
+        background: #f5f5f5;
+        width: 22%;
+        margin: 10px 1.5%;
+        float: left;
+        position: relative;
+    }
+
+        .relatedcampaign .item img {
+            width: 94%;
+            display: block;
+            margin-top: 28px;
+        }
+
+        .relatedcampaign .item .daysleft {
+            background: rgba(0,0,0,0.1);
+            float: left;
+            padding: 5px 8px;
+            margin: 10px;
+            position: absolute;
+            z-index: 10000;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #fff;
+        }
+
+        .relatedcampaign .item h4 {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 400;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .relatedcampaign .item p {
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            margin: 8px auto 16px;
+        }
+
+            .relatedcampaign .item p span {
+                margin: 0 5px;
+            }
+
+footer {
+    background: #f1f1f1;
+    width: 100%;
+    padding-top: 25px;
+    float: left;
+}
+
+    footer .logo {
+        background: #ff6622;
+        width: 36px;
+        height: 32px;
+        float: left;
+        position: relative;
+        margin-bottom: 25px;
+        margin-left: 25px;
+    }
+
+        footer .logo:before {
+            content: "";
+            background: #f1f1f1;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            position: absolute;
+            top: -7px;
+            left: 10px;
+        }
+
+    footer ul.menu {
+        list-style: none;
+        float: left;
+        height: 32px;
+        margin-left: 10px;
+    }
+
+        footer ul.menu li {
+            float: left;
+            line-height: 32px;
+            padding: 0 15px;
+        }
+
+            footer ul.menu li a {
+                color: #666;
+                font-size: 15px;
+                text-decoration: none;
+            }
+
+    footer select {
+        margin-left: 5px;
+        padding: 0 10px;
+        float: right;
+        height: 32px;
+        background: #fff url(../images/select.png) no-repeat right 0px top 50%;
+        background-size: 14px 16px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+        footer select.language {
+            width: 100px;
+            margin-right: 25px;
+        }
+
+        footer select.currency {
+            width: 60px;
+        }
+
+    footer ul.social {
+        float: right;
+        list-style: none;
+        margin-right: 10px;
+    }
+
+        footer ul.social li {
+            background: #666 url(../images/social.png) no-repeat;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            float: left;
+            margin: 0 4px;
+        }
+
+            footer ul.social li.fb {
+                background-position: 1px 1px;
+            }
+
+                footer ul.social li.fb:hover {
+                    background: #39579A url(../images/social.png) no-repeat;
+                    background-position: 1px 1px;
+                }
+
+            footer ul.social li.tw {
+                background-position: -35px 1px;
+            }
+
+                footer ul.social li.tw:hover {
+                    background: #50ABF1 url(../images/social.png) no-repeat;
+                    background-position: -35px 1px;
+                }
+
+            footer ul.social li.in {
+                background-position: -71px 1px;
+            }
+
+                footer ul.social li.in:hover {
+                    background: #39579A url(../images/social.png) no-repeat;
+                    background-position: -71px 1px;
+                }
+
+            footer ul.social li a {
+                display: block;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+            }
+
+    footer .copyright {
+        background: #333;
+        width: 100%;
+        float: left;
+        clear: both;
+        min-height: 40px;
+    }
+
+        footer .copyright p {
+            line-height: 40px;
+            color: #666;
+            margin-left: 50px;
+            font-size: 13px;
+        }
+
+            footer .copyright p a {
+                text-decoration: none;
+                color: #999;
+            }
+
+
+
+.zoomContainer, .zoomContainer * {
+    transition: all 0ms;
+}
+
+.zoomLens {
+    width: 230px !important;
+    height: 290px !important;
+    border: none !important;
+}
+
+.zoomWindow {
+    width: 468px !important;
+    height: 535px !important;
+    left: 676px !important;
+    top: -18px !important;
+    border: 1px solid #666 !important;
+}
+
+
+@media (max-width: 1440px) {
+    .main {
+        width: 100%;
+    }
+}
+
+@media (max-width: 1320px) {
+    .campaign {
+        width: 100%;
+    }
+}
+
+@media (max-width: 1200px) {
+    .campaign .right {
+        width: 40%;
+        padding-right: 10px;
+    }
+
+    .campaign .left {
+        width: 60%;
+    }
+}
+
+@media (max-width: 1024px) {
+    .campaign .right {
+        width: 470px;
+        padding-right: 0;
+        float: none;
+    }
+
+    .campaign .left {
+        width: 100%;
+        margin-bottom: 40px;
+    }
+
+    .campaign .refund {
+        width: 100%;
+        text-align: center;
+    }
+
+    .zoomContainer {
+        display: none !important;
+    }
+
+    .campaign .left .tee .colors {
+        margin-left: 4%;
+    }
+
+    .relatedcampaign .item .daysleft {
+        font-size: 10px;
+    }
+
+    .relatedcampaign .item h4 {
+        font-size: 14px;
+    }
+
+    .relatedcampaign {
+        margin: 50px 1%;
+    }
+}
+
+@media (max-width: 768px) {
+    header nav {
+        display: none;
+        width: 100%;
+        border-top: 1px solid #f0f0f0;
+        margin-bottom: -1px;
+    }
+
+        header nav ul li {
+            width: 100%;
+        }
+
+            header nav ul li a {
+                line-height: 36px;
+                text-align: center;
+                width: 50%;
+                display: block;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+    header .navbtn {
+        display: block;
+    }
+
+    header .login {
+        margin-right: 10px;
+    }
+
+    .relatedcampaign .item {
+        width: 47%;
+    }
+
+        .relatedcampaign .item .daysleft {
+            font-size: 12px;
+        }
+
+        .relatedcampaign .item h4 {
+            font-size: 16px;
+        }
+}
+
+@media (max-width: 660px) {
+    footer .logo {
+        margin-bottom: 10px;
+    }
+
+    footer ul.menu {
+        float: none;
+    }
+
+        footer ul.menu li {
+            width: 100%;
+        }
+
+    footer select {
+        width: 46% !important;
+        margin: 10px 2% !important;
+    }
+
+        footer select.language {
+            float: left;
+        }
+
+    footer ul.social {
+        float: none;
+        width: 120px;
+        margin: 0 auto;
+    }
+
+    footer .copyright {
+        margin-top: 10px;
+        padding: 5px 0;
+    }
+
+        footer .copyright p {
+            line-height: 20px;
+            margin: 0 auto;
+            text-align: center;
+        }
+}
+
+@media (max-width: 640px) {
+    .campaign .left .tee .colors {
+        width: auto;
+        margin-top: -30px;
+        margin-left: 0;
+    }
+
+        .campaign .left .tee .colors ul li {
+            margin: 3px;
+            float: left;
+        }
+
+    .campaign .left .tee .teeviewer .front, .campaign .left .tee .teeviewer .back {
+        top: 30px;
+    }
+
+    .campaign .left .tee .teeviewer {
+        margin-top: 100px;
+        width: 100%;
+    }
+
+        .campaign .left .tee .teeviewer img {
+            width: 100%;
+            max-width: 510px;
+        }
+
+    .campaign .left h1 {
+        font-size: 30px;
+        margin: 20px auto 10px;
+        text-align: center;
+        width: 100%;
+    }
+}
+
+@media (max-width: 490px) {
+    .campaign .right {
+        width: 98%;
+    }
+
+        .campaign .right select {
+            width: 100%;
+        }
+
+        .campaign .right .des {
+            max-height: none;
+            overflow: hidden;
+            overflow-y: scroll;
+            padding-right: 5px;
+        }
+
+            .campaign .right .des::-webkit-scrollbar {
+                width: 6px;
+                cursor: pointer !important;
+            }
+
+            .campaign .right .des::-webkit-scrollbar-track {
+                background: #f8f8f8;
+                border-radius: 1px;
+            }
+
+            .campaign .right .des::-webkit-scrollbar-thumb {
+                background: #ff4f00;
+                border-radius: 1px;
+            }
+
+            .campaign .right .des .camphoto {
+                width: 100%;
+                margin-bottom: 0;
+            }
+
+            .campaign .right .des p {
+                font-size: 14px;
+                color: #444;
+                line-height: 22px;
+            }
+
+        .campaign .right h3.title {
+            font-size: 17px;
+            color: #6c7478;
+            margin: 10px 0 8px;
+            float: left;
+        }
+
+        .campaign .right span.chcrncy {
+            font-size: 14px;
+            float: right;
+            margin: 14px 30px 0px 0;
+            cursor: pointer;
+            color: #19678E;
+        }
+
+        .campaign .right select {
+            background: url(../images/select.png) no-repeat right 4px top 50%;
+            background-size: 14px 16px;
+            float: left;
+            width: 94%;
+            border: 1px solid #eaeeef;
+            height: 38px;
+            border-radius: 4px;
+            padding-left: 18px;
+            color: #6C7495;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .campaign .right span.info {
+            background: url(../images/info.png) no-repeat center;
+            width: 23px;
+            height: 23px;
+            float: right;
+            display: block;
+            margin-top: 7px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .campaign .right .viewdetails {
+            cursor: pointer;
+            color: #19678E;
+            font-size: 15px;
+            text-align: center;
+            display: block;
+            font-weight: bold;
+            float: left;
+            width: 100%;
+            margin: 18px 0 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .campaign .right h4 {
+            font-size: 20px;
+            color: #484848;
+            width: 100%;
+            margin: 6px auto 18px;
+            float: left;
+            text-align: center;
+        }
+
+            .campaign .right h4 span.green {
+                color: #4bb232;
+            }
+
+        .campaign .right .buyit {
+            background: #4bb232;
+            font-size: 24px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            height: 70px;
+            line-height: 70px;
+            text-decoration: none;
+            display: block;
+            border-radius: 4px;
+            border-bottom: 4px solid #3a8a27;
+            margin-bottom: 17px;
+            float: left;
+            width: 100%;
+        }
+
+        .campaign .right .payment {
+            list-style: none;
+            margin: 0px auto;
+            width: 298px;
+            overflow: hidden;
+        }
+
+            .campaign .right .payment li.pay {
+                float: left;
+                background: url(../images/payment.png) no-repeat;
+                width: 42px;
+                height: 38px;
+                margin: 0px 3px;
+                background-size: 262px 27px;
+            }
+
+                .campaign .right .payment li.pay.maestro {
+                    background-position: 0 0;
+                }
+
+                .campaign .right .payment li.pay.cirrus {
+                    background-position: -44px 0;
+                }
+
+                .campaign .right .payment li.pay.discover {
+                    background-position: -89px 0;
+                }
+
+                .campaign .right .payment li.pay.mastercard {
+                    background-position: -133px 0;
+                }
+
+                .campaign .right .payment li.pay.visa {
+                    background-position: -177px 0;
+                }
+
+                .campaign .right .payment li.pay.paypal {
+                    background-position: -220px 0;
+                }
+
+        .campaign .right .timeleft {
+            width: 300px;
+            margin: 8px auto;
+        }
+
+            .campaign .right .timeleft .blks {
+                background: #eee;
+                width: 63px;
+                height: 63px;
+                border-radius: 3px;
+                float: left;
+                margin-right: 12px;
+                text-align: center;
+                line-height: 63px;
+                font-size: 32px;
+                color: #777;
+                font-weight: bold;
+            }
+
+                .campaign .right .timeleft .blks:nth-child(4) {
+                    margin-right: 0;
+                }
+
+            .campaign .right .timeleft .timet {
+                width: 63px;
+                float: left;
+                margin-right: 12px;
+                text-align: center;
+                line-height: 26px;
+                font-size: 14px;
+                color: #999;
+            }
+
+                .campaign .right .timeleft .timet:last-child {
+                    margin-right: 0;
+                }
+
+        .campaign .right .social {
+            list-style: none;
+            float: left;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+            .campaign .right .social li.socialicon {
+                float: left;
+                width: 100%;
+                margin-right: 1.333%;
+                margin-bottom: 3px;
+                height: 30px;
+                border-radius: 2px;
+                padding-left: 20px;
+            }
+}
+
+@media (max-width: 480px) {
+    header .logo {
+        width: 45px;
+    }
+
+    .relatedcampaign .item {
+        width: 97%;
+    }
+
+    .campaign .left .tee .teeviewer {
+        margin-top: 130px;
+        height: 570px;
+    }
+}
+
+@media (max-width: 440px) {
+    .campaign .left .tee .teeviewer {
+        height: 530px;
+    }
+}
+
+@media (max-width: 400px) {
+    .campaign .left .tee .teeviewer {
+        height: 475px;
+    }
+}
+
+@media (max-width: 360px) {
+    .campaign .left .tee .teeviewer {
+        height: 425px;
+    }
+}
+
+@media (max-width: 320px) {
+    .campaign .left .tee .teeviewer {
+        height: 390px;
+    }
+}
+
+
+@media(max-width:640px) {
+    .modal-main tr, .modal-main td, .modal-main th, .modal-main table, .modal-main tbody {
+        display: block;
+        text-align: left;
+        width: 100% !important;
+        float: right;
+    }
+
+    .hidden-mobile {
+        display: none !important;
+    }
+
+    .show-mobile {
+        display: inline-block !important;
+        width: 22%;
+        font-size: 12px;
+        float: left;
+        vertical-align: middle;
+        line-height: 40px;
+        font-weight: bold;
+        text-align: right;
+    }
+
+    .modal div select {
+        float: left;
+        appearance: none;
+        min-width: 60% !important;
+    }
+
+    .modal div input, .modal div .price {
+        float: right;
+        appearance: none;
+        min-width: 60% !important;
+    }
+}
+
+.hidden-mobile {
+    /* display: block; */
+}
+
+.show-mobile {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .modal div {
+        width: 320px !important;
+        max-height:500px;
+        overflow-y:auto;
+    }
+
+    a.checkout {
+        width: 100%;
+    }
+
+    span#add-row {
+        line-height: 32px !important;
+        display: block !important;
+        padding-top: 10px !important;
+        font-size: 15px;
+        margin-top: 10px !important;
+        font-weight: bold;
+    }
+    .show-mobile{
+        text-align: left;
+    }
+}
+
+div#messages {
+    display: none;
+}

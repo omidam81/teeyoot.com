@@ -1,0 +1,221 @@
+﻿.ssp-ssp-metadata-and-col-pick {
+    width: 200px !important;
+    min-width: 200px;
+}
+
+.h6Sale {
+    font-size: 0.8em;
+    margin-left: 5px;
+    margin-top: 11px;
+    color: #ff4f00;
+    font-weight: normal;
+    padding-top: 1px;
+}
+
+.price-calculator {
+    height: auto;
+}
+
+.costH4Rm {display: inline;}
+
+.costH4Float {
+    margin-left: 4px;
+    /* width: 68px; */
+    /* margin-right: 24px; */
+    /* text-align: right; */
+    /* font-weight: bold; */
+    display: inline;
+}
+
+.costH4Text {display: inline;}
+
+.profit {
+    font-weight: 700 !important;
+}
+
+.profit-calculator {
+}
+
+.cost-calculator {
+    /* border-bottom: 3px solid #afafaf; */
+    margin-left: -10px;
+    padding-left: 10px;
+}
+
+.all-price-calculator {
+    width: auto;
+    overflow: hidden;
+    /* position: relative; */
+    /* top: -4px; */
+}
+
+.ssp_pricing_new {
+    display: inline-flex !important;
+    display: -webkit-inline-box !important;
+    display: -ms-inline-flexbox !important;
+    height: auto;
+    vertical-align: sub !important;
+}
+
+.profSale {
+    height: 1.5em;
+    margin-left: 4px;
+    width: 120px !important;
+    font-size: 1.077em !important;
+    margin-right: 10px;
+    line-height: 1.5em;
+    padding: 0;
+}
+
+
+@media all and (max-width: 375px) {
+    .ssp_delete {
+        left: 130px;
+    }
+
+    .all-price-calculator {
+        width: 270px;
+    }
+
+    .cost-calculator {
+        margin-left: -5px;
+        padding-left: 5px;
+    }
+}
+
+@media all and (max-width: 375px) {
+    .ssp_delete {
+        left: 120px;
+    }
+
+    .slide-2__table > tr > td + td,
+    .slide-2__table > tbody > tr > td + td {
+        padding: 0 10px;
+    }
+}
+
+
+.noUi-pips {
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    color: #6c7478 !important;
+}
+
+.noUi-handle {
+    background: #ff4f00 !important;
+    cursor: -webkit-grab !important;
+    cursor: pointer !important;
+}
+
+.noUi-base {
+    background: #afafaf !important;
+    height: 6px !important;
+    border-radius: 5px !important;
+    cursor: -webkit-grab;
+    cursor: pointer;
+}
+
+.noUi-horizontal .noUi-handle {
+    width: 17px !important;
+    height: 17px !important;
+    border-radius: 10px !important;
+    top: -6px !important;
+    border: 1px solid #ff4f00 !important;
+    box-shadow: none !important;
+    left: -9px !important;
+}
+
+.noUi-handle:after, .noUi-handle:before {
+    background: none !important;
+}
+
+.noUi-horizontal {
+    height: 5px !important;
+}
+
+.noUi-target {
+    margin-top: 10px;
+}
+
+.noUi-value {
+    cursor: -webkit-grab;
+    cursor: pointer;
+}
+
+.design-active {
+    border-color: #ff4f00 !important;
+}
+
+
+.profit-soldcount-table {
+    width: 100%;
+    border: solid 2px #FF4F00;
+    border-radius: 4px;
+}
+
+.profit-soldcount-table .header {
+    background: #DBDBDB;
+    margin: 0px;
+    margin-top: 0px;
+    padding: 7px;
+    text-align: center;
+    border-bottom: solid 2px red;
+}
+
+.profit-soldcount-table h4 {
+    font-weight: bold;
+    font-size: 19px;
+    border-bottom:;
+}
+
+.profit-soldcount-table span {
+    /* margin-top: -10px; */
+    display: block;
+}
+
+tr.profit-soldcount-table-row td {
+    border-bottom: solid 2px #DBDBDB !important;
+    padding: 4px;
+    padding-left: 10px;
+    /* font-weight: 900; */
+    font-size: 13px;
+}
+
+.profit-soldcount-table table {
+    width: 100%;
+}
+
+.profit-soldcount-table th {
+    font-weight: bolder;
+    padding-left: 10px;
+}
+
+.set-target {
+    background: #DBDBDB;
+    border: solid 2px red;
+    margin-top: 20px;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.set-target h4 {
+    display: inline-block;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.set-target label.checkbox {
+    /* margin-top: -10px; */
+    margin-bottom: 15px;
+}
+
+.set-target p {
+    /* font-weight: bold; */
+    /* display: inline; */
+    margin-top: -14px;
+    font-size: 14px;
+}
+
+input#setTraget {
+    float: left !important;
+}

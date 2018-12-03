@@ -1,0 +1,247 @@
+﻿@using Teeyoot.Module.Models;
+
+@model Orchard.Users.ViewModels.UserSettingsViewModel
+
+@{
+    Style.Include("Settings.css");
+}
+
+@using (Script.Foot())
+{
+    <script>
+        document.title = "Profile | Teeyoot";
+    </script>
+
+    <script language="javascript">
+    var country_arr = new Array("Afghanistan", "Albania", "Algeria", "American Samoa", "Angola", "Anguilla", "Antartica", "Antigua and Barbuda", "Argentina", "Armenia", "Aruba", "Ashmore and Cartier Island", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "British Virgin Islands", "Brunei", "Bulgaria", "Burkina Faso", "Burma", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Cayman Islands", "Central African Republic", "Chad", "Chile", "China", "Christmas Island", "Clipperton Island", "Cocos (Keeling) Islands", "Colombia", "Comoros", "Congo, Democratic Republic of the", "Congo, Republic of the", "Cook Islands", "Costa Rica", "Cote d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czeck Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Europa Island", "Falkland Islands (Islas Malvinas)", "Faroe Islands", "Fiji", "Finland", "France", "French Guiana", "French Polynesia", "French Southern and Antarctic Lands", "Gabon", "Gambia, The", "Gaza Strip", "Georgia", "Germany", "Ghana", "Gibraltar", "Glorioso Islands", "Greece", "Greenland", "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guernsey", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Heard Island and McDonald Islands", "Holy See (Vatican City)", "Honduras", "Hong Kong", "Howland Island", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Ireland, Northern", "Israel", "Italy", "Jamaica", "Jan Mayen", "Japan", "Jarvis Island", "Jersey", "Johnston Atoll", "Jordan", "Juan de Nova Island", "Kazakhstan", "Kenya", "Kiribati", "Korea, North", "Korea, South", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macau", "Macedonia, Former Yugoslav Republic of", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Man, Isle of", "Marshall Islands", "Martinique", "Mauritania", "Mauritius", "Mayotte", "Mexico", "Micronesia, Federated States of", "Midway Islands", "Moldova", "Monaco", "Mongolia", "Montserrat", "Morocco", "Mozambique", "Namibia", "Nauru", "Nepal", "Netherlands", "Netherlands Antilles", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "Norfolk Island", "Northern Mariana Islands", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Pitcaim Islands", "Poland", "Portugal", "Puerto Rico", "Qatar", "Reunion", "Romainia", "Russia", "Rwanda", "Saint Helena", "Saint Kitts and Nevis", "Saint Lucia", "Saint Pierre and Miquelon", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Scotland", "Senegal", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Georgia and South Sandwich Islands", "Spain", "Spratly Islands", "Sri Lanka", "Sudan", "Suriname", "Svalbard", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Tobago", "Toga", "Tokelau", "Tonga", "Trinidad", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "Uruguay", "USA", "Uzbekistan", "Vanuatu", "Venezuela", "Vietnam", "Virgin Islands", "Wales", "Wallis and Futuna", "West Bank", "Western Sahara", "Yemen", "Yugoslavia", "Zambia", "Zimbabwe");
+    function populateCountries(countryElementId) {
+        var countryElement = document.getElementById(countryElementId);
+        countryElement.length = 0;
+        countryElement.options[0] = new Option('@Model.Country', '@Model.Country');
+        countryElement.selectedIndex = 0;
+        for (var i = 0; i < country_arr.length; i++) {
+            countryElement.options[countryElement.length] = new Option(country_arr[i], country_arr[i]);
+        }
+    }
+    populateCountries("Country");
+    </script>
+}
+
+<div class="dashboard-settings-title dashboard-section-title">
+    @T("Profile")
+
+    <span class="menu-closer" onclick="toggleMobileMenu()"><i class="fa fa-angle-up"></i></span>
+    <span class="menu-opener" onclick="toggleMobileMenu()"><i class="fa fa-angle-down"></i></span>
+    @if (Model.ErrorMessage != null)
+    {
+        <div class="validation-summary-errors">
+            @Model.ErrorMessage
+        </div>
+    }
+    @if (Model.InfoMessage != null)
+    {
+        <div class="info-message">
+            @Model.InfoMessage
+        </div>
+    }
+</div>
+<section class="general_settings">
+    <div class="dashboard_section__header">
+        <h1 class="dashboard_section__heading">@T("Change Your Info")</h1>
+    </div>
+    <div class="dashboard_section__content--padded">
+
+        @using (Html.BeginForm("ChangeUserInfo", "Dashboard", FormMethod.Post, new { model = Model }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+            <div class="account__user_info">
+                <label>
+                    <div class="label__title">@T("Name (Public)")</div>
+                    @Html.TextBoxFor(m => m.PublicName, new { @class = "label__title_large form__textfield", @maxlength = "50", @size = "30" })
+                </label>
+
+                <label>
+                    <div class="label__title">@T("Address line 1")</div>
+                    @Html.TextBoxFor(m => m.Street1, new { @class = "label__title_large form__textfield", @size = "30" })
+                </label>
+                <label>
+                    <div class="label__title">@T("Address line 2")</div>
+                    @Html.TextBoxFor(m => m.Street2, new { @class = "label__title_large form__textfield", @size = "30" })
+                </label>
+
+                <label class="address__field">
+                    <div class="label__title">@T("Postal code")</div>
+                    @Html.TextBoxFor(m => m.Zip, new { @class = "form__textfield", @maxlength = "50" })
+                </label>
+
+                <label class="address__field_right">
+                    <div class="label__title">@T("City")</div>
+                    @Html.TextBoxFor(m => m.City, new { @class = "form__textfield", @maxlength = "100" })
+                </label>
+
+                <label class="address__field" id="states">
+                    <div class="label__title">@T("State")</div>
+                    @Html.TextBoxFor(m => m.State, new { @class = "form__textfield", @maxlength = "100" })
+                </label>
+
+                <label class="address__field_right">
+                    <div class="label__title">@T("Country")</div>
+                    @* @Html.TextBoxFor(m => m.Street, new { @class = "form__textfield" })*@
+                    <select class="label_country label__title" id="Country" name="Country" tabindex="8"></select>
+
+
+                </label>
+
+                <label class="address__field">
+                    <div class="label__title">@T("Phone number")</div>
+                    @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form__textfield", @maxlength = "50", @size = "30" })
+                </label>
+
+                <label class="address__field_right" style="display:none;">
+                    <div class="label__title">@T("Default Currency")</div>
+                    <select name="CurrencyId" id="CurrencyId">
+                        @foreach (var currency in ViewBag.Currencies)
+                        {
+                        if (currency.Id == ViewBag.Currency.Id)
+                        {
+                        <option value="@currency.Id" selected="selected">@currency.Code</option>
+                        }
+                        else
+                        {
+                        <option value="@currency.Id">@currency.Code</option>
+                        }
+                        }
+                    </select>
+                </label>
+            </div>
+
+            <div class="account__user_info--submit">
+                <input name="commit" class="t-button" type="submit" value="@T("Update Info")">
+                @*Html.DropDownListFor(aa => aa.UserCurrencies, "Select One")*@
+
+            </div>
+
+
+        }
+    </div>
+</section>
+<section class="account__email_settings">
+    <div class="dashboard_section__header">
+        <h1 class="dashboard_section__heading">@T("Change Your Email")</h1>
+    </div>
+    <div class="dashboard_section__content--padded">
+        @using (Html.BeginForm("ChangeEmail", "Dashboard", FormMethod.Post, new { model = Model }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+            <div class="account__email_info">
+                <label>
+                    <div class="label__title">@T("Current email address")</div>
+                    @Html.TextBoxFor(m => m.CurrentEmail, new { @class = "form__textfield", @maxlength = "50", @size = "30" , @readonly = true})
+                </label>
+                <label>
+                    <div class="label__title">@T("New email address")</div>
+                    @Html.TextBoxFor(m => m.NewEmailAddress, new { @class = "form__textfield", @maxlength = "50", @size = "30" })
+                </label>
+                <label>
+                    <div class="label__title">@T("Confirm new email address")</div>
+                    @Html.TextBoxFor(m => m.ConfirmNewEmailAddress, new { @class = "form__textfield", @maxlength = "50", @size = "30" })
+                </label>
+                <input name="commit" class="t-button" type="submit" value="@T("Update Email")">
+            </div>
+        }
+    </div>
+</section>
+<section class="account__password_settings">
+    <div class="dashboard_section__header">
+        <h1 class="dashboard_section__heading">@T("Change Your Password")</h1>
+
+    </div>
+    <div class="dashboard_section__content--padded">
+        @using (Html.BeginForm("ChangePassword", "Dashboard", FormMethod.Post, new { model = Model }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+           
+            <div class="account__password_info">
+                <label>
+                    <div class="label__title">@T("Current password")</div>
+                    @Html.ValidationMessageFor(m => m.CurrentPassword)
+                    @Html.TextBoxFor(m => m.CurrentPassword, new { @class = "form__textfield", @maxlength = "50", @size = "30", @type = "password" })
+
+                </label>
+                <label>
+                    <div class="label__title">@T("New password")</div>
+                    @Html.ValidationMessageFor(m => m.NewPassword)
+                    @Html.TextBoxFor(m => m.NewPassword, new { @class = "form__textfield", @maxlength = "50", @size = "30", @type = "password", @placeholder = T("Must be longer than 8 characters") })
+
+                </label>
+                <label>
+                    <div class="label__title">@T("Confirm new password")</div>
+                    @Html.ValidationMessageFor(m => m.ConfirmPassword)
+                    @Html.TextBoxFor(m => m.ConfirmPassword, new { @class = "form__textfield", @maxlength = "50", @size = "30", @type = "password" })
+
+                </label>
+                <input name="commit" class="t-button" type="submit" value="@T("Update Password")">
+            </div>
+        }
+    </div>
+</section>
+
+
+<section class="account_tracking_pixels">
+    <div class="dashboard_section__header">
+        <h1 class="dashboard_section__heading">@T("Account Tracking Pixels")</h1>
+    </div>
+    <div class="dashboard_section__content--padded">
+        @using (Html.BeginForm("Change_tracking_pixels", "Dashboard", FormMethod.Post, new { model = Model }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+
+            <div class="panel">
+                <label class="conversation-pixel-text">
+                    <div class="label-title">@T("Facebook Tracking Pixel (Old)")</div>
+                    @Html.TextBoxFor(aa => aa.DefaultFBPixelId, new { @class = "text-boxes", @placeholder = "Enter the fb_param.pixel_id here" })
+                    <span class="label-info">@T("To get your Facebook conversion pixel, follow the instructions on this ") <a href="https://www.facebook.com/help/435189689870514/">page</a></span>
+                </label>
+
+                <label class="conversation-pixel-text">
+                    <div class="label-title">@T("Default Facebook Pixel (New)")</div>
+                    @Html.TextBoxFor(aa => aa.DefaultFacebookCustomAudiencePixel, new { @class = "text-boxes", @placeholder = "Enter new Facebook conversion pixell here" })
+                    <span class="label-info">@T("To get your Facebook website custom audience pixel, follow the instructions on this ")<a href="https://www.facebook.com/business/a/online-sales/custom-audiences-website">page</a></span>
+                </label>
+
+
+                @*<label class="conversation-pixel-text">
+                    <div class="label-title">@T("Default Twitter conversion pixel")</div>
+                    @Html.TextBoxFor(aa => aa.DefaultTwitterPixelId, new { @class = "text-boxes", @placeholder = "Enter the tw_param.pixel_id here" })
+                    <span class="label-info">@T("To get your Twitter conversion pixel, follow the instructions on this ")<a href="https://support.twitter.com/articles/20170807-conversion-tracking-for-websites/">page</a></span>
+                </label>
+                <label class="conversation-pixel-text">
+                    <div class="label-title">@T("Default Pinterest conversion pixel")</div>
+                    @Html.TextBoxFor(aa => aa.DefaultPinterestPixelId, new { @class = "text-boxes", @placeholder = "Enter the pinterest_param.pixel_id here" })
+                    <span class="label-info">@T("To get your Pinterest conversion pixel, follow the instructions on this ")<a href="https://help.pinterest.com/en/articles/website-conversion-tracking/">page</a></span>
+                </label>
+                <label class="conversation-pixel-text">
+                    <div class="label-title">@T("Default Google Adwords conversion pixel")</div>
+                    @Html.TextBoxFor(aa => aa.DefaultGooglePixelId, new { @class = "text-boxes", @placeholder = "Enter the google_adwords_param.pixel_id here" })
+                    <span class="label-info">@T("To get your Google Adwords conversion pixel, follow the instructions on this ")<a href="https://support.google.com/adwords/answer/1722022/">page</a></span>
+                </label>
+                <label class="conversation-pixel-text">
+                    <div class="label-title">@T("Default Google Adwords Label conversion pixel")</div>
+                    @Html.TextBoxFor(aa => aa.DefaultGoogleLabelPixelId, new { @class = "text-boxes", @placeholder = "Enter the google_adwords_label_param.pixel_id here" })
+                    <span class="label-info">@T("To get your Google Adwords conversion pixel, follow the instructions on this ")<a href="https://support.google.com/adwords/answer/1722022/">page</a></span>
+                </label>
+                <label class="conversation-pixel-text">
+                    <div class="label-title">@T("Default Google Analytics tracking snippet")</div>
+                    @Html.TextBoxFor(aa => aa.DefaultGoogleAnalyticsTrackingSnippet, new { @class = "text-boxes", @placeholder = "Enter the GA Tracking ID here" })
+                    <span class="label-info">@T("To get your GA Tracking ID, follow the instructions on this ")<a href="https://support.google.com/analytics/answer/1032385?hl=en">page</a></span>
+                </label>*@
+               
+                <input name="commit" class="t-button" type="submit" value="@T("Update Tracking Pixels")">
+            </div>
+        }
+    </div>
+</section>

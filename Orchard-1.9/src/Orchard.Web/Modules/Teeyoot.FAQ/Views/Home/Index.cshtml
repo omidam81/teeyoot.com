@@ -1,0 +1,45 @@
+﻿@{
+    Style.Include("FAQ.css");
+    @model IEnumerable<Teeyoot.FAQ.Models.FaqSectionRecord>
+
+
+}
+@Html.Partial("SearchPartial")
+
+<div class="text-area">
+
+
+    @foreach (var sec in Model)
+    {
+
+        <div class="section">
+            <p class="section-name"><a href="@Url.Action("ViewSection", new { sectionId = sec.Id })">@sec.Name</a></p>
+            <ul>
+                @foreach (var entry in sec.Entries.Take(5))
+                {
+
+                    <li>
+                        @Html.ActionLink(entry.Question, "ViewTopic", new { topicId = entry.Id }, new { @class = "faq-question" })
+                    </li>
+
+                }
+            </ul>
+
+            <a href="@Url.Action("ViewSection", new { sectionId = sec.Id })" class="btn btn-pill">
+                <span class="desk-view-text">@T("View All ")</span>
+                <text class="entries-count">@sec.Entries.Count()</text>
+            </a>
+        </div>
+
+    }
+
+</div>
+
+@using (Script.Foot())
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            document.title = "FAQ | Teeyoot";
+        }
+    </script>
+}

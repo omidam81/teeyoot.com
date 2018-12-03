@@ -1,0 +1,81 @@
+﻿@{
+    Script.Require("jQuery");
+    Script.Include("jquery.validate.min.js");
+    Script.Include("additional-methods.min.js");
+    @model Teeyoot.Account.ViewModels.CreateAccountViewModel
+}
+<style>
+    .password label.error{
+        color:red!important;
+        margin:0!important;
+    }
+</style>
+@using (Html.BeginFormAntiForgeryPost(Url.Action("Register", "Account", new { area = "Teeyoot.Account", returnUrl = Model.ReturnUrl }), FormMethod.Post, new { @id = "registration_form" }))
+{
+    <fieldset>
+        <div class="title">
+            <legend class="name">@T("Create a new account")</legend>
+            <legend class="link">
+                <a href="#" onclick="changeLogAndCreate('login-into-teeyoot', 'create-account')">@T("Already have an account?")</a>
+            </legend>
+        </div>
+        <div class="password tb-height">
+          <label><span class="mandatory">@T("* ")</span>@T("Name")</label>
+            @Html.TextBoxFor(model => model.Name)
+        </div>
+        <div class="password tb-height">
+            <label><span class="mandatory">@T("* ")</span>@T("Email address")</label>
+            @Html.TextBoxFor(model => model.Email)
+        </div>
+        <div class="password tb-height">
+            <label>@T("Phone Number")</label>
+            @Html.TextBoxFor(model => model.Phone)
+        </div>
+        <div class="password tb-height">
+            <label><span class="mandatory">@T("* ")</span>@T("Password")</label>
+            @Html.PasswordFor(model => model.Password)
+        </div>
+        <div class="password tb-height">
+            <label><span class="mandatory">@T("* ")</span>@T("Confirm Password")</label>
+            @Html.PasswordFor(model => model.ConfirmPassword)
+        </div>
+        <div>
+            <button class="button-login" type="submit">@T("Register")</button>
+        </div>
+    </fieldset>
+}
+
+
+@using (Script.Foot())
+{
+    
+    <script>
+        jQuery.validator.setDefaults({
+            debug: true,
+            success: "valid"
+        });
+        $("#registration_form").validate({
+            rules: {
+                Email: {
+                    required: true,
+                    email: true
+                },
+                Name: {
+                    required: true
+                },
+                Password: {
+                    required: true,
+                    minlength: 8
+                },
+                ConfirmPassword: {
+                    required: true,
+                    minlength: 8,
+                    equalTo: "#Password"
+                }
+            },
+            submitHandler: function (form) { form.submit(); }
+        });
+
+
+    </script>
+}

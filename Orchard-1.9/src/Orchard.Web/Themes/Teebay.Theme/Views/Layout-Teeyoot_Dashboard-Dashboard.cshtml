@@ -1,0 +1,282 @@
+﻿<!-- Google Tag Manager -->
+<noscript>
+    <iframe src="//www.googletagmanager.com/ns.html?id=GTM-PTHNDK"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+<script>
+    (function (w, d, s, l, i) {
+        w[l] = w[l] || []; w[l].push({
+            'gtm.start':
+            new Date().getTime(), event: 'gtm.js'
+        }); var f = d.getElementsByTagName(s)[0],
+        j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+        '//www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'dataLayer', 'GTM-PTHNDK');</script>
+<!-- End Google Tag Manager -->
+@using (Script.Head())
+{
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return;
+            n = f.fbq = function () {
+                n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            };
+            if (!f._fbq) f._fbq = n;
+            n.push = n; n.loaded = !0;
+            n.version = '2.0';
+            n.queue = []; t =
+                b.createElement(e);
+            t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+        }(window, document, 'script', '//connect.facebook.net/en_US/fbevents.js');
+        // Insert Your Custom Audience Pixel ID below.
+        fbq('init', '114806928867925');
+        fbq('track', 'PageView');
+        fbq('track', 'ViewContent');
+    </script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=114806928867925&ev=PageView&noscript=1" /></noscript>
+}
+
+@functions {
+    // To support the layout classifaction below. Implementing as a razor function because we can, could otherwise be a Func<string[], string, string> in the code block following.
+    string CalcuClassify(string[] zoneNames, string classNamePrefix)
+    {
+        var zoneCounter = 0;
+        var zoneNumsFilled = string.Join("", zoneNames.Select(zoneName => { ++zoneCounter; return Model[zoneName] != null ? zoneCounter.ToString() : ""; }).ToArray());
+        return HasText(zoneNumsFilled) ? classNamePrefix + zoneNumsFilled : "";
+    }
+}
+@{
+    /* Global includes for the theme
+    ***************************************************************/
+
+    SetMeta(httpEquiv: "X-UA-Compatible", content: "IE=edge,chrome=1");
+    SetMeta(name: "viewport", content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no");
+    Style.Include("//fonts.googleapis.com/css?family=Lobster&subset=latin");
+    Style.Include("site.css");
+    Style.Include("teebay.css");
+    Style.Include("//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css");
+
+    /* Some useful shortcuts or settings
+    ***************************************************************/
+
+    Func<dynamic, dynamic> Zone = x => Display(x); // Zone as an alias for Display to help make it obvious when we're displaying zones
+
+    /* Layout classification based on filled zones
+    ***************************************************************/
+
+    //Add classes to the wrapper div to toggle aside widget zones on and off
+    var asideClass = CalcuClassify(new[] { "AsideFirst", "AsideSecond" }, "aside-"); // for aside-1, aside-2 or aside-12 if any of the aside zones are filled
+    if (HasText(asideClass))
+    {
+        Model.Classes.Add(asideClass);
+    }
+
+    //Add classes to the wrapper div to toggle tripel widget zones on and off
+    var tripelClass = CalcuClassify(new[] { "TripelFirst", "TripelSecond", "TripelThird" }, "tripel-"); // for tripel-1, triple-2, etc. if any of the tripel zones are filled
+    if (HasText(tripelClass))
+    {
+        Model.Classes.Add(tripelClass);
+    }
+
+    //Add classes to the wrapper div to toggle quad widget zones on and off
+    var footerQuadClass = CalcuClassify(new[] { "FooterQuadFirst", "FooterQuadSecond", "FooterQuadThird", "FooterQuadFourth" }, "split-"); // for quad-1, quad-2, etc. if any of the quad zones are filled
+    if (HasText(footerQuadClass))
+    {
+        Model.Classes.Add(footerQuadClass);
+    }
+
+    /* Inserting some ad hoc shapes
+    ***************************************************************/
+
+    //WorkContext.Layout.Header.Add(New.Branding(), "5"); // Site name and link to the home page
+    WorkContext.Layout.Footer.Add(New.BadgeOfHonor(), "5"); // Powered by Orchard
+    WorkContext.Layout.Footer.Add(New.User(), "10"); // Login and dashboard links
+
+    /* Last bit of code to prep the layout wrapper
+    ***************************************************************/
+
+    Model.Id = "layout-wrapper";
+    var tag = Tag(Model, "div"); // using Tag so the layout div gets the classes, id and other attributes added to the Model
+}
+@tag.StartElement
+@if (Model.Header != null)
+{
+
+    <header class="tb-layout-header group">
+        <div id="header">
+            <script>
+                (function (i, s, o, g, r, a, m) {
+                    i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+                        (i[r].q = i[r].q || []).push(arguments)
+                    }, i[r].l = 1 * new Date(); a = s.createElement(o),
+                    m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+                })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+                ga('create', 'UA-67144532-3', 'auto');
+                ga('require', 'ecommerce');
+
+                ga('send', 'pageview');
+            </script>
+
+            @Zone(Model.Header)
+        </div>
+    </header>
+}
+@if (Model.Navigation != null)
+{
+    <div id="layout-navigation" class="group">
+        @Zone(Model.Navigation)
+    </div>
+}
+@if (Model.Featured != null)
+{
+    <div id="layout-featured" class="group">
+        @Zone(Model.Featured)
+    </div>
+}
+@if (Model.BeforeMain != null)
+{
+    <div class="tb-layout-before-main group">
+        @Zone(Model.BeforeMain)
+    </div>
+}
+<div class="tb-layout-main-container">
+    <div class="group tb-layout-main">
+        @if (Model.AsideFirst != null)
+        {
+            <aside class="tb-aside-first group">
+                @Zone(Model.AsideFirst)
+            </aside>
+        }
+        <div class="group tb-layout-content">
+            @if (Model.Messages != null)
+            {
+                <div id="messages">
+                    @Zone(Model.Messages)
+                </div>
+            }
+            @if (Model.BeforeContent != null)
+            {
+                <div id="before-content">
+                    @Zone(Model.BeforeContent)
+                </div>
+            }
+            @* the model content for the page is in the Content zone @ the default position (nothing, zero, zilch) *@
+            @if (Model.Content != null)
+            {
+                <div id="content" class="group">
+                    <script type="text/javascript">
+                        var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+                        (function () {
+                            var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+                            s1.async = true;
+                            s1.src = 'https://embed.tawk.to/55fbccedb2c76f801b2b9105/default';
+                            s1.charset = 'UTF-8';
+                            s1.setAttribute('crossorigin', '*');
+                            s0.parentNode.insertBefore(s1, s0);
+                        })();
+                    </script>
+                    @Zone(Model.Content)
+                </div>
+            }
+            @if (Model.AfterContent != null)
+            {
+                <div id="after-content">
+                    @Zone(Model.AfterContent)
+                </div>
+            }
+        </div>
+        @if (Model.AsideSecond != null)
+        {
+            <aside id="aside-second" class="aside-second">
+                @Zone(Model.AsideSecond)
+            </aside>
+        }
+    </div>
+</div>
+@if (Model.AfterMain != null)
+{
+    <div id="layout-after-main" class="group">
+        @Zone(Model.AfterMain)
+    </div>
+}
+@if (Model.TripelFirst != null || Model.TripelSecond != null || Model.TripelThird != null)
+{
+    <div id="layout-tripel-container">
+        <div id="layout-tripel" class="group">
+            @* as in beer *@
+            @if (Model.TripelFirst != null)
+            {
+                <div id="tripel-first">
+                    @Zone(Model.TripelFirst)
+                </div>
+            }
+            @if (Model.TripelSecond != null)
+            {
+                <div id="tripel-second">
+                    @Zone(Model.TripelSecond)
+                </div>
+            }
+            @if (Model.TripelThird != null)
+            {
+                <div id="tripel-third">
+                    @Zone(Model.TripelThird)
+                </div>
+            }
+        </div>
+    </div>
+}
+<div class="tb-layout-footer group">
+    <footer class="tb-footer" id="footer">
+        <div id="footer-quad" class="group">
+            @if (Model.FooterQuadFirst != null)
+            {
+                <div id="footer-quad-first">
+                    @Zone(Model.FooterQuadFirst)
+                </div>
+            }
+            @if (Model.FooterQuadSecond != null)
+            {
+                <div class="tb-footer-quad-second" id="footer-quad-second">
+                    @Zone(Model.FooterQuadSecond)
+                </div>
+            }
+            @if (Model.FooterQuadThird != null)
+            {
+                <div class="tb-footer-quad-third" id="footer-quad-third">
+                    @Zone(Model.FooterQuadThird)
+                </div>
+            }
+            @if (Model.FooterQuadFourth != null)
+            {
+                <div class="tb-footer-quad-forth" id="footer-quad-fourth">
+                    @Zone(Model.FooterQuadFourth)
+                </div>
+            }
+        </div>
+        @if (Model.Footer != null)
+        {
+            <div id="footer-sig" class="group">
+                @Zone(Model.Footer)
+            </div>
+        }
+    </footer>
+</div>
+@tag.EndElement
+
+@{
+    Script.Require("JQuery").AtHead();
+    Script.Include("teebay.js").AtHead();
+}
+
+
+@using (Script.Foot())
+{
+    <script>
+        window.intercomSettings = {
+            app_id: "agjlr56b"
+        };
+    </script>
+    <script>(function () { var w = window; var ic = w.Intercom; if (typeof ic === "function") { ic('reattach_activator'); ic('update', intercomSettings); } else { var d = document; var i = function () { i.c(arguments) }; i.q = []; i.c = function (args) { i.q.push(args) }; w.Intercom = i; function l() { var s = d.createElement('script'); s.type = 'text/javascript'; s.async = true; s.src = 'https://widget.intercom.io/widget/agjlr56b'; var x = d.getElementsByTagName('script')[0]; x.parentNode.insertBefore(s, x); } if (w.attachEvent) { w.attachEvent('onload', l); } else { w.addEventListener('load', l, false); } } })()</script>
+}

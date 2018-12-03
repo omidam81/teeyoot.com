@@ -1,0 +1,52 @@
+﻿@{
+    Style.Include("FAQ.css");
+    @model Teeyoot.FAQ.ViewModels.ViewSectionViewModel
+
+}
+@Html.Partial("SearchPartial")
+
+<div class="text-area">
+    <div class="faq-nav-div">
+        <a class="faq-navigation" href="@Url.Action("Index")">@T("Home")</a> > <span class="faq-navigation faq-current-navigation">@Model.Section.Name</span>
+    </div>
+    <div class="section-name">
+        @Model.Section.Name
+    </div>
+
+    @foreach (var entry in Model.Topics)
+    {
+
+        <div class="section-name question-sec">
+
+            @Html.ActionLink(entry.Question, "ViewTopic", new { topicId = entry.Id })
+        </div>
+        <div class="answer-topic section-name">
+            <div class="answer answer-topic answer-topic-short ">
+                <div>
+                    @Html.Raw(entry.Body.Text)
+                </div>
+            </div>
+            <div class="btn-read-article">
+                <a class="btn btn-pill" href="@Url.Action("ViewTopic", new { topicId = entry.Id })">
+                    <span class="desk-view-text">@T("Read Article ")</span>
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@using (Script.Foot())
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            document.title = "@Model.Section.Name | Teeyoot";
+
+            var tableElem = document.getElementsByClassName('answer-topic-short');
+
+            for (var i = 0; i < tableElem.length; i++) {
+                var str = tableElem[i].textContent;
+                tableElem[i].innerHTML = "<span>"+str.substr(0, 400) + "...</span>";
+            }
+        }
+    </script>
+}

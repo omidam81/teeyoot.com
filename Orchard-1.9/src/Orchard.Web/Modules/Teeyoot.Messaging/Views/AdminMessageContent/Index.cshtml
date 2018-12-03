@@ -1,0 +1,64 @@
+﻿@model  Teeyoot.Messaging.ViewModels.AdminMessagesViewModel
+
+@{
+    Style.Include("AdminContentMessage.css");
+    Layout.Title = T("Messages").ToString();
+}
+
+@{
+    <fieldset>
+        <table class="items">
+            <thead>
+                <tr class="admin-categories">
+                    <th class="date">
+                        <h3>@T("Date")</h3>
+                    </th>
+                    <th class="userId">
+                        <h3>@T("User Id")</h3>
+                    </th>
+                    <th class="subject">
+                        <h3>@T("Subject")</h3>
+                    </th>
+                    <th class="sender">
+                        <h3>@T("Sender")</h3>
+                    </th>
+                    <th class="text">
+                        <h3>@T("Text")</h3>
+                    </th>
+                    <th class="inf">
+                        <h3></h3>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model.Messages)
+                {
+                    
+                    <tr class="admin-categories-tr">
+                        <td class="date">
+                            @item.SendDate.ToLocalTime()
+                        </td>
+                        <td class="userId">
+                            @item.UserId
+                        </td>                       
+                        <td class="subject">
+                            @item.Subject
+                        </td>
+                        <td class="sender">
+                            @item.Sender
+                        </td>
+                        <td class="text">
+                            @Html.Raw(item.Text)
+                        </td>
+                        <td class="inf">
+                            <a class="button" href="@Url.Action("SendSellerMessage", "AdminMessageContent", new { messageId = @item.Id })" title="@T("Approve")">@T("Approve")</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </fieldset>
+    
+}
+@Display(Model.Pager)

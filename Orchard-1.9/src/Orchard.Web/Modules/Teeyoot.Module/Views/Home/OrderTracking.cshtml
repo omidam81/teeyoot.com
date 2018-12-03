@@ -1,0 +1,430 @@
+﻿@model Teeyoot.Module.ViewModels.OrderTrackingViewModel
+@{
+    Style.Include("bootstrap.min.css");
+    Style.Include("track.css");
+}
+
+@using (Script.Foot())
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            document.title = "Track order | Teeyoot";
+        }
+    </script>
+}
+<div class="order-tracker">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="h1">@T("Order Tracker")</h1>
+        </div>
+    </div>
+
+    <!-- Track Bar -->
+    <div class="row">
+        <div class="track-bar hidden-xs offset-top offset-top-large">
+
+            @if (Model.Status.Name == Teeyoot.Module.Common.Enums.OrderStatus.Approved.ToString())
+            {
+                <div class="col-sm-3">
+                    <div class="track-position track-order-current" id="track-order">
+                        <div class="track-state">
+                            <img alt="@T("Order")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/order-1cafc063faffc3ee4e2ec8fc8bff8572.png">
+                            @T("Order placed")
+                            <span>1</span>
+                        </div>
+                        <div class="track-arrow"></div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="track-position track-order-future" id="track-print">
+                        <div class="track-state">
+                            <img alt="@T("Print")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/print-b7289e70dccefac91318aae2b79684ca.png">
+                            @T("Printing")
+                            <span>2</span>
+                        </div>
+                        <div class="track-arrow"></div>
+                        <div class="track-margin-line"></div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="track-position track-order-future" id="track-ship">
+                        <div class="track-state">
+                            <img alt="@T("Ship")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/ship-9952054f10dbebebbbb7e64a0fc16bcc.png">
+                            @T("Shipped")
+                            <span>3</span>
+                        </div>
+                        <div class="track-arrow"></div>
+                        <div class="track-margin-line"></div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="track-position track-order-future" id="track-deliver">
+                        <div class="track-state">
+                            <img alt="@T("Deliver")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/deliver-0e278f07a2750522b9d74324b271d90a.png">
+                            @T("Delivered")
+                            <span>4</span>
+                        </div>
+                        <div class="track-margin-line"></div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Status.Name == Teeyoot.Module.Common.Enums.OrderStatus.Printing.ToString() || Model.Status.Name == Teeyoot.Module.Common.Enums.OrderStatus.Cancelled.ToString())
+            {
+                <div class="col-sm-3">
+                    <div class="track-position track-order-past" id="track-order">
+                        <div class="track-state">
+                            <img alt="@T("Order")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/order-1cafc063faffc3ee4e2ec8fc8bff8572.png">
+                            @T("Order placed")
+                            <span>1</span>
+                        </div>
+                        <div class="track-arrow"></div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="track-position track-order-current" id="track-print">
+                        <div class="track-state">
+                            <img alt="@T("Print")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/print-b7289e70dccefac91318aae2b79684ca.png">
+                            @T(Model.Status.Name)
+                            <span>2</span>
+                        </div>
+                        <div class="track-arrow"></div>
+                        <div class="track-margin-line"></div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="track-position track-order-future" id="track-ship">
+                        <div class="track-state">
+                            <img alt="@T("Ship")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/ship-9952054f10dbebebbbb7e64a0fc16bcc.png">
+                            @T("Shipped")
+                            <span>3</span>
+                        </div>
+                        <div class="track-arrow"></div>
+                        <div class="track-margin-line"></div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="track-position track-order-future" id="track-deliver">
+                        <div class="track-state">
+                            <img alt="@T("Deliver")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/deliver-0e278f07a2750522b9d74324b271d90a.png">
+                            @T("Delivered")
+                            <span>4</span>
+                        </div>
+                        <div class="track-margin-line"></div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Status.Name == Teeyoot.Module.Common.Enums.OrderStatus.Shipped.ToString())
+            {
+                <div class="col-sm-3">
+                    <div class="track-position track-order-past" id="track-order">
+                        <div class="track-state">
+                            <img alt="@T("Order")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/order-1cafc063faffc3ee4e2ec8fc8bff8572.png">
+                            @T("Order placed")
+                            <span>1</span>
+                        </div>
+                        <div class="track-arrow"></div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="track-position track-order-past" id="track-print">
+                        <div class="track-state">
+                            <img alt="@T("Print")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/print-b7289e70dccefac91318aae2b79684ca.png">
+                            @T("Printing")
+                            <span>2</span>
+                        </div>
+                        <div class="track-arrow"></div>
+                        <div class="track-margin-line"></div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="track-position track-order-current" id="track-ship">
+                        <div class="track-state">
+                            <img alt="@T("Ship")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/ship-9952054f10dbebebbbb7e64a0fc16bcc.png">
+                            @T("Shipped")
+                            <span>3</span>
+                        </div>
+                        <div class="track-arrow"></div>
+                        <div class="track-margin-line"></div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="track-position track-order-future" id="track-deliver">
+                        <div class="track-state">
+                            <img alt="@T("Deliver")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/deliver-0e278f07a2750522b9d74324b271d90a.png">
+                            @T("Delivered")
+                            <span>4</span>
+                        </div>
+                        <div class="track-margin-line"></div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Status.Name == Teeyoot.Module.Common.Enums.OrderStatus.Delivered.ToString())
+            {
+                <div class="col-sm-3">
+                    <div class="track-position track-order-past" id="track-order">
+                        <div class="track-state">
+                            <img alt="@T("Order")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/order-1cafc063faffc3ee4e2ec8fc8bff8572.png">
+                            @T("Order placed")
+                            <span>1</span>
+                        </div>
+                        <div class="track-arrow"></div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="track-position track-order-past" id="track-print">
+                        <div class="track-state">
+                            <img alt="@T("Print")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/print-b7289e70dccefac91318aae2b79684ca.png">
+                            @T("Printing")
+                            <span>2</span>
+                        </div>
+                        <div class="track-arrow"></div>
+                        <div class="track-margin-line"></div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="track-position track-order-past" id="track-ship">
+                        <div class="track-state">
+                            <img alt="@T("Ship")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/ship-9952054f10dbebebbbb7e64a0fc16bcc.png">
+                            @T("Shipped")
+                            <span>3</span>
+                        </div>
+                        <div class="track-arrow"></div>
+                        <div class="track-margin-line"></div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="track-position track-order-current" id="track-deliver">
+                        <div class="track-state">
+                            <img alt="@T("Deliver")" src="https://d1b2zzpxewkr9z.cloudfront.net/compiled_assets/v2/web/track/deliver-0e278f07a2750522b9d74324b271d90a.png">
+                            @T("Delivered")
+                            <span>4</span>
+                        </div>
+                        <div class="track-margin-line"></div>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+
+    <!-- Information -->
+    <div class="track-stats offset-top">
+        <div class="row">
+            <div class="col-md-12">
+                <div id="blank-header"></div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col-md-8">
+                <div class="track-left">
+                    <div class="track-inner">
+                        @*<span class="badge badge-success">@("Status")</span> @T("Updated") @(Model.Events.Count() > 0 ?
+                            Model.Events.Last().EventDate.ToLocalTime().ToString("dd MMM HH:mm", Model.CultureInfo) :
+                            Model.CreateDate)*@
+                        <div class="offset-top offset-top-small offset-top-xs"></div>
+
+                        @if (Model.Status.Name == Teeyoot.Module.Common.Enums.OrderStatus.Approved.ToString())
+                        {
+                            <h2 class="h2">@T("Your order was confirmed on") @Model.CreateDate @T(" but...")</h2>
+                            <p class="offset-top offset-top-small">
+                                @T("we will only send it for printing when the campaign ends. Click the campaign link below to check out how the campaign is doing")
+                            </p>
+                            @*<p>
+                                    <a id="cancel_order_link" href="#">@T("Cancel order")</a>
+                                </p>*@
+                            <p class="offset-top offset-top-small">
+                                @T("Click the campaign link below to check out how the campaign is doing.")
+                            </p>
+                            <p style="text-align: center">
+                                @{string url = WorkContext.CurrentSite.BaseUrl.ToString() + "/" + Model.CampaignAlias; }
+                                <a id="campaign_link" href="@url">@Model.CampaignName</a>
+                            </p>
+                        }
+
+                        @if (Model.Status.Name == Teeyoot.Module.Common.Enums.OrderStatus.Printing.ToString())
+                        {
+                            <h2 class="h2">@T("We are printing your order!")</h2>
+                            <p class="offset-top offset-top-small">
+                                @T("Sit back and relax, while our little elves print your order. Meanwhile, check out other popular campaigns that you may be interested here")
+                            </p>
+                            <p style="text-align: center">
+                                <a id="campaign_link" href="@Url.Action("Search", new { Controller = "Search", Area = "Teeyoot.Search", filter = " ", showall = "true" })">@T("Search Other Campaigns")</a>
+                            </p>
+                        }
+
+                        @if (Model.Status.Name == Teeyoot.Module.Common.Enums.OrderStatus.Cancelled.ToString())
+                        {
+                            <h2 class="h2">@T("Your order has been cancelled")</h2>
+                            <p class="offset-top offset-top-small">
+                                @T("Your order has been cancelled and will not be produced. " +
+                                    "If you were already charged, a refund will automatically be issued.")
+                            </p>
+                        }
+
+                        @if (Model.Status.Name == Teeyoot.Module.Common.Enums.OrderStatus.Shipped.ToString())
+                        {
+                            <h2 class="h2">@T("Your order is on its way to you!")</h2>
+                            <p class="offset-top offset-top-small">
+                                @T("We have sent your order either by post or courier. Take a stroll in the park, it will be right on your doorstep soon!")
+                            </p>
+                        }
+
+                        @if (Model.Status.Name == Teeyoot.Module.Common.Enums.OrderStatus.Delivered.ToString())
+                        {
+                            <h2 class="h2">@T("Your order has been delivered!")</h2>
+                            <p class="offset-top offset-top-small">
+                                @T("Thank you for the purchase! The T-shirt is excited to meet you!")
+                            </p>
+                            <p class="offset-top offset-top-small">
+                                @T("We hope you’re happy with the purchase. If you have any questions, feel free to contact us and tell us what you think about our services. We would love to hear from you.")
+                            </p>
+                        }
+
+                        @*<hr>
+                            <h4 class="h4">@T("Order history")</h4>
+                            <ul class="list-unstyled">
+
+                                <li>
+                                    <span class="badge">@Model.CreateDate</span>
+                                    @T("Order for") <a href="/@Model.CampaignAlias">@Model.CampaignName</a> @T("placed")
+                                </li>
+
+                                @foreach (var e in Model.Events)
+                                {
+                                    <li>
+                                        <span class="badge">@e.EventDate.ToLocalTime().ToString("dd MMM HH:mm", Model.CultureInfo)</span>
+                                        @e.Event
+                                    </li>
+                                }
+
+                            </ul>*@
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="track-right track-border-left">
+                    <div class="track-inner">
+                        <h4 class="h4">@T("Your order details")</h4>
+
+                        @foreach (var prod in Model.Products)
+                        {
+                            <div style="display: inline-flex; margin-bottom:2px">
+                                <div>
+                                    <div style="float:left"><strong>( @prod.Count )</strong> @prod.ProductSizeRecord.SizeCodeRecord.Name - @prod.CampaignProductRecord.ProductRecord.Name </div>
+                                    <div style="float:left; margin-right 5px; margin-bottom -4px; width: 20px; height: 20px; display: inline-block;  background-color: @(prod.ProductColorRecord == null ? "" : prod.ProductColorRecord.Value);    margin: 0 5px 5px 5px; border: 1px solid #000000;"></div>
+                                    <div style="float:left"> @prod.CampaignProductRecord.CurrencyRecord.Code @prod.CampaignProductRecord.Price</div><br>
+                                </div>
+                            </div>
+                            <br/>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Promotion)) { 
+                        <p style="margin-top: 10px;">
+                            <strong>@*@T("Promotion: ") @Model.Products.First().CampaignProductRecord.CurrencyRecord.Code @Model.Promotion.Replace(',', '.')*@</strong>
+                            <strong>
+                                <span class="price price-currency-code price-@Model.Products.First().CampaignProductRecord.CurrencyRecord.Code" data-bc="@Model.Products.First().CampaignProductRecord.CurrencyRecord.Code" data-string-format="{0}" data-price="@Model.Promotion">@Model.Products.First().CampaignProductRecord.CurrencyRecord.Code @Model.Promotion</span>
+                            </strong>
+                        </p>
+                        }
+                        <p style="margin-top: 10px;">
+                            <strong>
+                                <span class="price price-currency-code price-@Model.Products.First().CampaignProductRecord.CurrencyRecord.Code" data-bc="@Model.Products.First().CampaignProductRecord.CurrencyRecord.Code" data-string-format="{0}" data-price="@Model.Delivery">@Model.Products.First().CampaignProductRecord.CurrencyRecord.Code @Model.Delivery</span>
+                            </strong>
+
+
+                            @*<strong>@T("Delivery cost: ") @Model.Products.First().CampaignProductRecord.CurrencyRecord.Code @Model.Delivery.Replace(',', '.')</strong>*@
+                        </p>
+                        <p style="margin-top: 10px;">
+                            <strong>
+                                <span class="price price-currency-code price-@Model.Products.First().CampaignProductRecord.CurrencyRecord.Code" data-bc="@Model.Products.First().CampaignProductRecord.CurrencyRecord.Code" data-string-format="{0}" data-price="@Model.TotalPrice">@Model.Products.First().CampaignProductRecord.CurrencyRecord.Code @Model.TotalPrice</span>
+                            </strong>
+                            @*<strong>@T("Total price: ") @Model.Products.First().CampaignProductRecord.CurrencyRecord.Code @Model.TotalPrice.Replace(',', '.')</strong>*@
+                        </p>
+                        <br />
+                        <h4 class="h4">@T("Delivery Address")</h4>
+                        @foreach (var str in Model.ShippingTo)
+                        {
+                            <div class="shipping-address">@str</div>
+                        }
+                    </div>
+                    <div class="track-margin-line track-border-none"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<!--
+<div style="display:none">
+    <h3></h3>
+    <p></p>
+    <a class="button tb-button" href="@Url.Action("CancelOrder", new { orderId = Model.OrderId, publicId = Model.OrderPublicId })">@T("Cancel order")</a>
+    <button class="button tb-button" id="btn_not_now">@T("Not now")</button>
+</div>
+    -->
+
+
+<div class="modal-dialog modal fade" id="modal_form">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+            <h4 class="modal-title h4">@T("Cancel Order") #@Model.OrderPublicId</h4>
+        </div>
+        <div class="modal-body">
+            <p>@T("Are you sure you want to cancel your order? You will not be able to re-open this order.")</p>
+        </div>
+        <div class="modal-footer">
+            <a class="btn btn-default tb-button-orange" href="@Url.Action("CancelOrder", new { orderId = Model.OrderId, publicId = Model.OrderPublicId })">@T("Cancel order")</a>
+            <button type="button" class="btn btn-primary tb-button-orange" id="btn_not_now">@T("Not now")</button>
+        </div>
+    </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+
+<div id="overlay"></div>
+@using (Script.Foot())
+{
+    <script>
+
+        $(document).ready(function () {
+            $('#cancel_order_link').click(function (event) {
+                event.preventDefault();
+                $('#overlay').fadeIn(400,
+                    function () {
+                        $('#modal_form')
+                            .css('display', 'block')
+                            .animate({ opacity: 1, top: '50%' }, 200);
+                    });
+            });
+
+            $('#overlay, #btn_not_now, .modal-header .close').click(function () {
+                $('#modal_form')
+                    .animate({ opacity: 0, top: '45%' }, 200,
+                        function () {
+                            $(this).css('display', 'none');
+                            $('#overlay').fadeOut(400);
+                        }
+                    );
+            });
+        });
+
+    </script>
+}

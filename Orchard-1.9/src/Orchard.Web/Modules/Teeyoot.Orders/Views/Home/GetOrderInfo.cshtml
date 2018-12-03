@@ -1,0 +1,234 @@
+﻿@model Teeyoot.Module.Models.OrderRecord
+
+@{
+    var products = Model.Products.Select(o => new
+    {
+        Name = o.CampaignProductRecord.ProductRecord.Name,
+        Count = o.Count,
+        Currency = o.CampaignProductRecord.CurrencyRecord.Code,
+        Price =
+            o.CampaignProductRecord.Price +
+            o.CampaignProductRecord.ProductRecord.SizesAvailable.Where(aa => aa.Id == o.ProductSizeRecord.Id).First().SizeCost,
+        Size = o.ProductSizeRecord.SizeCodeRecord.Name,
+        Color =
+            o.ProductColorRecord == null
+                ? o.CampaignProductRecord.ProductColorRecord.Name
+
+                : o.ProductColorRecord.Name,
+    });
+    var totalPrice = Model.TotalPriceWithPromo > 0.0 ? Model.TotalPriceWithPromo : Model.TotalPrice;
+    totalPrice += Model.Delivery;
+    var result = new { products, totalPrice };
+    Teeyoot.Module.Services.Interfaces.IPriceConversionService PriceConversionService = (Teeyoot.Module.Services.Interfaces.IPriceConversionService)ViewBag.PriceConversionService;
+}
+<h1>@T("Order information")</h1>
+<span class="order-id">@("ID:" + Model.Id)</span>
+<h2 class="public-Id">@("#" + Model.OrderPublicId)</h2>
+
+
+@using (@Html.BeginForm("UpdateOrder", "Home", FormMethod.Post, new { id = "update-order" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" value="@Model.Products.Count" name="productcount" />
+
+    <input type="hidden" value="@Model.Id" name="orderid" />
+
+
+    <table class="items" id="modalOrderTable">
+        <thead>
+            <tr>
+                <th class="note1">
+                    <h3 class="val">@T("Name")</h3>
+                </th>
+                <th class="val">
+                    <h3 class="val">@T("Color")</h3>
+                </th>
+                <th>
+                    <h3 class="val">@T("Size")</h3>
+                </th>
+                <th>
+                    <h3 class="val">@T("Count")</h3>
+                </th>
+                <th>
+                    <h3 class="val">@T("Price")</h3>
+                </th>
+
+            </tr>
+            @{var i = 0;}
+            @foreach (var product in Model.Products)
+            {
+                <tr class="item">
+                    <td class="form-item">
+                        <input type="hidden" name="product_@i" value="@product.Id" />
+                        <div class="value">@product.CampaignProductRecord.ProductRecord.Name</div>
+                    </td>
+                    <td class="form-item">
+                        @T("Ordered Color:") <span>@(product.ProductColorRecord != null ? product.ProductColorRecord.Name : "")</span>
+                        <br />
+                        <select name="color_@i" class=" form__select_menu color-dropdown precheckout_items_table__item--color shown">
+                            @if (product.CampaignProductRecord.ProductRecord != null)
+                            {
+                                if (product.ProductColorRecord != null && product.CampaignProductRecord.ProductColorRecord.Id == product.ProductColorRecord.Id)
+                                {
+                                    <option selected="selected" value="@product.CampaignProductRecord.ProductColorRecord.Id">@product.CampaignProductRecord.ProductColorRecord.Name</option>
+
+                                }
+                                else
+                                {
+                                    <option value="@product.CampaignProductRecord.ProductColorRecord.Id">@product.CampaignProductRecord.ProductColorRecord.Name</option>
+
+                                }
+                            }
+                            @if (product.ProductColorRecord != null && product.CampaignProductRecord.SecondProductColorRecord != null)
+                            {
+                                if (product.CampaignProductRecord.SecondProductColorRecord.Id == product.ProductColorRecord.Id)
+                                {
+                                    <option selected="selected" value="@product.CampaignProductRecord.SecondProductColorRecord.Id">@product.CampaignProductRecord.SecondProductColorRecord.Name</option>
+
+                                }
+                                else
+                                {
+                                    <option value="@product.CampaignProductRecord.SecondProductColorRecord.Id">@product.CampaignProductRecord.SecondProductColorRecord.Name</option>
+
+                                }
+
+                            }
+                            @if (product.ProductColorRecord != null && product.CampaignProductRecord.ThirdProductColorRecord != null)
+                            {
+                                if (product.CampaignProductRecord.ThirdProductColorRecord.Id == product.ProductColorRecord.Id)
+                                {
+                                    <option selected="selected" value="@product.CampaignProductRecord.ThirdProductColorRecord.Id">@product.CampaignProductRecord.ThirdProductColorRecord.Name</option>
+
+                                }
+                                else
+                                {
+                                    <option value="@product.CampaignProductRecord.ThirdProductColorRecord.Id">@product.CampaignProductRecord.ThirdProductColorRecord.Name</option>
+
+                                }
+
+                            }
+                            @if (product.ProductColorRecord != null && product.CampaignProductRecord.FourthProductColorRecord != null)
+                            {
+                                if (product.CampaignProductRecord.FourthProductColorRecord.Id == product.ProductColorRecord.Id)
+                                {
+                                    <option selected="selected" value="@product.CampaignProductRecord.FourthProductColorRecord.Id">@product.CampaignProductRecord.FourthProductColorRecord.Name</option>
+
+                                }
+                                else
+                                {
+                                    <option value="@product.CampaignProductRecord.FourthProductColorRecord.Id">@product.CampaignProductRecord.FourthProductColorRecord.Name</option>
+
+                                }
+
+                            }
+                            @if (product.ProductColorRecord != null && product.CampaignProductRecord.FifthProductColorRecord != null)
+                            {
+                                if (product.CampaignProductRecord.FifthProductColorRecord.Id == product.ProductColorRecord.Id)
+                                {
+                                    <option selected="selected" value="@product.CampaignProductRecord.FifthProductColorRecord.Id">@product.CampaignProductRecord.FifthProductColorRecord.Name</option>
+
+                                }
+                                else
+                                {
+                                    <option value="@product.CampaignProductRecord.FifthProductColorRecord.Id">@product.CampaignProductRecord.FifthProductColorRecord.Name</option>
+
+                                }
+                            }
+
+                        </select>
+                        @*<br />
+                                                <span>Current Color:</span>  <div class="value"><b>
+                                                @(product.ProductColorRecord == null
+                                                ? product.CampaignProductRecord.ProductColorRecord.Name
+                                                : product.ProductColorRecord.Name)
+                            </div>
+                                                </b>*@
+
+                    </td>
+                    <td class="form-item">
+                        @T("Ordered Size:") <span>@((product.ProductSizeRecord == null) ? "" : product.ProductSizeRecord.SizeCodeRecord.Name)</span>
+                        <select name="size_@i">
+
+                            @foreach (var size in ((product.CampaignProductRecord).ProductRecord).SizesAvailable)
+                            {
+                                if (product.ProductSizeRecord.Id == size.ProductSizeRecord.Id)
+                                {
+                                    <option value="@size.ProductSizeRecord.Id" selected="selected" id="@size.ProductSizeRecord.Id">@size.ProductSizeRecord.SizeCodeRecord.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@size.ProductSizeRecord.Id" id="@size.ProductSizeRecord.Id">@size.ProductSizeRecord.SizeCodeRecord.Name</option>
+                                }
+                                @*<option selected="selected" id="@prod.Id" name="@prod.ProductRecord.Name" value="@prod.Id">@prod.ProductRecord.Name - @prod.CurrencyRecord.Code @prod.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)</option>*@
+                            }
+
+                        </select>
+                        @*<div class="value">@product.ProductSizeRecord.SizeCodeRecord.Name</div>*@
+                    </td>
+                    <td class="form-item">
+                        <div class="value"><input type="text" name="count_@i" value="@product.Count" disabled="disabled" /></div>
+                    </td>
+                    <td class="form-item">
+
+                        <div class="value">
+                            @{
+
+                            var sizeRecord = product.CampaignProductRecord.ProductRecord.SizesAvailable.Where(aa => aa.ProductSizeRecord.Id == product.ProductSizeRecord.Id);
+                            double x = 0;
+                            if (sizeRecord.Count() > 0)
+                            {
+                                x = (product.CampaignProductRecord.Price + product.CampaignProductRecord.ProductRecord.SizesAvailable.Where(aa => aa.ProductSizeRecord.Id == product.ProductSizeRecord.Id).First().SizeCost);
+                                if (PriceConversionService == null)
+                                {
+                                    <a>error1</a>
+                                }
+                                else if (Model.Campaign == null)
+                                {
+                                    <a>error2</a>
+                                }
+                                else if (Model.Campaign.CurrencyRecord == null)
+                                {
+                                    <a>error3</a>
+                                }
+                                else
+                                {
+                                    x = PriceConversionService.ConvertPrice(x, Model.Campaign.CurrencyRecord, "USD").Value;
+                                }
+                            }
+                            }
+                            $@x
+                        </div>
+                    </td>
+                </tr>
+                            i++;
+            }
+        </thead>
+
+    </table>
+
+    <div class="total-price">
+        <b>@T("Payment Method:    ")</b><h2>@Model.PaymentMethod</h2>
+    </div>
+
+
+    <div class="total-price">
+
+        @{
+            var delivery = Model.Delivery;
+            var promotion = (Model.Promotion > 0.0 ? Model.Promotion : 0);
+            var total = ((Model.TotalPriceWithPromo > 0.0 ? Model.TotalPriceWithPromo : Model.TotalPrice) + Model.Delivery);
+            delivery = PriceConversionService.ConvertPrice(delivery, Model.Campaign.CurrencyRecord, "USD").Value;
+            promotion = PriceConversionService.ConvertPrice(promotion, Model.Campaign.CurrencyRecord, "USD").Value;
+            total = PriceConversionService.ConvertPrice(total, Model.Campaign.CurrencyRecord, "USD").Value;
+        }
+
+        <b>@T("Delivery Cost:     ")</b><h2 id="totalPrice">$@(Math.Truncate((delivery) * 100) / 100)</h2>
+        <br />
+        <b>@("Discount (promo):   ")</b><h2 id="totalPrice">$@(Math.Truncate(promotion * 100) / 100)</h2>
+        <br />
+        <b>@("Total Price:        ")</b><h2 id="totalPrice">$@(Math.Truncate(total * 100) / 100)</h2>
+    </div>
+    <div style="text-align:right">
+        <button type="submit" id="updateform">Update</button>
+    </div>
+}
